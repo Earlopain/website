@@ -1,0 +1,45 @@
+:root{
+    padding: 10% 10%;
+    background: black;
+    color: green;
+}
+
+a {
+    color: green;
+    text-decoration: none;
+}
+
+.grid-container {
+    display: grid;
+    height: 100%;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 0.5fr;
+    grid-gap: 1px;
+    grid-template-areas: "link1" "link2" ".";
+  }
+
+  .selectable{
+      font-size: 40px;
+  }
+  
+  .link1 { grid-area: link1; }
+  
+  .link2 { grid-area: link2; }
+  
+  .about {
+      position: absolute;
+      bottom: 0;
+    font-size: 20px;
+    display: grid;
+    grid-area: 3 / 1 / 4 / 4;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-gap: 1px;
+    grid-template-areas: "steam discord email";
+  }
+  
+  .steam { grid-area: steam; }
+  
+  .discord { grid-area: discord; }
+  
+  .email { grid-area: email; }
