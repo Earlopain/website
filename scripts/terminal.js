@@ -1,11 +1,13 @@
 class Terminal {
-    constructor() {
+    constructor(containerID = "terminal-container", controlsID = "terminal-controls") {
         this.root = new Folder("root");
-        this.rootDOM = document.getElementById("terminal-container");
+        this.rootDOM = document.getElementById(containerID);
+        this.controlsDOM = document.getElementById(controlsID);
         this.currentFolder = this.root;
         this.location = [0];
         this.counter = 0;
         this.done = false;
+        this.addCss();
     }
 
     //keyboard code
@@ -27,15 +29,18 @@ class Terminal {
     select() {
         if (this.selectedIsFile()) {
             if (this.done) {
-                switch (this.getCurrentElement().action) {
+                const currentElement = this.getCurrentElement();
+                switch (currentElement.actionType) {
                     case "onedown":
                         this.cdDown();
                         break;
+                    case "href":
+                        window.location.href = currentElement.action;
+                        break;
                     default:
-                        console.log("unknown action " + this.getCurrentElement.action);
+                        console.log("unknown actionType " + this.getCurrentElement.actionType);
                 }
             }
-
         }
         else {
             this.location.push(0);
@@ -46,8 +51,8 @@ class Terminal {
     cdDown() {
         if (this.location.length === 1)
             return false;
-            this.location.pop();
-        if(this.done){
+        this.location.pop();
+        if (this.done) {
             this.location.pop();
             this.location.push(0);
         }
@@ -66,8 +71,8 @@ class Terminal {
         this.counter++;
     }
 
-    addFile(text, action) {
-        this.currentFolder.addFile(text, action);
+    addFile(text, actionType, action) {
+        this.currentFolder.addFile(text, actionType, action);
         this.location[this.location.length - 1]++;
     }
 
@@ -101,30 +106,50 @@ class Terminal {
         if (this.counter !== 0)
             throw new Error("Invalid call count for start/endFolder");
         this.addToDOM();
+        this.addControls();
         let element = document.getElementById("id_0");
         element.classList.add("selected");
         this.location = [0];
-        this.hideAll();
-        this.showVisible();
+        this.handleDOM();
         this.done = true;
         //Add event listener for keydown event
         document.addEventListener('keydown', (event) => {
-            const keyName = event.key;
+            const key = event.key;
             let element = document.getElementById("id_" + this.location.join("_"));
             element.classList.remove("selected");
-            if (keyName === "ArrowUp")
+            if (key === "ArrowUp")
                 this.moveUp();
-            else if (keyName === "ArrowDown")
+            else if (key === "ArrowDown")
                 this.moveDown();
-            else if (keyName === "Enter") {
+            else if (key === "Enter") {
                 this.select();
-                this.hideAll();
-                this.showVisible();
+                this.handleDOM();
             }
+            else
+                console.log(event);
             element = document.getElementById("id_" + this.location.join("_"));
             element.classList.add("selected");
-
         });
+    }
+
+    addControls() {
+        const names = ["ArrowUp", "ArrowDown", "Enter"];
+        for (let i = 0; i < names.length; i++) {
+            let div = document.createElement("div");
+            div.classList.add("control");
+            div.appendChild(document.createTextNode(names[i]));
+            div.id = names[i];
+            div.addEventListener("click", () => {
+                let evt = new KeyboardEvent('keydown', { key: div.id });
+                document.dispatchEvent(evt);
+            });
+            this.controlsDOM.appendChild(div);
+        }
+    }
+
+    handleDOM() {
+        this.hideAll();
+        this.showVisible();
     }
 
     showVisible() {
@@ -132,7 +157,6 @@ class Terminal {
         const currentFolder = this.getFolderFromLocation2();
 
         for (let i = 0; i < currentFolder.fs.length; i++) {
-            console.log((currentID + "_" + i).replace("__", "_"));
             document.getElementById((currentID + "_" + i).replace("__", "_")).classList.remove("invisible");
         }
     }
@@ -193,6 +217,16 @@ class Terminal {
     selectedIsFile() {
         return this.currentFolder.fs[this.location[this.location.length - 1]] instanceof File;
     }
+
+    addCss() {
+        let head = document.head;
+        let link = document.createElement("link");
+        link.type = "text/css";
+        link.rel = "stylesheet";
+        link.href = "/css/terminal.css";
+
+        head.appendChild(link);
+    }
 }
 
 
@@ -206,39 +240,15 @@ class Folder {
         this.fs.push(new Folder(text));
 
     }
-    addFile(text, action) {
-        this.fs.push(new File(text, action));
+    addFile(text, actionType, action) {
+        this.fs.push(new File(text, actionType, action));
     }
 }
 
 class File {
-    constructor(text, action) {
+    constructor(text, actionType, action) {
         this.text = text;
+        this.actionType = actionType;
         this.action = action;
     }
 }
-
-let terminal = new Terminal();
-terminal.startFolder("folder1");
-terminal.addFile("file1");
-terminal.addFile("file2");
-terminal.addFile("file3");
-terminal.startFolder("subfolder1");
-terminal.startFolder("subfolder2");
-terminal.startFolder("subfolder3");
-terminal.addFile("file9");
-terminal.addFile("file10");
-terminal.endFolder();
-terminal.endFolder();
-terminal.endFolder();
-terminal.endFolder();
-terminal.startFolder("folder2");
-terminal.addFile("file4");
-terminal.addFile("file5");
-terminal.endFolder();
-terminal.startFolder("folder3");
-terminal.addFile("file6");
-terminal.addFile("file7");
-terminal.addFile("file8");
-terminal.endFolder();
-terminal.finish();
