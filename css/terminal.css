@@ -1,0 +1,33 @@
+.terminal-container {
+    padding: 20px 20px;
+    background: black;
+}
+
+.selectable {
+    color: green;
+    font-size: 40px;
+}
+
+.selected {
+    background: green;
+    color: black;
+}
+
+.invisible {
+    display: none;
+}
+
+.terminal-controls {
+    position: absolute;
+    bottom: 0;
+}
+
+.control {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    font-size: 40px;
+    color: black;
+    background: green;
+    padding: 10px;
+}
