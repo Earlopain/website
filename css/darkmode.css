@@ -1,0 +1,22 @@
+html,
+body,
+input,
+textarea,
+select,
+button {
+    border-color: #5e5d5a;
+    color: #e5e1d8;
+}
+
+html,
+body,
+input,
+textarea,
+select,
+button {
+    background-color: #232325;
+}
+
+a {
+    color: #4791e6
+}
