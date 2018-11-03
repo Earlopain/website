@@ -125,8 +125,6 @@ class Terminal {
                 this.select();
                 this.handleDOM();
             }
-            else
-                console.log(event);
             element = document.getElementById("id_" + this.location.join("_"));
             element.classList.add("selected");
         });
