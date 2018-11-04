@@ -1,18 +1,31 @@
+
 async function loadGraph(id) {
     const data = await loadData(id);
 
     let lines = data.split("\n");
     lines.shift();  //removes cvs definition
     lines.pop();    //removes last line which is empty
-
+    const maxDataPoints = 250;
     let dataset = [];
+    //don't let factor fall under 2 because you can't realy pic something in the middle of [1,2] for example
+    const factor = lines.length / maxDataPoints < 2 ? 1 : lines.length / maxDataPoints;
+    let counter = 0;
+    lines.forEach((line, index) => {
+        //if we want more points than available just use all
+        if (!(maxDataPoints > lines.length)) {
+            //% with decimal is shit, never really zero so we have to look when the value wraps around
+            if (index % factor > counter) {
+                counter = index % factor;
+                return;
+            }
+            counter = 0;
+        }
 
-    lines.forEach(line => {
         let count = line.split(",")[1];
         let time = line.split(",")[0];
         dataset.push({ "count": count, "time": time });
-    });
-
+    });//Alawys push the last entry so the timeframe is the same no matter how many datapoint we use
+    dataset.push({ "count": lines[lines.length - 1].split(",")[1], "time": lines[lines.length - 1].split(",")[0] });
     //populate statistics labels
     document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
     document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
@@ -24,9 +37,7 @@ async function loadGraph(id) {
     const max = Math.max(...Object.keys(dataset).map((key) => { return dataset[key].count })) + 25;
     const min = Math.min(...Object.keys(dataset).map((key) => { return dataset[key].count })) - 25;
 
-    let margin = { top: 25, right: 25, bottom: 50, left: 50 }, width = 1000, height = 500;
-    // The number of datapoints
-    let n = lines.length;
+    let margin = { top: 25, right: 75, bottom: 50, left: 50 }, width = 1000, height = 500;
 
     // X scale will use the dates of our data
     const minDate = dateStringToDate(dataset[0].time);
@@ -58,7 +69,7 @@ async function loadGraph(id) {
     // Call the y axis in a group tag
     svg.append("g")
         .attr("class", "y axis")
-        .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+        .call(d3.axisLeft(yScale)) // Create an axis component with d3.axisLeft
 
     // d3's line generator
     let line = d3.line()
@@ -73,6 +84,37 @@ async function loadGraph(id) {
         .datum(dataset) // Binds data to the line 
         .attr("class", "line") // Assign a class for styling 
         .attr("d", line); // Calls the line generator 
+
+    //Show value on mouseover
+    let focus = svg.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
+
+    focus.append("circle")
+        .attr("r", 4.5);
+
+    focus.append("text")
+        .attr("x", 10)
+        .attr("y", -10)
+
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .on("mouseover", function () { focus.style("display", null); })
+        .on("mouseout", function () { focus.style("display", "hidden"); })
+        .on("mousemove", mousemove);
+    let bisectDate = d3.bisector(function (d) { return dateStringToDate(d.time); }).left;
+    function mousemove() {
+        var x0 = xScale.invert(d3.mouse(this)[0]),
+            i = bisectDate(dataset, x0, 0),
+            d0 = dataset[i],
+            d1 = dataset[i - 1],
+            d = x0 - d0.time > d1.time - x0 ? d1 : d0;
+        focus.attr("transform", "translate(" + xScale(dateStringToDate(d.time)) + "," + yScale(d.count) + ")");
+        focus.select("text").text(d.count);
+    }
 }
 
 const node = document.getElementById("dropdown");
@@ -134,7 +176,9 @@ function getNearestDataPoint(array, dateWished, hours) {
         }//dif has increased, must have wooshed by the best value already
         else
             break;
-    }
+    }//the point we had to check was already the left most one, so return it
+    if (!result)
+        return array[0];
     return result;
 }
 
