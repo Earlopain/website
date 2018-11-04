@@ -9,8 +9,9 @@ async function loadGraph(id) {
     //remove invalid entries and replace with 0
     lines.forEach(line => {
         let count = line.split(",")[1];
+        let time = line.split(",")[0];
         count = (count === "undefined" || count === "" || !count) ? 0 : count;
-        dataset.push({ "y": count });
+        dataset.push({ "y": count, "time": time });
     });
     //put y values in a seperate array for easy access
     let numbers = [];
@@ -18,15 +19,11 @@ async function loadGraph(id) {
         if (element["y"] !== 0)
             numbers.push(element["y"]);
     });
-    let allNumbers = [];
-    dataset.forEach(element => {
-        allNumbers.push(element["y"]);
-    });
-    document.getElementById("lasthour").innerHTML = joinedLastXHours(allNumbers, 1);
-    document.getElementById("last6hours").innerHTML = joinedLastXHours(allNumbers, 6);
-    document.getElementById("last12hours").innerHTML = joinedLastXHours(allNumbers, 12);
-    document.getElementById("lastday").innerHTML = joinedLastXHours(allNumbers, 24);
-    document.getElementById("total").innerHTML = joinedSinceTracked(allNumbers);
+    document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
+    document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
+    document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12);
+    document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24);
+    document.getElementById("total").innerHTML = joinedSinceTracked(dataset);
     const max = Math.max(...numbers) + 25;
     const min = Math.min(...numbers) - 25;
     //replace 0 values with the min dispaly value so the values stop at the x axis
@@ -96,7 +93,7 @@ loadGraph(node.value);
 function loadData(invite) {
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
-        request.open("GET", "/projects/datavisualisation/discordoutput/" + invite + ".csv", true);
+        request.open("GET", "/projects/visualization/discordoutput/" + invite + ".csv", true);
 
         request.onload = () => {
             if (request.status >= 200 && request.status < 400) {
@@ -115,14 +112,55 @@ function loadData(invite) {
 const updateInterval = 20;
 
 function joinedLastXHours(array, hours) {
-    let sub = array[array.length - 1 - 3 * 60 * hours];
+    const currentDate = dateStringToDate(array[array.length - 1]["time"]);
+    const dateWished = new Date(currentDate.getTime() - 1000 * 60 * 60 * hours);
+    const point = getNearestDataPoint(array, dateWished, hours);
+
+    let sub = point["y"];
     if (!sub && sub !== 0)
         sub = array[0];
     if (sub === 0)
         return "Data incomplete"
-    return array[array.length - 1] - sub;
+    return array[array.length - 1]["y"] - sub;
 }
 
 function joinedSinceTracked(array) {
-    return array[array.length - 1] - array[0];
+    return array[array.length - 1]["y"] - array[0]["y"];
+}
+
+function getNearestDataPoint(array, dateWished, hours) {
+    const target = dateWished.getTime();
+    let current;
+    let bestDif = Number.MAX_SAFE_INTEGER; //lmao dates won't work anymore if we hit that
+    let result;
+    //loop the array backwards until the distance to the wanted date increases instead of decreaes, we went past the point, so take it
+    //skip the ones definatly not in range, every entry will get updated once every 20 seconds or more, so 3 entries are a minute and 3 * hours are
+    //as much as get checked in the timeframe we wish to check. Because it can only take longer or exactly that long we can safely skip them
+    for (let i = array.length - 1 - (60 / updateInterval * hours); i >= 0; i--) {
+        current = dateStringToDate(array[i]["time"]).getTime();
+        if (current - target < bestDif && current - target > 0) {
+            bestDif = current - target;
+            result = array[i];
+        }//dif has increased, must have wooshed by the best value already
+        else
+            break;
+    }
+    return result;
+}
+
+
+function getTimeString() {
+    const date = new Date();
+    const hour = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const seconds = date.getUTCSeconds();
+    const result = date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate() + " " + (hour.toString().length === 1 ? "0" + hour : hour) + ":" + (minutes.toString().length === 1 ? "0" + minutes : minutes) + ":" + (seconds.toString().length === 1 ? "0" + seconds : seconds);
+    return result;
+}
+
+//remove local timezone from date
+function dateStringToDate(string) {
+    let result = new Date(string);
+    result = new Date(result.getTime() + -result.getTimezoneOffset() * 60000);
+    return result;
 }
