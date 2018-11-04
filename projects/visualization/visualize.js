@@ -25,6 +25,7 @@ async function loadGraph(id) {
     document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12);
     document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24);
     document.getElementById("total").innerHTML = joinedSinceTracked(dataset);
+    document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1]["y"];
     //max and min display of the y axis + some buffer in both directions
     const max = Math.max(...numbers) + 25;
     const min = Math.min(...numbers) - 25;
@@ -41,8 +42,12 @@ async function loadGraph(id) {
     let n = lines.length;
 
     // X scale will use the index of our data
-    let xScale = d3.scaleLinear()
-        .domain([0, n - 1]) // input
+    const minDate = dateStringToDate(dataset[0].time);
+    const maxDate = dateStringToDate(dataset[dataset.length - 1].time);
+    console.log(minDate);
+    console.log(maxDate);
+    let xScale = d3.scaleTime()
+        .domain([minDate, maxDate]) // input
         .range([0, width]); // output
 
     let yScale = d3.scaleLinear()
@@ -71,7 +76,9 @@ async function loadGraph(id) {
 
     // d3's line generator
     let line = d3.line()
-        .x(function (d, i) { return xScale(i); }) // set the x values for the line generator
+        .x(function (d, i) {
+            return xScale(dateStringToDate(d.time));
+        }) // set the x values for the line generator
         .y(function (d) { return yScale(d.y); }) // set the y values for the line generator 
         .curve(d3.curveMonotoneX) // apply smoothing to the line
 
