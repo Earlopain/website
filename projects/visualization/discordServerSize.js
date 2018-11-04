@@ -25,13 +25,12 @@ async function main() {
             try {
                 serverSize = await getServerSize(servers[i]);
             } catch (error) {
-                fs.appendFileSync(outputFolder + "/" + servers[i] + ".csv", dateString + ",Network Error,\n");
+                console.log("Network Error");
                 skip = true;
             }
             if (!skip) {
                 if (!serverSize) {
                     console.log("Invite expired");
-                    fs.appendFileSync(outputFolder + "/" + servers[i] + ".csv", dateString + ",Invite Expired,\n");
                 }
                 else
                     fs.appendFileSync(outputFolder + "/" + servers[i] + ".csv", dateString + "," + serverSize + ",\n");
