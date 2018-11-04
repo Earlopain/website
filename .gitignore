@@ -1,3 +1,4 @@
-owncloud
-pihole
+owncloud/**
+pihole/**
 projects/visualization/discordoutput
+.vscode/**
