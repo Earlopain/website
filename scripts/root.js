@@ -31,7 +31,7 @@ terminal.addFile("user.cfg");
 terminal.endFolder();
 terminal.endFolder();
 terminal.startFolder("Projects");
-terminal.addFile("Visualization", "href", "/projects/datavisualization/discord.html");
+terminal.addFile("Visualization", "href", "/projects/visualization/discord.html");
 terminal.endFolder();
 terminal.startFolder("About");
 terminal.addFile("My Steam", "href", "https://steamcommunity.com/id/earlopain/");
