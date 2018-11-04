@@ -19,11 +19,13 @@ async function loadGraph(id) {
         if (element["y"] !== 0)
             numbers.push(element["y"]);
     });
+    //populate statistics labels
     document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
     document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
     document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12);
     document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24);
     document.getElementById("total").innerHTML = joinedSinceTracked(dataset);
+    //max and min display of the y axis + some buffer in both directions
     const max = Math.max(...numbers) + 25;
     const min = Math.min(...numbers) - 25;
     //replace 0 values with the min dispaly value so the values stop at the x axis
@@ -81,15 +83,15 @@ async function loadGraph(id) {
 }
 
 const node = document.getElementById("dropdown");
-function changeGraph() {
+function changeGraph() {    //gets called if dropdown menu selected value changes
     let svg = document.getElementById("svg");
     svg.parentElement.removeChild(svg);
     loadGraph(node.value);
 }
-loadGraph(node.value);
+loadGraph(node.value);  //loads the initial graph without user intervention
 
 
-
+//simply returns content of a url on same-origin
 function loadData(invite) {
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
@@ -102,10 +104,6 @@ function loadData(invite) {
         };
         request.onerror = () => { reject() };
         request.send();
-
-        //$.get("/projects/datavisualisation/discordoutput/" + invite + ".csv", function (data) {
-        //   resolve(data);
-        //});
     })
 }
 
@@ -117,10 +115,10 @@ function joinedLastXHours(array, hours) {
     const point = getNearestDataPoint(array, dateWished, hours);
 
     let sub = point["y"];
-    if (!sub && sub !== 0)
-        sub = array[0];
     if (sub === 0)
-        return "Data incomplete"
+        return "Data incomplete";
+    if (!sub)
+        sub = array[0]
     return array[array.length - 1]["y"] - sub;
 }
 
@@ -145,16 +143,6 @@ function getNearestDataPoint(array, dateWished, hours) {
         else
             break;
     }
-    return result;
-}
-
-
-function getTimeString() {
-    const date = new Date();
-    const hour = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
-    const seconds = date.getUTCSeconds();
-    const result = date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate() + " " + (hour.toString().length === 1 ? "0" + hour : hour) + ":" + (minutes.toString().length === 1 ? "0" + minutes : minutes) + ":" + (seconds.toString().length === 1 ? "0" + seconds : seconds);
     return result;
 }
 
