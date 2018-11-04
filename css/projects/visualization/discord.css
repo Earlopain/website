@@ -1,0 +1,18 @@
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3px;
+}
+
+.count {
+    color: #047700
+}
+
+.focus circle {
+    fill: #047700;
+    stroke: #047700;
+}
+.focus text{
+    fill: white;
+    font-size: 18px
+}
