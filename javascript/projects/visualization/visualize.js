@@ -105,10 +105,9 @@ async function loadGraph(id) {
         .on("mouseover", function () { focus.style("display", null); })
         .on("mouseout", function () { focus.style("display", "hidden"); })
         .on("mousemove", mousemove);
-    let bisectDate = d3.bisector(function (d) { return dateStringToDate(d.time); }).left;
     function mousemove() {
         var x0 = xScale.invert(d3.mouse(this)[0]),
-            i = bisectDate(dataset, x0, 0),
+            i = d3.bisector(function (d) { return dateStringToDate(d.time); }).left(dataset, x0, 0),
             d0 = dataset[i],
             d1 = dataset[i - 1],
             d = x0 - d0.time > d1.time - x0 ? d1 : d0;
@@ -162,24 +161,21 @@ function joinedSinceTracked(array) {
 
 function getNearestDataPoint(array, dateWished, hours) {
     const target = dateWished.getTime();
-    let current;
-    let bestDif = Number.MAX_SAFE_INTEGER; //lmao dates won't work anymore if we hit that
-    let result;
-    //loop the array backwards until the distance to the wanted date increases instead of decreaes, we went past the point, so take it
-    //skip the ones definatly not in range, every entry will get updated once every 20 seconds or more, so 3 entries are a minute and 3 * hours are
-    //as much as get checked in the timeframe we wish to check. Because it can only take longer or exactly that long we can safely skip them
-    for (let i = array.length - 1 - (60 / updateInterval * hours); i >= 0; i--) {
-        current = dateStringToDate(array[i].time).getTime();
-        if (current - target < bestDif && current - target > 0) {
-            bestDif = current - target;
-            result = array[i];
-        }//dif has increased, must have wooshed by the best value already
-        else
-            break;
-    }//the point we had to check was already the left most one, so return it
-    if (!result)
-        return array[0];
-    return result;
+    let mid;
+    let lo = 0;
+    let hi = array.length - 1;
+    while (hi - lo > 1) {
+        mid = Math.floor((lo + hi) / 2);
+        if (dateStringToDate(array[mid].time).getTime() < target) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    if (target - array[lo] <= array[hi] - target) {
+        return array[lo];
+    }
+    return array[hi];
 }
 
 //remove local timezone from date
