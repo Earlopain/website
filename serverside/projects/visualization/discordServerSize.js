@@ -1,7 +1,8 @@
 const request = require("request");
 const fs = require("fs");
 
-const servers = ["Z9Zc9cE", "eC72Vj9", "b2tDDVd"];
+const json = JSON.parse(fs.readFileSync("tracking.json"));
+const servers = Object.keys(json.servers).map((key) => json.servers[key].id);
 const outputFolder = "./discordoutput";
 try {
     fs.mkdirSync(outputFolder);

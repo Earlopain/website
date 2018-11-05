@@ -1,7 +1,5 @@
-
 async function loadGraph(id) {
     const data = await loadData(id);
-
     let lines = data.split("\n");
     lines.shift();  //removes cvs definition
     lines.pop();    //removes last line which is empty
@@ -116,20 +114,33 @@ async function loadGraph(id) {
     }
 }
 
-const node = document.getElementById("dropdown");
+let node = document.getElementById("dropdown");
+populateDropdown()
+
+async function populateDropdown() {
+    const json = JSON.parse(await getURL("/serverside/projects/visualization/tracking.json")).servers;
+    console.log(json);
+    json.reverse().forEach(element => {
+        var option = document.createElement('option');
+        option.text = element.name
+        option.value = element.id;
+        node.add(option, 0);
+    });
+    node.selectedIndex = 0;
+    loadGraph(node.value);  //loads the initial graph without user intervention
+}
+
 function changeGraph() {    //gets called if dropdown menu selected value changes
     let svg = document.getElementById("svg");
     svg.parentElement.removeChild(svg);
     loadGraph(node.value);
 }
-loadGraph(node.value);  //loads the initial graph without user intervention
-
 
 //simply returns content of a url on same-origin
-function loadData(invite) {
+function getURL(url) {
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
-        request.open("GET", "/projects/visualization/discordoutput/" + invite + ".csv", true);
+        request.open("GET", url, true);
         request.onload = () => {
             if (request.status >= 200 && request.status < 400) {
                 resolve(request.responseText);
@@ -138,6 +149,10 @@ function loadData(invite) {
         request.onerror = () => { reject() };
         request.send();
     })
+}
+
+async function loadData(invite) {
+    return await getURL("/serverside/projects/visualization/discordoutput/" + invite + ".csv");
 }
 
 const updateInterval = 20;
