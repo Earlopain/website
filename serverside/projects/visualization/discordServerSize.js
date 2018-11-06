@@ -1,30 +1,53 @@
 const request = require("request");
 const fs = require("fs");
+const filename = "./tracking.json"
+let servers;
+try {
+    servers = JSON.parse(fs.readFileSync(filename)).servers;
+} catch (error) {
+    if (error.code === "ENOENT") { //file not existant, build from scratch
+        servers = { servers: [] };
+    }
+    else if (error.name === "SyntaxError") {
+        console.log(filename + " not in a valid json format, please fix");
+        console.log("Terminating...");
+        return
+    }
+    else    //not sure what the error is, better not do anything
+        throw error;
+}
 
-const json = JSON.parse(fs.readFileSync("tracking.json"));
-const servers = Object.keys(json.servers).map((key) => json.servers[key].id);
+
 const outputFolder = "./discordoutput";
 try {
     fs.mkdirSync(outputFolder);
 } catch (error) {/*EEXIST*/ }
 
-const checkInterval = 20 //seconds
+fs.watchFile("./tracking.json", current => {
+    update = true;
+    servers = JSON.parse(fs.readFileSync(filename)).servers;
+});
 
+const checkInterval = 20 //seconds
+let update = true;  //true at start(really?) and if server file changed so we know when to update server list
 async function main() {
-    for (let i = 0; i < servers.length; i++) {
-        if (!fs.existsSync(outputFolder + "/" + servers[i] + ".csv")) {
-            const serverName = await getServerName(servers[i]);
-            fs.appendFileSync(outputFolder + "/" + servers[i] + ".csv", "Date,Count," + serverName + "\n");
-        }
-    }
     while (true) {
+        if (update) {
+            for (let i = 0; i < servers.length; i++) {
+                if (!fs.existsSync(outputFolder + "/" + servers[i].id + ".csv")) {
+                    fs.appendFileSync(outputFolder + "/" + servers[i].id + ".csv", "Date,Count\n");
+                }
+            }
+            update = false;
+        }
+
         const timeStart = new Date().getMilliseconds();
         for (let i = 0; i < servers.length; i++) {
             const dateString = getTime();
             let skip = false;
             let serverSize;
             try {
-                serverSize = await getServerSize(servers[i]);
+                serverSize = await getServerSize(servers[i].invite);
             } catch (error) {
                 console.log("Network Error");
                 skip = true;
@@ -34,7 +57,7 @@ async function main() {
                     console.log("Invite expired");
                 }
                 else
-                    fs.appendFileSync(outputFolder + "/" + servers[i] + ".csv", dateString + "," + serverSize + ",\n");
+                    fs.appendFileSync(outputFolder + "/" + servers[i].id + ".csv", dateString + "," + serverSize + "\n");
             }
         }
         const runtime = new Date().getMilliseconds() - timeStart;
@@ -47,10 +70,6 @@ main();
 async function getServerSize(id) {
     const json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
     return json.approximate_member_count;
-}
-async function getServerName(id) {
-    const json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
-    return json.guild.name;
 }
 
 function getJSON(url) {
