@@ -18,7 +18,7 @@
     <title>Some Stuff</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    
+
     <link rel="stylesheet" href="/css/darkmode.css">
     <link rel="stylesheet" href="/css/projects/visualization/discord.css">
 
@@ -28,6 +28,9 @@
     <div class="Invite ID">
         <label>Available Servers:</label>
         <select id="dropdown" onchange="changeGraph()"></select>
+        Server Invite: <input type="text" id="textfield">
+        <button onclick="submitNew()">Submit</button>
+        <div id="errorcontainer" style="display :inline;"></div>
         <p></p>
         Checks discord invite link every 20s or so and puts time and count in a .cvs file available raw <a href="/projects/visualization/discordoutput/eC72Vj9.csv">like
             this</a>
@@ -45,7 +48,7 @@
 
     </div>
     <script src="/javascript/projects/visualization/visualize.js"></script>
-
+    <svg id="svg"></svg>
 
 </body>
 
