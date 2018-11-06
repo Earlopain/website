@@ -1,8 +1,17 @@
 async function loadGraph(id) {
     const data = await loadData(id);
+    if (!data) {
+        setInfoBox("Please wait a few seconds before checking newly added servers");
+        return;
+    }
+
     let lines = data.split("\n");
     lines.shift();  //removes cvs definition
     lines.pop();    //removes last line which is empty
+    if (lines.length === 1) {   //no use in display just 1 point, wait for at least 2 so we can draw a line
+        setInfoBox("Please wait a few seconds before checking newly added servers");
+        return;
+    }
     const maxDataPoints = 250;
     let dataset = [];
     //don't let factor fall under 2 because you can't realy pic something in the middle of [1,2] for example
@@ -48,7 +57,9 @@ async function loadGraph(id) {
     let yScale = d3.scaleLinear()
         .domain([min, max]) // input 
         .range([height, 0]); // output 
-
+    //firstly remove the old graph
+    let svgOld = document.getElementById("svg");
+    svgOld.parentElement.removeChild(svgOld);
     // Add the SVG to the page
     let svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -119,7 +130,6 @@ populateDropdown()
 
 async function populateDropdown() {
     const json = JSON.parse(await getURL("/serverside/projects/visualization/tracking.json")).servers;
-    console.log(json);
     json.reverse().forEach(element => {
         var option = document.createElement('option');
         option.text = element.name
@@ -131,8 +141,6 @@ async function populateDropdown() {
 }
 
 function changeGraph() {    //gets called if dropdown menu selected value changes
-    let svg = document.getElementById("svg");
-    svg.parentElement.removeChild(svg);
     loadGraph(node.value);
 }
 
@@ -151,8 +159,29 @@ function getURL(url) {
     })
 }
 
-async function loadData(invite) {
-    return await getURL("/serverside/projects/visualization/discordoutput/" + invite + ".csv");
+//simply returns content of a url on same-origin
+function postURL(url, data) {
+    return new Promise((resolve, reject) => {
+        let request = new XMLHttpRequest();
+        console.log(data);
+        request.open("POST", url, true);
+        request.onload = () => {
+            if (request.status >= 200 && request.status < 400) {
+                resolve(request.responseText);
+            } else { reject(); }
+        };
+        request.onerror = () => { reject() };
+        request.send(JSON.stringify(data));
+    })
+}
+
+async function loadData(id) {
+    try {
+        return await getURL("/serverside/projects/visualization/discordoutput/" + id + ".csv");
+    } catch (error) {   //a server was added but the script didn't create the datafile yet
+        return undefined;
+    }
+
 }
 
 const updateInterval = 20;
@@ -198,4 +227,13 @@ function dateStringToDate(string) {
     let result = new Date(string);
     result = new Date(result.getTime() + -result.getTimezoneOffset() * 60000);
     return result;
+}
+
+async function submitNew() {
+    const invite = document.getElementById("textfield").value;
+    setInfoBox(await postURL("/serverside/projects/visualization/discord.php", { "invite": invite }));
+}
+
+function setInfoBox(text) {
+    document.getElementById("errorcontainer").innerHTML = text;
 }
