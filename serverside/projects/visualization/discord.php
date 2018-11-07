@@ -19,22 +19,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "Not a valid invite";
         return;
     }
-    if (alreadyTracking($obj["invite"])) {
+    if (alreadyTracking($inviteJSON["guild"]["id"])) {
         echo "Already tracking that";
         return;
     };
     addServer($inviteJSON["guild"]["id"], $inviteJSON["code"], $inviteJSON["guild"]["name"]);
     echo "Success";
 }
-//only gets called if server does not already exist
+//only gets called if server does not have a valid invite
 function addServer($id, $invite, $name)
 {
     $currentJSON = json_decode(file_get_contents("./tracking.json"), true);
+    //if already exists but no valid invite, replace the one instead of appending a new
+    foreach ($currentJSON["servers"] as $key => $server) {
+        if ($server["id"] === $id && !$server["invite"]) {   //found a server missing an invite with the right id, so put it there
+            $currentJSON["servers"][$key]["invite"] = $invite;
+            $currentJSON["servers"][$key]["name"] = $name;
+            file_put_contents("./tracking.json", json_encode($currentJSON));
+            return;
+        }
+    }
     $size = count($currentJSON["servers"]);
     $currentJSON["servers"][$size]["id"] = $id;
     $currentJSON["servers"][$size]["invite"] = $invite;
     $currentJSON["servers"][$size]["name"] = htmlspecialchars($name);
-    file_put_contents("./tracking.json", json_encode($currentJSON)) or die("failed");
+    file_put_contents("./tracking.json", json_encode($currentJSON));
 }
 
 function isValidInvite($id)
@@ -57,11 +66,12 @@ function isValidInvite($id)
 
 function alreadyTracking($id)
 {
-    $currentJSON = json_decode(file_get_contents("./tracking.json"), true)["servers"];
+    $currentJSON = json_decode(file_get_contents("./tracking.json"), true);
 
-    foreach ($currentJSON as $value) {
-        if($value["invite"] === $id)
+    foreach ($currentJSON["servers"] as $value) {
+        if ($value["id"] === $id) {
             return true;
+        }
     }
     return false;
 }

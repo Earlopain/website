@@ -43,6 +43,8 @@ async function main() {
 
         const timeStart = new Date().getMilliseconds();
         for (let i = 0; i < servers.length; i++) {
+            if (!servers[i].invite)     //no invite for the server, skip
+                continue;
             const dateString = getTime();
             let skip = false;
             let serverSize;
@@ -53,8 +55,9 @@ async function main() {
                 skip = true;
             }
             if (!skip) {
-                if (!serverSize) {
-                    console.log("Invite expired");
+                if (serverSize === undefined) { //invite expired
+                    delete servers[i].invite;   //frees up the invite so php can set a new one if provided
+                    await fs.writeFileSync(filename, JSON.stringify({ servers }));
                 }
                 else
                     fs.appendFileSync(outputFolder + "/" + servers[i].id + ".csv", dateString + "," + serverSize + "\n");
@@ -69,6 +72,8 @@ main();
 
 async function getServerSize(id) {
     const json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
+    if (json.code === 10006) //invite invalid
+        return undefined;
     return json.approximate_member_count;
 }
 
