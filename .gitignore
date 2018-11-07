@@ -1,4 +1,5 @@
 owncloud/**
 pihole/**
 serverside/projects/visualization/discordoutput/**
+serverside/projects/visualization/tracking.json
 .vscode/**
