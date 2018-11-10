@@ -45,7 +45,7 @@ async function main() {
         for (let i = 0; i < servers.length; i++) {
             if (!servers[i].invite)     //no invite for the server, skip
                 continue;
-            const dateString =  Math.floor(new Date().getTime() / 1000);
+            const dateString = Math.floor(new Date().getTime() / 1000);
             let skip = false;
             let serverSize;
             try {
@@ -71,12 +71,7 @@ async function main() {
 main();
 
 async function getServerSize(id) {
-    let json;
-    try {
-        json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
-    } catch (error) {
-        throw new Error();
-    }
+    let json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
     if (json.code === 10006) //invite invalid
         return undefined;
     return json.approximate_member_count;
