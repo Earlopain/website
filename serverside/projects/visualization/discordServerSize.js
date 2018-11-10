@@ -45,7 +45,7 @@ async function main() {
         for (let i = 0; i < servers.length; i++) {
             if (!servers[i].invite)     //no invite for the server, skip
                 continue;
-            const dateString = getTime();
+            const dateString =  Math.floor(new Date().getTime() / 1000);
             let skip = false;
             let serverSize;
             try {
@@ -71,31 +71,29 @@ async function main() {
 main();
 
 async function getServerSize(id) {
-    const json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
+    let json;
+    try {
+        json = await getJSON("https://discordapp.com/api/v6/invite/" + id + "?with_counts=true");
+    } catch (error) {
+        throw new Error();
+    }
     if (json.code === 10006) //invite invalid
         return undefined;
     return json.approximate_member_count;
 }
 
 function getJSON(url) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         request.get(url, (error, response, body) => {
-            resolve(JSON.parse(body));
+            try {
+                resolve(JSON.parse(body));
+            } catch (error) {
+                reject();
+            }
         });
     });
 }
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function getTime() {
-    const date = new Date();
-    const month = ("0" + date.getUTCMonth() + 1).slice(-2);
-    const day = ("0" + date.getUTCDate()).slice(-2);
-    const hour = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
-    const seconds = date.getUTCSeconds();
-    const result = date.getUTCFullYear() + "-" + month + "-" + day + "T" + (hour.toString().length === 1 ? "0" + hour : hour) + ":" + (minutes.toString().length === 1 ? "0" + minutes : minutes) + ":" + (seconds.toString().length === 1 ? "0" + seconds : seconds);
-    return result;
 }
