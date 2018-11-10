@@ -30,9 +30,9 @@ async function loadGraph(id) {
 
         let count = line.split(",")[1];
         let time = line.split(",")[0];
-        dataset.push({ "count": count, "time": time });
+        dataset.push({ "count": count, "time": time * 1000 });
     });//Alawys push the last entry so the timeframe is the same no matter how many datapoint we use
-    dataset.push({ "count": lines[lines.length - 1].split(",")[1], "time": lines[lines.length - 1].split(",")[0] });
+    dataset.push({ "count": lines[lines.length - 1].split(",")[1], "time": lines[lines.length - 1].split(",")[0] * 1000 });
     //populate statistics labels
     document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
     document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
@@ -47,9 +47,8 @@ async function loadGraph(id) {
     let margin = { top: 25, right: 75, bottom: 50, left: 50 }, width = 1000, height = 500;
 
     // X scale will use the dates of our data
-    const minDate = dateStringToDate(dataset[0].time);
-    const maxDate = dateStringToDate(dataset[dataset.length - 1].time);
-
+    const minDate = dataset[0].time;
+    const maxDate = dataset[dataset.length - 1].time;
     let xScale = d3.scaleTime()
         .domain([minDate, maxDate]) // input
         .range([0, width]); // output
@@ -83,7 +82,7 @@ async function loadGraph(id) {
     // d3's line generator
     let line = d3.line()
         .x(function (d, i) {
-            return xScale(dateStringToDate(d.time));
+            return xScale(d.time);
         }) // set the x values for the line generator
         .y(function (d) { return yScale(d.count); }) // set the y values for the line generator 
         .curve(d3.curveMonotoneX) // apply smoothing to the line
@@ -115,13 +114,9 @@ async function loadGraph(id) {
         .on("mouseout", function () { focus.style("display", "hidden"); })
         .on("mousemove", mousemove);
     function mousemove() {
-        var x0 = xScale.invert(d3.mouse(this)[0]),
-            i = d3.bisector(function (d) { return dateStringToDate(d.time); }).left(dataset, x0, 0),
-            d0 = dataset[i],
-            d1 = dataset[i - 1],
-            d = x0 - d0.time > d1.time - x0 ? d1 : d0;
-        focus.attr("transform", "translate(" + xScale(dateStringToDate(d.time)) + "," + yScale(d.count) + ")");
-        focus.select("text").text(d.count);
+        let point = dataset[d3.bisector(function (d) { return d.time; }).left(dataset, xScale.invert(d3.mouse(this)[0]), 0)];
+        focus.attr("transform", "translate(" + xScale(point.time) + "," + yScale(point.count) + ")");
+        focus.select("text").text(point.count);
     }
 }
 
@@ -163,7 +158,6 @@ function getURL(url) {
 function postURL(url, data) {
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
-        console.log(data);
         request.open("POST", url, true);
         request.onload = () => {
             if (request.status >= 200 && request.status < 400) {
@@ -187,13 +181,11 @@ async function loadData(id) {
 const updateInterval = 20;
 
 function joinedLastXHours(array, hours) {
-    const currentDate = dateStringToDate(array[array.length - 1].time);
-    const dateWished = new Date(currentDate.getTime() - 1000 * 60 * 60 * hours);
-    const point = getNearestDataPoint(array, dateWished, hours);
+    const currentDate = array[array.length - 1].time;
+    const dateWished = currentDate - 60 * 60 * hours * 1000;
+    const point = getNearestDataPoint(array, dateWished);
 
     let sub = point.count;
-    if (sub === 0)
-        return "Data incomplete";
     if (!sub)
         sub = array[0]
     return array[array.length - 1].count - sub;
@@ -203,30 +195,22 @@ function joinedSinceTracked(array) {
     return array[array.length - 1].count - array[0].count;
 }
 
-function getNearestDataPoint(array, dateWished, hours) {
-    const target = dateWished.getTime();
-    let mid;
-    let lo = 0;
-    let hi = array.length - 1;
+function getNearestDataPoint(array, dateWished) {
+    var mid;
+    var lo = 0;
+    var hi = array.length - 1;
     while (hi - lo > 1) {
         mid = Math.floor((lo + hi) / 2);
-        if (dateStringToDate(array[mid].time).getTime() < target) {
+        if (array[mid].time < dateWished) {
             lo = mid;
         } else {
             hi = mid;
         }
     }
-    if (target - array[lo] <= array[hi] - target) {
+    if (dateWished - array[lo].time <= array[hi].time - dateWished) {
         return array[lo];
     }
     return array[hi];
-}
-
-//remove local timezone from date
-function dateStringToDate(string) {
-    let result = new Date(string);
-    result = new Date(result.getTime() + -result.getTimezoneOffset() * 60000);
-    return result;
 }
 
 async function submitNew() {
