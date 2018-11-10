@@ -91,9 +91,11 @@ function sleep(ms) {
 
 function getTime() {
     const date = new Date();
+    const month = ("0" + date.getUTCMonth() + 1).slice(-2);
+    const day = ("0" + date.getUTCDate()).slice(-2);
     const hour = date.getUTCHours();
     const minutes = date.getUTCMinutes();
     const seconds = date.getUTCSeconds();
-    const result = date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate() + " " + (hour.toString().length === 1 ? "0" + hour : hour) + ":" + (minutes.toString().length === 1 ? "0" + minutes : minutes) + ":" + (seconds.toString().length === 1 ? "0" + seconds : seconds);
+    const result = date.getUTCFullYear() + "-" + month + "-" + day + "T" + (hour.toString().length === 1 ? "0" + hour : hour) + ":" + (minutes.toString().length === 1 ? "0" + minutes : minutes) + ":" + (seconds.toString().length === 1 ? "0" + seconds : seconds);
     return result;
 }
