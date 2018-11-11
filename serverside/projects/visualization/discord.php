@@ -47,7 +47,9 @@ function addServer($id, $invite, $name)
 }
 
 function isValidInvite($id)
-{
+{   //no code specified but doesn't return the same error as invalid so return prematurely
+    if($id === "")
+        return false;
     $c = curl_init();
     curl_setopt($c, CURLOPT_URL, "https://discordapp.com/api/v6/invite/".$id."?with_counts=true");
     curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
