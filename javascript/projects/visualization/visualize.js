@@ -1,17 +1,33 @@
+let zoomArea = [0, 1];
+
 async function loadGraph(id) {
+    let oldZoomArea = zoomArea;
     const data = await loadData(id);
     if (!data) {
         setInfoBox("Please wait a few seconds before checking newly added servers");
         return;
     }
 
-    let lines = data.split("\n");
-    lines.shift();  //removes cvs definition
-    lines.pop();    //removes last line which is empty
-    if (lines.length === 1) {   //no use in display just 1 point, wait for at least 2 so we can draw a line
+    let allLines = data.split("\n");
+    allLines.shift();  //removes cvs definition
+    allLines.pop();    //removes last line which is empty
+    if (allLines.length === 1) {   //no use in display just 1 point, wait for at least 2 so we can draw a line
         setInfoBox("Please wait a few seconds before checking newly added servers");
         return;
     }
+
+    let lines = [];
+    //filter out the lines not in the zoomarea
+    allLines.forEach((line, index) => {
+        if (index / allLines.length > zoomArea[0] && index / allLines.length < zoomArea[1])
+            lines.push(line);
+        //if there are no more lines in the zoomarea but we got less than 2, add another one regardless
+        if (index / allLines.length > zoomArea[1] && lines.length < 2) {
+            lines.push(line);
+        }
+    });
+
+
     const maxDataPoints = 250;
     let dataset = [];
     //don't let factor fall under 2 because you can't realy pic something in the middle of [1,2] for example
@@ -34,12 +50,16 @@ async function loadGraph(id) {
     });//Alawys push the last entry so the timeframe is the same no matter how many datapoint we use
     dataset.push({ "count": lines[lines.length - 1].split(",")[1], "time": lines[lines.length - 1].split(",")[0] * 1000 });
     //populate statistics labels
-    document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
-    document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
-    document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12);
-    document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24);
-    document.getElementById("total").innerHTML = joinedSinceTracked(dataset);
-    document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1].count;
+    //but only if displaying the whole thing, eg zoom = [0,1] which is always true if a graph has been selected from the dropdown menu
+    if (zoomArea[0] === 0 && zoomArea[1] === 1) {
+        document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
+        document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
+        document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12);
+        document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24);
+        document.getElementById("total").innerHTML = joinedSinceTracked(dataset);
+        document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1].count;
+    }
+
     //max and min display of the y axis + some buffer in both directions
     const max = Math.max(...Object.keys(dataset).map((key) => { return dataset[key].count })) + 25;
     const min = Math.min(...Object.keys(dataset).map((key) => { return dataset[key].count })) - 25;
@@ -112,11 +132,39 @@ async function loadGraph(id) {
         .style("pointer-events", "all")
         .on("mouseover", function () { focus.style("display", null); })
         .on("mouseout", function () { focus.style("display", "hidden"); })
-        .on("mousemove", mousemove);
+        .on("mousemove", mousemove)
+        .on("mouseup", mouseUp)
+        .on("mousedown", mouseDown);
+
     function mousemove() {
-        let point = dataset[d3.bisector(function (d) { return d.time; }).left(dataset, xScale.invert(d3.mouse(this)[0]), 0)];
+        let point = pointAtMouse(this);
         focus.attr("transform", "translate(" + xScale(point.time) + "," + yScale(point.count) + ")");
         focus.select("text").text(point.count);
+    }
+    function mouseDown() {
+        zoomArea = [];
+        zoomArea.push(indexAtMouse(this) / maxDataPoints);
+    }
+    function mouseUp() {
+        zoomArea.push(indexAtMouse(this) / maxDataPoints);
+        zoomArea.sort();    //sort them so the lowest one is always left
+        const diff = oldZoomArea[1] - oldZoomArea[0];   //how much area did the old zoom have?
+        zoomArea[0] = oldZoomArea[0] + diff * zoomArea[0];  //go from the old zoom as a start and add the % of the diff * the new zoom
+        zoomArea[1] = oldZoomArea[0] + diff * zoomArea[1];
+        //don't set the zoom if both points are the same and revert back
+        if (zoomArea[0] === zoomArea[1]) {
+            zoomArea = oldZoomArea;
+            return;
+        }
+        loadGraph(id);
+    }
+
+    function pointAtMouse(state) {
+        return dataset[indexAtMouse(state)];
+    }
+
+    function indexAtMouse(state) {
+        return d3.bisector(function (d) { return d.time; }).left(dataset, xScale.invert(d3.mouse(state)[0]), 0);
     }
 }
 
@@ -136,6 +184,7 @@ async function populateDropdown() {
 }
 
 function changeGraph() {    //gets called if dropdown menu selected value changes
+    zoomArea = [0, 1];      //reset zoom
     loadGraph(node.value);
 }
 
@@ -175,10 +224,7 @@ async function loadData(id) {
     } catch (error) {   //a server was added but the script didn't create the datafile yet
         return undefined;
     }
-
 }
-
-const updateInterval = 20;
 
 function joinedLastXHours(array, hours) {
     const currentDate = array[array.length - 1].time;
@@ -187,7 +233,7 @@ function joinedLastXHours(array, hours) {
 
     let sub = point.count;
     if (!sub)
-        sub = array[0]
+        sub = array[0];
     return array[array.length - 1].count - sub;
 }
 
@@ -196,9 +242,9 @@ function joinedSinceTracked(array) {
 }
 
 function getNearestDataPoint(array, dateWished) {
-    var mid;
-    var lo = 0;
-    var hi = array.length - 1;
+    let mid;
+    let lo = 0;
+    let hi = array.length - 1;
     while (hi - lo > 1) {
         mid = Math.floor((lo + hi) / 2);
         if (array[mid].time < dateWished) {
