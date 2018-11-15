@@ -31,8 +31,9 @@ fs.watchFile("./tracking.json", current => {
 const checkInterval = 20 //seconds
 let update = true;  //true at start(really?) and if server file changed so we know when to update server list
 async function main() {
+    let skip = false;
     while (true) {
-        if (update) {
+        if (!skip && update) {
             for (let i = 0; i < servers.length; i++) {
                 if (!fs.existsSync(outputFolder + "/" + servers[i].id + ".csv")) {
                     fs.appendFileSync(outputFolder + "/" + servers[i].id + ".csv", "Date,Count\n");
@@ -40,29 +41,32 @@ async function main() {
             }
             update = false;
         }
-
         const timeStart = new Date().getMilliseconds();
+
         for (let i = 0; i < servers.length; i++) {
-            if (!servers[i].invite)     //no invite for the server, skip
-                continue;
-            const dateString = Math.floor(new Date().getTime() / 1000);
-            let skip = false;
-            let serverSize;
-            try {
-                serverSize = await getServerSize(servers[i].invite);
-            } catch (error) {
-                console.log("Network Error");
-                skip = true;
-            }
             if (!skip) {
-                if (serverSize === undefined) { //invite expired
-                    delete servers[i].invite;   //frees up the invite so php can set a new one if provided
-                    await fs.writeFileSync(filename, JSON.stringify({ servers }));
+                if (!servers[i].invite)     //no invite for the server, skip
+                    continue;
+                const dateString = Math.floor(new Date().getTime() / 1000);
+
+                let serverSize;
+                try {
+                    serverSize = await getServerSize(servers[i].invite);
+                } catch (error) {
+                    console.log("Network Error");
+                    skip = true;
                 }
-                else
-                    fs.appendFileSync(outputFolder + "/" + servers[i].id + ".csv", dateString + "," + serverSize + "\n");
+                if (!skip) {
+                    if (serverSize === undefined) { //invite expired
+                        delete servers[i].invite;   //frees up the invite so php can set a new one if provided
+                        await fs.writeFileSync(filename, JSON.stringify({ servers }));
+                    }
+                    else
+                        fs.appendFileSync(outputFolder + "/" + servers[i].id + ".csv", dateString + "," + serverSize + "\n");
+                }
             }
         }
+        skip = false;
         const runtime = new Date().getMilliseconds() - timeStart;
         await sleep(checkInterval * 1000 - runtime);
     }
