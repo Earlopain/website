@@ -32,6 +32,7 @@ terminal.endFolder();
 terminal.endFolder();
 terminal.startFolder("Projects");
 terminal.addFile("Visualization", "href", "/projects/visualization/discord.html");
+terminal.addFile("owotext", "href", "/projects/owotext/owo.html");
 terminal.endFolder();
 terminal.startFolder("About");
 terminal.addFile("My Steam", "href", "https://steamcommunity.com/id/earlopain");
