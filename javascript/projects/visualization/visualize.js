@@ -168,7 +168,8 @@ async function loadGraph(id) {
     }
 }
 
-let node = document.getElementById("dropdown");
+let dropdownAll = document.getElementById("dropdownall");
+let dropdownMissing = document.getElementById("dropdownmissing");
 populateDropdown()
 
 async function populateDropdown() {
@@ -177,15 +178,17 @@ async function populateDropdown() {
         var option = document.createElement('option');
         option.text = element.name
         option.value = element.id;
-        node.add(option, 0);
+        dropdownAll.add(option, 0);
+        if (!element.invite)
+            dropdownMissing.add(option, 0);
     });
-    node.selectedIndex = 0;
-    loadGraph(node.value);  //loads the initial graph without user intervention
+    dropdownAll.selectedIndex = 0;
+    loadGraph(dropdownAll.value);  //loads the initial graph without user intervention
 }
 
 function changeGraph() {    //gets called if dropdown menu selected value changes
     zoomArea = [0, 1];      //reset zoom
-    loadGraph(node.value);
+    loadGraph(dropdownAll.value);
 }
 
 //simply returns content of a url on same-origin
