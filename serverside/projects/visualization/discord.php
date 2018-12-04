@@ -71,7 +71,7 @@ function alreadyTracking($id)
     $currentJSON = json_decode(file_get_contents("./tracking.json"), true);
 
     foreach ($currentJSON["servers"] as $value) {
-        if ($value["id"] === $id) {
+        if ($value["id"] === $id  && isset($value["invite"])) {
             return true;
         }
     }
