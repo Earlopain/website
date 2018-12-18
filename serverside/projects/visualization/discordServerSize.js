@@ -1,6 +1,6 @@
 const request = require("request");
 const fs = require("fs");
-const filename = "./tracking.json"
+const filename = __dirname + "/tracking.json"
 let servers;
 try {
     servers = JSON.parse(fs.readFileSync(filename)).servers;
@@ -18,12 +18,12 @@ try {
 }
 
 
-const outputFolder = "./discordoutput";
+const outputFolder = __dirname + "/discordoutput";
 try {
     fs.mkdirSync(outputFolder);
 } catch (error) {/*EEXIST*/ }
 
-fs.watchFile("./tracking.json", current => {
+fs.watchFile(filename, current => {
     update = true;
     servers = JSON.parse(fs.readFileSync(filename)).servers;
 });
