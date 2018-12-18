@@ -2,4 +2,6 @@ owncloud/**
 pihole/**
 serverside/projects/visualization/discordoutput/**
 serverside/projects/visualization/tracking.json
+serverside/projects/e621history/data.*
+serverside/projects/e621history/posts.json
 .vscode/**
