@@ -27,14 +27,13 @@ async function loadGraph(id) {
             let split = line.split(",");
             let time = split[0] * 1000;
             let count = split[1];
-
             if (time > currentDate.getTime() - timeWindow * 1000)
                 lines.push({ "count": count, "time": time });
         }
     });
 
 
-    const maxDataPoints = 250;
+    const maxDataPoints = 250 - 1;
     let dataset = [];
     //don't let factor fall under 2 because you can't realy pic something in the middle of [1,2] for example
     const factor = lines.length / maxDataPoints < 2 ? 1 : lines.length / maxDataPoints;
@@ -53,14 +52,15 @@ async function loadGraph(id) {
         dataset.push({ "count": line.count, "time": line.time });
     });//Alawys push the last entry so the timeframe is the same no matter how many datapoint we use
     dataset.push({ "count": lines[lines.length - 1].count, "time": lines[lines.length - 1].time });
+    console.log(dataset.length);
     //populate statistics labels
     //but only if displaying the whole thing, eg zoom = [0,1] which is always true if a graph has been selected from the dropdown menu
     if (zoomArea[0] === 0 && zoomArea[1] === 1) {
-        document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1);
-        document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6);
-        document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12);
-        document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24);
-        document.getElementById("total").innerHTML = joinedSinceTracked(dataset);
+        document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1, timeWindow);
+        document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6,timeWindow);
+        document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12,timeWindow);
+        document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24,timeWindow);
+        document.getElementById("total").innerHTML = joinedSinceTracked(allLines[0], allLines[allLines.length - 1]);
         document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1].count;
     }
 
@@ -233,9 +233,15 @@ async function loadData(id) {
     }
 }
 
-function joinedLastXHours(array, hours) {
+function joinedLastXHours(array, hours, timeframe) {
+    return joinedLastXSeconds(array, hours * 60 * 60, timeframe);
+}
+
+function joinedLastXSeconds(array, seconds, timeframe){
+    if(seconds > timeframe)
+        return ""
     const currentDate = array[array.length - 1].time;
-    const dateWished = currentDate - 60 * 60 * hours * 1000;
+    const dateWished = currentDate - seconds * 1000;
     const point = getNearestDataPoint(array, dateWished);
 
     let sub = point.count;
@@ -244,8 +250,8 @@ function joinedLastXHours(array, hours) {
     return array[array.length - 1].count - sub;
 }
 
-function joinedSinceTracked(array) {
-    return array[array.length - 1].count - array[0].count;
+function joinedSinceTracked(first, last) {
+    return last.split(",")[1] - first.split(",")[1];
 }
 
 function getNearestDataPoint(array, dateWished) {
