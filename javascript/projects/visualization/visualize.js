@@ -1,7 +1,5 @@
-let zoomArea = [0, 1];
 
 async function loadGraph(id) {
-    let oldZoomArea = zoomArea;
     const data = await loadData(id);
     if (!data) {
         setInfoBox("Please wait a few seconds before checking newly added servers");
@@ -17,19 +15,15 @@ async function loadGraph(id) {
     }
 
     let lines = [];
-    const currentDate = new Date();
-    const timeWindow = 60 * 60 * 24 * 7;
-    //filter out the lines not in the zoomarea
+    const timeWindow = new Date().getTime() / 1000 - 60 * 60 * 24 * 7;
+    const totalTime = allLines[allLines.length - 1].split(",")[0] - allLines[0].split(",")[0];
     allLines.forEach((line, index) => {
-        //if there are no more lines in the zoomarea but we got less than 2, add another one regardless
-        if ((index / allLines.length > zoomArea[0] && index / allLines.length < zoomArea[1]) || (index / allLines.length > zoomArea[1] && lines.length < 2)) {
 
             let split = line.split(",");
             let time = split[0] * 1000;
             let count = split[1];
-            if (time > currentDate.getTime() - timeWindow * 1000)
+            if (time > timeWindow * 1000)
                 lines.push({ "count": count, "time": time });
-        }
     });
 
 
@@ -54,15 +48,12 @@ async function loadGraph(id) {
     dataset.push({ "count": lines[lines.length - 1].count, "time": lines[lines.length - 1].time });
     console.log(dataset.length);
     //populate statistics labels
-    //but only if displaying the whole thing, eg zoom = [0,1] which is always true if a graph has been selected from the dropdown menu
-    if (zoomArea[0] === 0 && zoomArea[1] === 1) {
         document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1, timeWindow);
-        document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6,timeWindow);
-        document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12,timeWindow);
-        document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24,timeWindow);
+        document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6, timeWindow);
+        document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12, timeWindow);
+        document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24, timeWindow);
         document.getElementById("total").innerHTML = joinedSinceTracked(allLines[0], allLines[allLines.length - 1]);
         document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1].count;
-    }
 
     //max and min display of the y axis + some buffer in both directions
     const max = Math.max(...Object.keys(dataset).map((key) => { return dataset[key].count })) + 25;
@@ -146,21 +137,10 @@ async function loadGraph(id) {
         focus.select("text").text(point.count);
     }
     function mouseDown() {
-        zoomArea = [];
-        zoomArea.push(indexAtMouse(this) / maxDataPoints);
+
     }
     function mouseUp() {
-        zoomArea.push(indexAtMouse(this) / maxDataPoints);
-        zoomArea.sort();    //sort them so the lowest one is always left
-        const diff = oldZoomArea[1] - oldZoomArea[0];   //how much area did the old zoom have?
-        zoomArea[0] = oldZoomArea[0] + diff * zoomArea[0];  //go from the old zoom as a start and add the % of the diff * the new zoom
-        zoomArea[1] = oldZoomArea[0] + diff * zoomArea[1];
-        //don't set the zoom if both points are the same and revert back
-        if (zoomArea[0] === zoomArea[1]) {
-            zoomArea = oldZoomArea;
-            return;
-        }
-        loadGraph(id);
+
     }
 
     function pointAtMouse(state) {
@@ -191,7 +171,6 @@ async function populateDropdown() {
 }
 
 function changeGraph() {    //gets called if dropdown menu selected value changes
-    zoomArea = [0, 1];      //reset zoom
     loadGraph(dropdownAll.value);
 }
 
@@ -237,8 +216,8 @@ function joinedLastXHours(array, hours, timeframe) {
     return joinedLastXSeconds(array, hours * 60 * 60, timeframe);
 }
 
-function joinedLastXSeconds(array, seconds, timeframe){
-    if(seconds > timeframe)
+function joinedLastXSeconds(array, seconds, timeframe) {
+    if (seconds > timeframe)
         return ""
     const currentDate = array[array.length - 1].time;
     const dateWished = currentDate - seconds * 1000;
