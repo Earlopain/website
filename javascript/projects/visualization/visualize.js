@@ -17,13 +17,19 @@ async function loadGraph(id) {
     }
 
     let lines = [];
+    const currentDate = new Date();
+    const timeWindow = 60 * 60 * 24 * 7;
     //filter out the lines not in the zoomarea
     allLines.forEach((line, index) => {
-        if (index / allLines.length > zoomArea[0] && index / allLines.length < zoomArea[1])
-            lines.push(line);
         //if there are no more lines in the zoomarea but we got less than 2, add another one regardless
-        if (index / allLines.length > zoomArea[1] && lines.length < 2) {
-            lines.push(line);
+        if ((index / allLines.length > zoomArea[0] && index / allLines.length < zoomArea[1]) || (index / allLines.length > zoomArea[1] && lines.length < 2)) {
+
+            let split = line.split(",");
+            let time = split[0] * 1000;
+            let count = split[1];
+
+            if (time > currentDate.getTime() - timeWindow * 1000)
+                lines.push({ "count": count, "time": time });
         }
     });
 
@@ -44,11 +50,9 @@ async function loadGraph(id) {
             counter = 0;
         }
 
-        let count = line.split(",")[1];
-        let time = line.split(",")[0];
-        dataset.push({ "count": count, "time": time * 1000 });
+        dataset.push({ "count": line.count, "time": line.time });
     });//Alawys push the last entry so the timeframe is the same no matter how many datapoint we use
-    dataset.push({ "count": lines[lines.length - 1].split(",")[1], "time": lines[lines.length - 1].split(",")[0] * 1000 });
+    dataset.push({ "count": lines[lines.length - 1].count, "time": lines[lines.length - 1].time });
     //populate statistics labels
     //but only if displaying the whole thing, eg zoom = [0,1] which is always true if a graph has been selected from the dropdown menu
     if (zoomArea[0] === 0 && zoomArea[1] === 1) {
