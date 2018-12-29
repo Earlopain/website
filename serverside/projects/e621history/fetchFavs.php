@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "Not a valid username";
         return;
     }
-    $favs = getFavs($obj["username"]);
+    $favs = shell_exec("node ./getUserFavs.js " . $obj["username"]);
     echo json_encode($favs);
 
 }
