@@ -3,5 +3,6 @@ pihole/**
 serverside/projects/visualization/discordoutput/**
 serverside/projects/visualization/tracking.json
 serverside/projects/e621history/data.*
-serverside/projects/e621history/posts.json
+serverside/projects/e621history/userfavs
+serverside/projects/e621history/postjson
 .vscode/**
