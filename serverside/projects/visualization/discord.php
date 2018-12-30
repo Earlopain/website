@@ -1,6 +1,8 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $json = file_get_contents('php://input');
+    //assume the worst, set 200 later, if checks pass
+    http_response_code(400);
     $obj = json_decode($json, true);
     if (!isset($obj)) {
         echo "No json data";
@@ -20,6 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         return;
     };
     addServer($inviteJSON["guild"]["id"], $inviteJSON["code"], $inviteJSON["guild"]["name"]);
+    http_response_code(200);
     echo "Success";
 }
 //only gets called if server does not have a valid invite
