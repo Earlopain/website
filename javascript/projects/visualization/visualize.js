@@ -1,7 +1,7 @@
 async function loadGraph(id) {
     const data = await loadData(id);
     if (!data) {
-        setInfoBox("Please wait a few seconds before checking newly added servers");
+        infoMessage("Please wait a few seconds before checking newly added servers", "info");
         return;
     }
 
@@ -9,7 +9,7 @@ async function loadGraph(id) {
     allLines.shift();  //removes cvs definition
     allLines.pop();    //removes last line which is empty
     if (allLines.length === 1) {   //no use in display just 1 point, wait for at least 2 so we can draw a line
-        setInfoBox("Please wait a few seconds before checking newly added servers");
+        infoMessage("Please wait a few seconds before checking newly added servers", "info");
         return;
     }
 
@@ -221,10 +221,6 @@ function getNearestDataPoint(array, dateWished) {
 }
 
 async function submitNew() {
-    const invite = document.getElementById("textfield").value;
-    setInfoBox(await postURL("/serverside/projects/visualization/discord.php", { "invite": invite }));
-}
-
-function setInfoBox(text) {
-    document.getElementById("errorcontainer").innerHTML = text;
+    request = await postURL("/serverside/projects/visualization/discord.php", { "invite": invite });
+    infoMessage(request.responseText, request.status)
 }
