@@ -71,17 +71,17 @@ function infoMessage(message, level) {
             let op = 1;  // initial opacity
             let timer = setInterval(function () {
                 if (op <= 0.15) {
-                    //walk through the elements and remove the one actually turning invisible, not the top most
+                    //remove the element which turned invisible and save the index
+                    let index;
                     for (let i = 0; i < allBoxes.length; i++) {
                         if (allBoxes[i].match === element.match) {
+                            index = i;
                             allBoxes.splice(i, 1);
                             break;
                         }
-                    }
-                    allBoxes.forEach((box, index) => {
-                        //update position, because we remove the top one
-                        box.style.top = (textSize + padding * 3) * index + "px";
-                    });
+                    }//move all boxes under the removed one up
+                    for (let i = index; i < allBoxes.length; i++)
+                        updatePosition(allBoxes[i], i);
                     clearInterval(timer);   //remove element, if not visible anymore
                     element.parentNode.removeChild(element);
                 }
@@ -90,5 +90,20 @@ function infoMessage(message, level) {
                 op -= op * 0.15;
             }, 50);
         }, delay)
+    }
+    //gradually move up, stop once the position of the box above has been reached
+    function updatePosition(element, index) {
+        const wishedPos = (textSize + padding * 3) * index;
+        const speed = 4;
+        const timer = setInterval(() => {
+            if (parseInt(element.style.top) - speed <= wishedPos) {
+                element.style.top = wishedPos + "px";
+                clearInterval(timer);
+            }
+            else {
+                element.style.top = parseInt(element.style.top) - speed + "px";
+                pixels -= speed;
+            }
+        }, 25);
     }
 }
