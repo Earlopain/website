@@ -30,9 +30,10 @@ function postURL(url, data) {
 
 let allBoxes = [];
 function infoMessage(message, level) {
-    const delay = 3000;
+    let delay = 3000;
     const textSize = 20;
     const padding = 3;
+    const rounding = 4
     let wrapper = document.createElement("div");
     wrapper.style.position = "absolute";
     wrapper.style.top = padding * 2 + "px";
@@ -43,12 +44,13 @@ function infoMessage(message, level) {
     infoBox.style.position = "relative";
     infoBox.style.textAlign = "center";
     infoBox.style.display = "inline-block";
-    infoBox.style.borderRadius = "4px";
+    infoBox.style.borderRadius = rounding + "px";
     //offset needed to not obstruct the other elements
     infoBox.style.top = (textSize + padding * 3) * allBoxes.length + "px";
     switch (level) {
         case "error": case 400:
             infoBox.style.backgroundColor = "rgb(145, 35, 32)";
+            delay = 10000;
             break;
         case "info":
             infoBox.style.backgroundColor = "rgb(174, 108, 15)";
@@ -68,7 +70,7 @@ function infoMessage(message, level) {
         setTimeout(() => {
             let op = 1;  // initial opacity
             let timer = setInterval(function () {
-                if (op <= 0.05) {
+                if (op <= 0.15) {
                     //remove the top most element
                     allBoxes.shift();
                     allBoxes.forEach((box, index) => {
@@ -80,7 +82,7 @@ function infoMessage(message, level) {
                 }
                 element.style.opacity = op;
                 element.style.filter = 'alpha(opacity=' + op * 100 + ")";
-                op -= op * 0.1;
+                op -= op * 0.15;
             }, 50);
         }, delay)
     }
