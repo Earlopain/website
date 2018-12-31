@@ -71,8 +71,13 @@ function infoMessage(message, level) {
             let op = 1;  // initial opacity
             let timer = setInterval(function () {
                 if (op <= 0.15) {
-                    //remove the top most element
-                    allBoxes.shift();
+                    //walk through the elements and remove the one actually turning invisible, not the top most
+                    for (let i = 0; i < allBoxes.length; i++) {
+                        if (allBoxes[i].match === element.match) {
+                            allBoxes.splice(i, 1);
+                            break;
+                        }
+                    }
                     allBoxes.forEach((box, index) => {
                         //update position, because we remove the top one
                         box.style.top = (textSize + padding * 3) * index + "px";
