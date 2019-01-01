@@ -6,6 +6,8 @@ const postFolder = __dirname + "/postjson";
 let updateJSON = true;
 
 async function main() {
+    if (!fs.existsSync(postFolder + "/00"))
+        generateFolderStrucutre();
     //should always e present, because php checks for argument
     const username = process.argv[2];
     const favsmd5 = await getFavsMd5(username);
@@ -22,7 +24,7 @@ main();
 function getPosts(md5array) {
     let result = [];
     md5array.forEach(md5 => {//should never fail, because all posts were previously populated
-        result.push(JSON.parse(fs.readFileSync(postFolder + "/" + md5 + ".json", "utf8")));
+        result.push(JSON.parse(fs.readFileSync(getJSONPath(md5), "utf8")));
     });
     return result;
 }
@@ -44,14 +46,19 @@ async function getFavsMd5(username) {
             //got a hash we already saw, backtracked to already known values
             if (currentFavs.includes(json[i].md5))
                 return result;
-            if (!fs.existsSync(postFolder + "/" + json[i].md5 + ".json"))
-                fs.writeFileSync(postFolder + "/" + json[i].md5 + ".json", JSON.stringify(json[i]));
+            const path = getJSONPath(json[i].md5)
+            if (!fs.existsSync(path))
+                fs.writeFileSync(path, JSON.stringify(json[i]));
             result.push(json[i].md5);
         }
         if (json.length !== 320)
             return result;
         page++;
     }
+}
+
+function getJSONPath(md5) {
+    return postFolder + "/" + md5.substr(0, 2) + "/" + md5.substr(2, 2) + "/" + md5 + ".json";
 }
 
 function updateNeeded(username, json) {
@@ -72,5 +79,25 @@ function getJSON(url) {
             body = JSON.parse(body);
             resolve(body);
         })
+    });
+}
+
+function generateFolderStrucutre() {
+    if (!fs.existsSync(userFolder))
+        fs.mkdirSync(userFolder);
+    if (!fs.existsSync(postFolder))
+        fs.mkdirSync(postFolder);
+    const chars = [..."0123456789abcdef"];
+    chars.forEach(c1 => {
+        chars.forEach(c2 => {
+            fs.mkdirSync(postFolder + "/" + c1 + c2);
+            chars.forEach(c3 => {
+                chars.forEach(c4 => {
+                    fs.mkdirSync(postFolder + "/" + c1 + c2 + "/" + c3 + c4);
+                });
+            });
+
+        });
+
     });
 }
