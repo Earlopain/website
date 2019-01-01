@@ -100,10 +100,8 @@ function infoMessage(message, level) {
                 element.style.top = wishedPos + "px";
                 clearInterval(timer);
             }
-            else {
+            else
                 element.style.top = parseInt(element.style.top) - speed + "px";
-                pixels -= speed;
-            }
         }, 25);
     }
 }
