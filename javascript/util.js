@@ -19,13 +19,20 @@ function postURL(url, data) {
         let request = new XMLHttpRequest();
         request.open("POST", url, true);
         request.onload = () => {
-            if (request.status >= 200 && request.status < 400) {
+            if (request.status >= 200 && request.status <= 400) {
                 resolve(request);
             } else { reject(); }
         };
         request.onerror = () => { reject() };
         request.send(JSON.stringify(data));
     })
+}
+
+function logResponse(request){
+    if(request.status !== 200)
+        infoMessage(request.responseText, request.status);
+    else
+        infoMessage("Success");
 }
 
 let allBoxes = [];
