@@ -221,6 +221,6 @@ function getNearestDataPoint(array, dateWished) {
 }
 
 async function submitNew() {
-    request = await postURL("/serverside/projects/visualization/discord.php", { "invite": invite });
-    infoMessage(request.responseText, request.status)
+    const invite = document.getElementById("textfield").value;
+    logResponse(await postURL("/serverside/projects/visualization/discord.php", { "invite": invite }));
 }
