@@ -1,8 +1,7 @@
-
 async function loadGraph(id) {
     const data = await loadData(id);
     if (!data) {
-        setInfoBox("Please wait a few seconds before checking newly added servers");
+        infoMessage("Please wait a few seconds before checking newly added servers", "info");
         return;
     }
 
@@ -10,20 +9,20 @@ async function loadGraph(id) {
     allLines.shift();  //removes cvs definition
     allLines.pop();    //removes last line which is empty
     if (allLines.length === 1) {   //no use in display just 1 point, wait for at least 2 so we can draw a line
-        setInfoBox("Please wait a few seconds before checking newly added servers");
+        infoMessage("Please wait a few seconds before checking newly added servers", "info");
         return;
     }
 
     let lines = [];
-    const timeWindow = new Date().getTime() / 1000 - 60 * 60 * 24 * 7;
-    const totalTime = allLines[allLines.length - 1].split(",")[0] - allLines[0].split(",")[0];
+    const currentDate = new Date();
+    const timeWindow = 60 * 60 * 24 * 7;
+    //filter out the lines not in the timeWindow
     allLines.forEach((line, index) => {
-
-            let split = line.split(",");
-            let time = split[0] * 1000;
-            let count = split[1];
-            if (time > timeWindow * 1000)
-                lines.push({ "count": count, "time": time });
+        let split = line.split(",");
+        let time = split[0] * 1000;
+        let count = split[1];
+        if (time > currentDate.getTime() - timeWindow * 1000)
+            lines.push({ "count": count, "time": time });
     });
 
 
@@ -48,12 +47,12 @@ async function loadGraph(id) {
     dataset.push({ "count": lines[lines.length - 1].count, "time": lines[lines.length - 1].time });
     console.log(dataset.length);
     //populate statistics labels
-        document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1, timeWindow);
-        document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6, timeWindow);
-        document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12, timeWindow);
-        document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24, timeWindow);
-        document.getElementById("total").innerHTML = joinedSinceTracked(allLines[0], allLines[allLines.length - 1]);
-        document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1].count;
+    document.getElementById("lasthour").innerHTML = joinedLastXHours(dataset, 1, timeWindow);
+    document.getElementById("last6hours").innerHTML = joinedLastXHours(dataset, 6, timeWindow);
+    document.getElementById("last12hours").innerHTML = joinedLastXHours(dataset, 12, timeWindow);
+    document.getElementById("lastday").innerHTML = joinedLastXHours(dataset, 24, timeWindow);
+    document.getElementById("total").innerHTML = joinedSinceTracked(allLines[0], allLines[allLines.length - 1]);
+    document.getElementById("currentcount").innerHTML = dataset[dataset.length - 1].count;
 
     //max and min display of the y axis + some buffer in both directions
     const max = Math.max(...Object.keys(dataset).map((key) => { return dataset[key].count })) + 25;
@@ -137,10 +136,8 @@ async function loadGraph(id) {
         focus.select("text").text(point.count);
     }
     function mouseDown() {
-
     }
     function mouseUp() {
-
     }
 
     function pointAtMouse(state) {
@@ -174,35 +171,7 @@ function changeGraph() {    //gets called if dropdown menu selected value change
     loadGraph(dropdownAll.value);
 }
 
-//simply returns content of a url on same-origin
-function getURL(url) {
-    return new Promise((resolve, reject) => {
-        let request = new XMLHttpRequest();
-        request.open("GET", url, true);
-        request.onload = () => {
-            if (request.status >= 200 && request.status < 400) {
-                resolve(request.responseText);
-            } else { reject(); }
-        };
-        request.onerror = () => { reject() };
-        request.send();
-    })
-}
 
-//simply returns content of a url on same-origin
-function postURL(url, data) {
-    return new Promise((resolve, reject) => {
-        let request = new XMLHttpRequest();
-        request.open("POST", url, true);
-        request.onload = () => {
-            if (request.status >= 200 && request.status < 400) {
-                resolve(request.responseText);
-            } else { reject(); }
-        };
-        request.onerror = () => { reject() };
-        request.send(JSON.stringify(data));
-    })
-}
 
 async function loadData(id) {
     try {
@@ -252,10 +221,6 @@ function getNearestDataPoint(array, dateWished) {
 }
 
 async function submitNew() {
-    const invite = document.getElementById("textfield").value;
-    setInfoBox(await postURL("/serverside/projects/visualization/discord.php", { "invite": invite }));
-}
-
-function setInfoBox(text) {
-    document.getElementById("errorcontainer").innerHTML = text;
+    request = await postURL("/serverside/projects/visualization/discord.php", { "invite": invite });
+    infoMessage(request.responseText, request.status)
 }

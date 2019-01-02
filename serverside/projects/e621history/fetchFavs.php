@@ -2,6 +2,7 @@
 set_time_limit(10);   //1h
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $json = file_get_contents('php://input');
+    http_response_code(400);
     $obj = json_decode($json, true);
     if (!isset($obj)) {
         echo "No post data";
@@ -15,7 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "Not a valid username";
         return;
     }
-    $favs = getFavs($obj["username"]);
+    $favs = shell_exec("node ./getUserFavs.js " . $obj["username"]);
+    http_response_code(200);
     echo json_encode($favs);
 
 }

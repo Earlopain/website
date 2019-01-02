@@ -17,6 +17,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Some Stuff</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/javascript/util.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
     <link rel="stylesheet" href="/css/darkmode.css">
@@ -31,7 +32,6 @@
         Server Invite: <input type="text" id="textfield">
         <button onclick="submitNew()">Submit</button>
         Missing: <select id="dropdownmissing"></select>
-        <div id="errorcontainer" style="display :inline;"></div>
         <p></p>
         Checks discord invite link every 20s or so and puts time and count in a .cvs file available raw <a href="/serverside/projects/visualization/discordoutput/41771983423143937.csv">like
             this</a>
