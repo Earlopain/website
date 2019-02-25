@@ -6,3 +6,4 @@ serverside/projects/e621history/data.*
 serverside/projects/e621history/userfavs
 serverside/projects/e621history/postjson
 .vscode/**
+serverside/secrets.txt
