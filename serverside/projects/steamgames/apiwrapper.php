@@ -14,8 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "No url specified";
         return;
     }
-    $obj["url"] .= "&key=".getSecret("steam");
-    $response = proxyGetUrl($obj["url"]);
+    $response = proxyGetUrl($obj["url"]."&key=".getSecret("steam"));
     http_response_code(200);
     echo $response;
 }
