@@ -4,7 +4,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     include $_SERVER['DOCUMENT_ROOT'].'/serverside/proxy.php';
 
     $json = file_get_contents('php://input');
-    http_response_code(400);
     $obj = json_decode($json, true);
     if (!isset($obj)) {
         echo "No data";
@@ -15,6 +14,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         return;
     }
     $response = proxyGetUrl($obj["url"]."&key=".getSecret("steam"));
-    http_response_code(200);
     echo $response;
 }
