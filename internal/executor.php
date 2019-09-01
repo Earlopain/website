@@ -29,6 +29,8 @@ function getCommand()
             return "node /media/plex/cronjobs/filetagger/plexTagNewImages.js";
         case 'apache2restart':
             return "sudo service apache2 restart";
+        case 'deezerdl':
+            return "cd /media/plex/software/deezerdl && /media/plex/software/deezerdl/SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -u ".$_REQUEST["link"];
         default:
             return "echo test";
     }

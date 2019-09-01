@@ -7,18 +7,25 @@ let loadedFile;
 document.getElementById("commandout");
 
 function executeOnServer(command) {
-    document.getElementById("commandout").value = "";
     hideSubmitButton();
-    if(commandInProgress){
+    if (commandInProgress) {
         console.log("already executing");
         return;
     }
     commandInProgress = true;
-    httpGET("executor.php?command=" + command);
+    switch (command) {
+        case "deezerdl":
+            httpGET("executor.php?command=" + command + "&link=" + document.getElementById("commandout").value);
+            break;
+        default:
+            httpGET("executor.php?command=" + command);
+            break;
+    }
+    document.getElementById("commandout").value = "";
 }
 
-function getFileFromServer(filePath){
-    if(commandInProgress){
+function getFileFromServer(filePath) {
+    if (commandInProgress) {
         console.log("already executing");
         return;
     }
@@ -29,42 +36,27 @@ function getFileFromServer(filePath){
     httpGET("executor.php?getfile=" + filePath);
 }
 
-function putFileOnServer(){
-    httpPOST("executor.php", {"savefile": loadedFile, "savefiledata": document.getElementById("commandout").value});
+function putFileOnServer() {
+    httpPOST("executor.php", { "savefile": loadedFile, "savefiledata": document.getElementById("commandout").value });
 }
 
-function hideSubmitButton(){
+function hideSubmitButton() {
     document.getElementById("submitfile").style.display = "none";
 }
 
-function showSubmitButton(){
+function showSubmitButton() {
     document.getElementById("submitfile").style.display = "";
 }
 
 function httpGET(url) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", url, true); // false for synchronous request
-    xmlHttp.onprogress = function(event) {
+    xmlHttp.onprogress = function (event) {
         document.getElementById("commandout").value = event.target.responseText;
         document.getElementById("commandout").scrollTop = 999999;
     };
-    xmlHttp.onload = function(){
+    xmlHttp.onload = function () {
         commandInProgress = false;
-    };
-    xmlHttp.onloadend = function(event){
-        console.log(event);
-    };
-    xmlHttp.ontimeout = function(event){
-        console.log(event);
-    };
-    xmlHttp.onabort = function(event){
-        console.log(event);
-    };
-    xmlHttp.onerror = function(event){
-        console.log(event);
-    };
-    xmlHttp.onreadystatechange = function(event){
-        console.log(event);
     };
     xmlHttp.send(null);
 }
@@ -77,7 +69,7 @@ function httpPOST(url, formDataJSON) {
     });
     xmlHttp.open("POST", url, true); // false for synchronous request
 
-    xmlHttp.onload = function(){
+    xmlHttp.onload = function () {
         document.getElementById("commandout").value += "\nDone!";
         document.getElementById("commandout").scrollTop = 999999;
         hideSubmitButton();
