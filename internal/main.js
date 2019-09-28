@@ -17,6 +17,9 @@ function executeOnServer(command) {
         case "deezerdl":
             httpGET("executor.php?command=" + command + "&link=" + document.getElementById("commandout").value);
             break;
+        case "e621dl":
+            httpGET("executor.php?command=" + command + "&posts=" + document.getElementById("commandout").value);
+            break;
         default:
             httpGET("executor.php?command=" + command);
             break;
