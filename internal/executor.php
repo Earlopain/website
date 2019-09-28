@@ -2,6 +2,8 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+ignore_user_abort(true);
+set_time_limit(0);
 
 if (isset($_GET["command"])) {
     while (@ ob_end_flush()); // end all output buffers if any
@@ -31,6 +33,8 @@ function getCommand()
             return "sudo service apache2 restart";
         case 'deezerdl':
             return "cd /media/plex/software/deezerdl && /media/plex/software/deezerdl/SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -u ".$_REQUEST["link"];
+        case 'e621dl':
+            return "node /media/plex/software/e621downloader.js '" . $_REQUEST["posts"] . "'";
         default:
             return "echo test";
     }
