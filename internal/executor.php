@@ -7,7 +7,6 @@ set_time_limit(0);
 
 if (isset($_GET["command"])) {
     while (@ ob_end_flush()); // end all output buffers if any
-
     $proc = popen(getCommand(), 'r');
     while (!feof($proc)) {
         echo fread($proc, 4096);
@@ -32,7 +31,10 @@ function getCommand()
         case 'apache2restart':
             return "sudo service apache2 restart";
         case 'deezerdl':
-            return "cd /media/plex/software/deezerdl && /media/plex/software/deezerdl/SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -u ".$_REQUEST["link"];
+            $myfile = fopen("/media/plex/software/deezerdl/downloadLinks.txt", "w") or die("Unable to open file!");
+            fwrite($myfile, implode("\n", explode("|" , $_REQUEST["link"])));
+            fclose($myfile);
+            return "cd /media/plex/software/deezerdl && ./SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -d all";
         case 'e621dl':
             return "node /media/plex/software/e621downloader.js '" . $_REQUEST["posts"] . "'";
         default:
