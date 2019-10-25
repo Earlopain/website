@@ -28,6 +28,8 @@ function getCommand()
             return "node /media/plex/cronjobs/e621comics/e621PoolDownloader.js";
         case 'plextagimages':
             return "node /media/plex/cronjobs/filetagger/plexTagNewImages.js";
+        case 'plexfixdates':
+            return "echo 'Stopping Server' && sudo service plexmediaserver stop && echo 'Server Stopped' && sudo node /media/plex/software/plexFixDateAdded.js && echo 'Starting Server' && sudo service plexmediaserver start && echo 'Server Started'";
         case 'apache2restart':
             return "sudo service apache2 restart";
         case 'deezerdl':
