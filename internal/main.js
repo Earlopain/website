@@ -11,13 +11,11 @@ function executeOnServer(command) {
     switch (command) {
         case "deezerdl":
         case "musicvideo":
-            httpGET("executor.php?command=" + command + "&link=" + document.getElementById("commandout").value);
-            break;
         case "e621dl":
-            httpGET("executor.php?command=" + command + "&posts=" + document.getElementById("commandout").value);
+            httpPOST({"command": command, "link": document.getElementById("commandout").value});
             break;
         default:
-            httpGET("executor.php?command=" + command);
+            httpPOST("command", command);
             break;
     }
     document.getElementById("commandout").value = "";
@@ -36,7 +34,7 @@ function getFileFromServer(filePath) {
 }
 
 function putFileOnServer() {
-    httpPOST("executor.php", { "savefile": loadedFile, "savefiledata": document.getElementById("commandout").value });
+    httpPOST({ "savefile": loadedFile, "savefiledata": document.getElementById("commandout").value });
 }
 
 function hideSubmitButton() {
@@ -60,17 +58,18 @@ function httpGET(url) {
     xmlHttp.send(null);
 }
 
-function httpPOST(url, formDataJSON) {
+function httpPOST(formDataJSON) {
     let xmlHttp = new XMLHttpRequest();
     let formData = new FormData();
     Object.keys(formDataJSON).forEach(key => {
         formData.append(key, formDataJSON[key])
     });
-    xmlHttp.open("POST", url, true); // false for synchronous request
-
-    xmlHttp.onload = function () {
-        document.getElementById("commandout").value += "\nDone!";
+    xmlHttp.open("POST", "executor.php", true); // false for synchronous request
+    xmlHttp.onprogress = function (event) {
+        document.getElementById("commandout").value = event.target.responseText;
         document.getElementById("commandout").scrollTop = 999999;
+    };
+    xmlHttp.onload = function () {
         hideSubmitButton();
         commandInProgress = false;
     };

@@ -5,23 +5,25 @@ error_reporting(E_ALL);
 ignore_user_abort(true);
 set_time_limit(0);
 
-if (isset($_GET["command"])) {
+if (isset($_POST["command"])) {
     while (@ ob_end_flush()); // end all output buffers if any
+    echo getCommand();
+    die();
     $proc = popen(getCommand(), 'r');
     while (!feof($proc)) {
         echo fread($proc, 4096);
         @ flush();
     }
-} elseif (isset($_REQUEST["getfile"])) {
-    echo file_get_contents($_REQUEST["getfile"]);
+} elseif (isset($_GET["getfile"])) {
+    echo file_get_contents($_GET["getfile"]);
 } elseif (isset($_POST["savefile"]) && isset($_POST["savefiledata"])) {
-    file_put_contents($_REQUEST["savefile"], $_REQUEST["savefiledata"]);
+    file_put_contents($_POST["savefile"], $_POST["savefiledata"]);
 }
 
 
 function getCommand()
 {
-    switch ($_REQUEST["command"]) {
+    switch ($_POST["command"]) {
         case 'plexrestart':
             return "sudo service plexmediaserver restart";
         case 'plexrefreshcomics':
@@ -34,13 +36,18 @@ function getCommand()
             return "sudo service apache2 restart";
         case 'deezerdl':
             $myfile = fopen("/media/plex/software/deezerdl/downloadLinks.txt", "w") or die("Unable to open file!");
-            fwrite($myfile, implode("\n", explode("|" , $_REQUEST["link"])));
+            fwrite($myfile, implode("\n", explode("|" , $_POST["link"])));
             fclose($myfile);
             return "cd /media/plex/software/deezerdl && ./SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -d all";
         case 'e621dl':
-            return "node /media/plex/software/e621downloader.js '" . $_REQUEST["posts"] . "'";
+            return "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
         case 'musicvideo':
-            return "youtube-dl --no-cache-dir --no-playlist -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' " . implode(" ", explode("\n", $_REQUEST["link"])) . " && echo 'Done'";
+            $myfile = fopen("/media/plex/software/tempfiles/youtubedl.txt", "w") or die("Unable to open file!");
+            fwrite($myfile, $_POST["link"]);
+            fclose($myfile);
+            return "youtube-dl --get-filename --write-thumbnail https://www.youtube.com/watch?v=SAj6DiZKwyM --no-cache-dir --no-playlist -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' -v &&  && echo 'Done'";
+        case 'plexfixnames':
+            return "sudo service plexmediaserver stop && sudo node /media/plex/software/plexFixFileNames.js && sudo service plexmediaserver start && echo 'Done'";
         default:
             return "echo test";
     }
