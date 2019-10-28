@@ -40,7 +40,7 @@ function getCommand()
         case 'e621dl':
             return "node /media/plex/software/e621downloader.js '" . $_REQUEST["posts"] . "'";
         case 'musicvideo':
-            return "youtube-dl --no-cache-dir -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' " . $_REQUEST["link"];
+            return "youtube-dl --no-cache-dir --no-playlist -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' " . implode(" ", explode("\n", $_REQUEST["link"])) . " && echo 'Done'";
         default:
             return "echo test";
     }

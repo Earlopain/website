@@ -1,8 +1,6 @@
 let commandInProgress = false;
 let loadedFile;
 
-document.getElementById("commandout");
-
 function executeOnServer(command) {
     hideSubmitButton();
     if (commandInProgress) {
