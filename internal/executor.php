@@ -39,6 +39,8 @@ function getCommand()
             return "cd /media/plex/software/deezerdl && ./SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -d all";
         case 'e621dl':
             return "node /media/plex/software/e621downloader.js '" . $_REQUEST["posts"] . "'";
+        case 'musicvideo':
+            return "youtube-dl -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' " . $_REQUEST["link"];
         default:
             return "echo test";
     }

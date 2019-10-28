@@ -1,9 +1,6 @@
 let commandInProgress = false;
 let loadedFile;
 
-
-
-
 document.getElementById("commandout");
 
 function executeOnServer(command) {
@@ -15,6 +12,7 @@ function executeOnServer(command) {
     commandInProgress = true;
     switch (command) {
         case "deezerdl":
+        case "musicvideo":
             httpGET("executor.php?command=" + command + "&link=" + document.getElementById("commandout").value);
             break;
         case "e621dl":
