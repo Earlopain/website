@@ -7,9 +7,7 @@ set_time_limit(0);
 
 if (isset($_POST["command"])) {
     while (@ ob_end_flush()); // end all output buffers if any
-    echo getCommand();
-    die();
-    $proc = popen(getCommand(), 'r');
+    $proc = popen(getCommand() , 'r');
     while (!feof($proc)) {
         echo fread($proc, 4096);
         @ flush();
@@ -42,10 +40,11 @@ function getCommand()
         case 'e621dl':
             return "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
         case 'musicvideo':
-            $myfile = fopen("/media/plex/software/tempfiles/youtubedl.txt", "w") or die("Unable to open file!");
+            $filePath = "/media/plex/software/tempfiles/youtubedl.txt";
+            $myfile = fopen($filePath, "w") or die("Unable to open file!");
             fwrite($myfile, $_POST["link"]);
             fclose($myfile);
-            return "youtube-dl --get-filename --write-thumbnail https://www.youtube.com/watch?v=SAj6DiZKwyM --no-cache-dir --no-playlist -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' -v &&  && echo 'Done'";
+            return "youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' && echo 'Done'";
         case 'plexfixnames':
             return "sudo service plexmediaserver stop && sudo node /media/plex/software/plexFixFileNames.js && sudo service plexmediaserver start && echo 'Done'";
         default:
