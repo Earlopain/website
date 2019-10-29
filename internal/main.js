@@ -11,11 +11,12 @@ function executeOnServer(command) {
     switch (command) {
         case "deezerdl":
         case "musicvideo":
+        case "shortmovie":
         case "e621dl":
             httpPOST({"command": command, "link": document.getElementById("commandout").value});
             break;
         default:
-            httpPOST("command", command);
+            httpPOST({"command": command});
             break;
     }
     document.getElementById("commandout").value = "";

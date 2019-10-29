@@ -30,6 +30,8 @@ function getCommand()
             return "node /media/plex/cronjobs/filetagger/plexTagNewImages.js";
         case 'plexfixdates':
             return "echo 'Stopping Server' && sudo service plexmediaserver stop && echo 'Server Stopped' && sudo node /media/plex/software/plexFixDateAdded.js && echo 'Starting Server' && sudo service plexmediaserver start && echo 'Server Started'";
+        case 'plexfixnames':
+            return "echo 'Stopping Server' && sudo service plexmediaserver stop && sudo node /media/plex/software/plexFixFileNames.js && sudo service plexmediaserver start && echo 'Starting Server' && echo 'Done'";
         case 'apache2restart':
             return "sudo service apache2 restart";
         case 'deezerdl':
@@ -45,8 +47,12 @@ function getCommand()
             fwrite($myfile, $_POST["link"]);
             fclose($myfile);
             return "youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s' && echo 'Done'";
-        case 'plexfixnames':
-            return "sudo service plexmediaserver stop && sudo node /media/plex/software/plexFixFileNames.js && sudo service plexmediaserver start && echo 'Done'";
+        case 'shortmovie':
+            $filePath = "/media/plex/software/tempfiles/youtubedl.txt";
+            $myfile = fopen($filePath, "w") or die("Unable to open file!");
+            fwrite($myfile, $_POST["link"]);
+            fclose($myfile);
+            return "youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s' && echo 'Done'";
         default:
             return "echo test";
     }
