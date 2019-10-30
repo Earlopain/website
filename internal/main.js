@@ -12,6 +12,7 @@ function executeOnServer(command) {
         case "deezerdl":
         case "musicvideo":
         case "shortmovie":
+        case "youtubechannel":
         case "e621dl":
             httpPOST({"command": command, "link": document.getElementById("commandout").value});
             break;
