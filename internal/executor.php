@@ -54,12 +54,6 @@ function getCommand()
             fwrite($myfile, $_POST["link"]);
             fclose($myfile);
             return "youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s' && echo 'Done'";
-        case 'youtubechannel':
-            $filePath = "/media/plex/software/youtubechannel.txt";
-            if($_POST["link"] !== ""){
-                file_put_contents($filePath, $_POST["link"] . "\n", FILE_APPEND);
-            }
-            return "youtube-dl --write-thumbnail --ignore-errors --no-cache-dir --batch-file {$filePath} -o '/media/plex/plexmedia/youtubechannels/%(uploader)s/%(title)s.%(ext)s' && echo 'Done'";
         default:
             return "echo test";
     }
