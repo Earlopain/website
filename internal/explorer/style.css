@@ -1,0 +1,33 @@
+:root{
+    --folder-name-width: 50%;
+    --top-button-count: 3;
+}
+
+#toprow > input[type=button] {
+    width: calc((100% - var(--folder-name-width)) / 3);
+}
+#currentfolder {
+    width: calc(var(--folder-name-width) - 5%);
+}
+
+.filename{
+    width: 20%;
+}
+
+.user {
+    width:7%
+}
+
+.group{
+    width:7%
+}
+
+.checkbox {
+    margin: 6px;
+}
+
+
+
+.inline {
+    display: inline-block;
+}
