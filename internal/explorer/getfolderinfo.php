@@ -46,7 +46,7 @@ class DirectoryInfo
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);
             foreach ($dir as $fileInfo) {
-                if (!$fileInfo->isDot()) {
+                if (!$fileInfo->isDot() && $fileInfo->getRealPath() !== false) {
                     $this->entries[] = new DirectoryEntry($fileInfo);
                 }
             }
