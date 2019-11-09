@@ -9,8 +9,11 @@ switch ($_POST["action"]) {
         break;
     case 'downloadselection':
         $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
+        $date = date_create();
+        $filename = date_format($date, 'Y-m-d_H-i-s');
         header('Content-Type: application/zip');
         header("Content-Transfer-Encoding: binary");
+        header('Content-Disposition: attachment; filename="' . $filename . '.zip"');
         $dir = new DirectoryInfo($_POST["folder"], explode(",", $_POST["ids"]));
         $zip = new ZipArchive();
         $zip->open($zipPath, ZipArchive::OVERWRITE | ZipArchive::CREATE);
