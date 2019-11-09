@@ -47,7 +47,7 @@ async function getFolderContent() {
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
     for (const entry of response.entries) {
-        const element = generateFileDiv(entry);
+        const element = generateFileEntry(entry);
         container.appendChild(element)
     }
 }
@@ -67,13 +67,13 @@ function httpPOST(url, formDataJSON) {
     });
 }
 
-function generateFileDiv(file) {
-    let div = document.createElement("div");
+function generateFileEntry(file) {
+    let row = document.createElement("tr");
     let checkbox = document.createElement("input");
     checkbox.classList.add("checkbox");
     checkbox.type = "checkbox";
-    div.appendChild(checkbox);
-    let fileName = createDiv(file.fileName);
+    row.appendChild(checkbox);
+    let fileName = createTableColumn(file.fileName);
     if (file.isDir) {
         fileName.addEventListener("click", () => {
             const current = document.getElementById("currentfolder").value;
@@ -89,21 +89,21 @@ function generateFileDiv(file) {
         })
     }
     fileName.classList.add("filename");
-    div.appendChild(fileName);
-    div.appendChild(createDiv(file.user, "user"));
-    div.appendChild(createDiv(file.group, "group"));
-    div.appendChild(createDiv(file.perms, "perms"));
+    row.appendChild(fileName);
+    row.appendChild(fileName);
+    row.appendChild(createTableColumn(file.user, "user"));
+    row.appendChild(createTableColumn(file.group, "group"));
+    row.appendChild(createTableColumn(file.perms, "perms"));
 
-    return div;
+    return row;
 }
 
-function createDiv(content, className) {
-    let div = document.createElement("span");
-    div.style.display = "inline-block";
-    div.classList.add(className);
-    div.classList.add("column");
-    div.innerHTML = content;
-    return div;
+function createTableColumn(content, className) {
+    let col = document.createElement("td");
+    col.classList.add(className);
+    col.classList.add("column");
+    col.innerHTML = content;
+    return col;
 }
 
 function removeTrailingSlash(element) {

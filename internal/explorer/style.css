@@ -10,29 +10,40 @@
     width: calc(var(--folder-name-width) - 5%);
 }
 
-.filename{
-    width: 20%;
-}
-
-.user {
-    width:7%
-}
-
-.group {
-    width:7%
-}
 
 .checkbox {
     margin: 6px;
 }
 
 .column {
+    width: auto;
     overflow: hidden;
     margin-right: 5px;
-    display: inline;
     white-space:nowrap;
 }
 
+tr:not(.tableheader):nth-child(odd) {
+    background-color: #3A3A3A;
+}
+
+tr:not(.tableheader):nth-child(even) {
+    background-color: #333333;
+}
+
+#table {
+    border-collapse: collapse;
+    width: 50%;
+ }
+ 
+ /* And this to your table's `td` elements. */
+ #table td {
+    padding: 0; 
+    margin: 0;
+ }
+
+ #table th {
+     text-align: left;
+ }
 
 .inline {
     display: inline-block;
