@@ -6,12 +6,12 @@ ignore_user_abort(true);
 set_time_limit(0);
 
 if (isset($_POST["command"])) {
-    while (@ ob_end_flush()); // end all output buffers if any
+    while (@ob_end_flush()); // end all output buffers if any
     //die(getCommand());
-    $proc = popen(getCommand() , 'r');
+    $proc = popen(getCommand(), 'r');
     while (!feof($proc)) {
         echo fread($proc, 4096);
-        @ flush();
+        @flush();
     }
 } elseif (isset($_GET["getfile"])) {
     echo file_get_contents($_GET["getfile"]);
@@ -19,9 +19,7 @@ if (isset($_POST["command"])) {
     file_put_contents($_POST["savefile"], $_POST["savefiledata"]);
 }
 
-
-function getCommand()
-{
+function getCommand() {
     switch ($_POST["command"]) {
         case 'plexrestart':
             return "sudo service plexmediaserver restart";
@@ -50,12 +48,12 @@ function getCommand()
     }
 }
 
-function youtubedl($targetFormat){
+function youtubedl($targetFormat) {
     $filePath = "/media/plex/software/tempfiles/youtubedl.txt";
     file_put_contents($filePath, $_POST["link"]);
     return "youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '{$targetFormat}'";
 }
 
-function wrapPlexStop($command){
+function wrapPlexStop($command) {
     return "echo 'Stopping Server' && sudo service plexmediaserver stop && echo 'Server Stopped' && " . $command . " && echo 'Starting Server' && sudo service plexmediaserver start && echo 'Server Started'";
 }

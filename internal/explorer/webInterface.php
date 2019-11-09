@@ -12,8 +12,7 @@ switch ($_POST["action"]) {
         break;
 }
 
-function createZipAndEcho()
-{
+function createZipAndEcho() {
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
     $date = date_create();
     $filename = date_format($date, 'Y-m-d_H-i-s');
@@ -33,7 +32,7 @@ function createZipAndEcho()
             $folderPath = dirname($file->absolutePath);
             $offset = strlen(substr($file->absolutePath, 0, strlen($folderPath)));
             $subdir = new RecursiveDirectoryIterator($file->absolutePath, RecursiveDirectoryIterator::SKIP_DOTS);
-            $subdirfiles = new RecursiveIteratorIterator($subdir,  RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
+            $subdirfiles = new RecursiveIteratorIterator($subdir, RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
             foreach ($subdirfiles as $subfile) {
                 if (!$subfile->isReadable() || $subfile->isDir()) {
                     continue;

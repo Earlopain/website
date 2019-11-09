@@ -14,10 +14,10 @@ function executeOnServer(command) {
         case "shortmovie":
         case "youtubechannel":
         case "e621dl":
-            httpPOST({"command": command, "link": document.getElementById("commandout").value});
+            httpPOST({ "command": command, "link": document.getElementById("commandout").value });
             break;
         default:
-            httpPOST({"command": command});
+            httpPOST({ "command": command });
             break;
     }
     document.getElementById("commandout").value = "";

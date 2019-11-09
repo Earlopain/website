@@ -1,7 +1,6 @@
 <?php
 
-class DirectoryEntry
-{
+class DirectoryEntry {
     public $fileName;
     public $absolutePath;
     public $index;
@@ -12,8 +11,7 @@ class DirectoryEntry
     public $group;
     public $infoObject;
 
-    function __construct(SplFileInfo $fileInfo, $realPath, $index)
-    {
+    public function __construct(SplFileInfo $fileInfo, $realPath, $index) {
         $this->fileName = $fileInfo->getBasename();
         $this->absolutePath = $realPath;
         $this->index = $index;
@@ -25,8 +23,7 @@ class DirectoryEntry
         $this->infoObject = $fileInfo;
     }
 
-    function formatBytes($bytes)
-    {
+    public function formatBytes($bytes) {
         $units = array('B', 'KB', 'MB', 'GB', 'TB');
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
@@ -36,14 +33,12 @@ class DirectoryEntry
     }
 }
 
-class DirectoryInfo
-{
+class DirectoryInfo {
     public $entries = [];
     public $entriesCount = 0;
     public $currentFolder;
 
-    function __construct($path, $idList = [])
-    {
+    public function __construct($path, $idList = []) {
         $getAll = count($idList) === 0;
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);

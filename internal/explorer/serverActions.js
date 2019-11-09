@@ -14,7 +14,7 @@ async function getFolderContent() {
     });
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
-    let fakeFile = {fileName: "..", group: "", user: "", isDir: true, perms: "", size: -1};
+    let fakeFile = { fileName: "..", group: "", user: "", isDir: true, perms: "", size: -1 };
     container.appendChild(generateFileEntry(fakeFile));
     for (const entry of response.entries) {
         const element = generateFileEntry(entry);
@@ -30,7 +30,7 @@ async function downloadSelection() {
         if (file.childNodes[0].checked)
             ids.push(file.id.substring(4));
     }
-    postDownload({action: "downloadselection", folder: folderPath, ids: ids.join(",")});
+    postDownload({ action: "downloadselection", folder: folderPath, ids: ids.join(",") });
 }
 
 function postDownload(postData) {
@@ -68,7 +68,7 @@ function httpPOST(url, formDataJSON) {
         });
         xmlHttp.open("POST", url, true); // false for synchronous request
         xmlHttp.onload = event => {
-                resolve(event.target.responseText);
+            resolve(event.target.responseText);
         };
         xmlHttp.send(formData);
     });
