@@ -10,6 +10,8 @@ class DirectoryEntry
     public $perms;
     public $user;
     public $group;
+    public $infoObject;
+
     function __construct(SplFileInfo $fileInfo, $realPath, $index)
     {
         $this->fileName = $fileInfo->getBasename();
@@ -20,6 +22,7 @@ class DirectoryEntry
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = posix_getpwuid($fileInfo->getOwner())["name"];
         $this->group = posix_getgrgid($fileInfo->getGroup())["name"];
+        $this->infoObject = $fileInfo;
     }
 
     function formatBytes($bytes)
