@@ -37,7 +37,7 @@ class DirectoryInfo
 {
     public $entries = [];
     public $entriesCount = 0;
-    public $parentFolder;
+    public $currentFolder;
 
     function __construct($path, $idList = [])
     {
@@ -56,6 +56,6 @@ class DirectoryInfo
             }
         }
         $this->entriesCount = count($this->entries);
-        $this->parentFolder = dirname($path);
+        $this->currentFolder = realpath($path);
     }
 }
