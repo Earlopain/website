@@ -98,9 +98,10 @@ function generateFileDiv(file) {
 }
 
 function createDiv(content, className) {
-    let div = document.createElement("div");
+    let div = document.createElement("span");
     div.style.display = "inline-block";
-    div.classList.value = className;
+    div.classList.add(className);
+    div.classList.add("column");
     div.innerHTML = content;
     return div;
 }

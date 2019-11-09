@@ -18,7 +18,7 @@
     width:7%
 }
 
-.group{
+.group {
     width:7%
 }
 
@@ -26,6 +26,12 @@
     margin: 6px;
 }
 
+.column {
+    overflow: hidden;
+    margin-right: 5px;
+    display: inline;
+    white-space:nowrap;
+}
 
 
 .inline {
