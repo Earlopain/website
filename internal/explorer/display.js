@@ -58,6 +58,7 @@ function generateFileEntry(file) {
     row.appendChild(createTableColumn(file.user, "user"));
     row.appendChild(createTableColumn(file.group, "group"));
     row.appendChild(createTableColumn(file.perms, "perms"));
+    row.appendChild(createTableColumn(file.isDir ? "" : file.size, "size"));
 
     return row;
 }

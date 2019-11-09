@@ -10,15 +10,11 @@
     width: calc(var(--folder-name-width) - 5%);
 }
 
-
 .checkbox {
     margin: 6px;
 }
 
 .column {
-    width: auto;
-    overflow: hidden;
-    margin-right: 5px;
     white-space:nowrap;
 }
 
@@ -32,13 +28,15 @@ tr:not(.tableheader):nth-child(even) {
 
 #table {
     border-collapse: collapse;
-    width: 50%;
  }
  
- /* And this to your table's `td` elements. */
  #table td {
-    padding: 0; 
-    margin: 0;
+    padding: 1px 5px 1px 5px; 
+ }
+
+ .tableheader > th {
+     width: 0px;
+     padding-right: 10px;
  }
 
  #table th {
