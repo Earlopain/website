@@ -1,6 +1,6 @@
 <?php
 
-require_once "getfolderinfo.php";
+require_once "getFolderInfo.php";
 
 switch ($_POST["action"]) {
     case 'getfolder':
