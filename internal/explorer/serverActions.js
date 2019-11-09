@@ -14,7 +14,7 @@ async function getFolderContent() {
     });
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
-    let fakeFile = { fileName: "..", group: "", user: "", isDir: true, perms: "", size: -1 };
+    let fakeFile = { fileName: "..", group: "", user: "", isDir: true, perms: "", size: -1, isReadable: "", isWriteable : "" };
     container.appendChild(generateFileEntry(fakeFile));
     for (const entry of response.entries) {
         const element = generateFileEntry(entry);

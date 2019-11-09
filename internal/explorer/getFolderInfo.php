@@ -7,6 +7,8 @@ class DirectoryEntry {
     public $isDir;
     public $size;
     public $perms;
+    public $isWriteable;
+    public $isReadable;
     public $user;
     public $group;
     public $infoObject;
@@ -20,7 +22,20 @@ class DirectoryEntry {
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = UserGroupCache::resolveUser($fileInfo->getOwner());
         $this->group = UserGroupCache::resolveUser($fileInfo->getGroup());
+        $this->isReadable = $this->permissionCheck(2);
+        $this->isWriteable = $this->permissionCheck(1);
         $this->infoObject = $fileInfo;
+    }
+
+    private function permissionCheck($position) {
+        if ($this->user === UserGroupCache::getUser() && $this->perms {0} & (1 << $position)) {
+            return true;
+        } else if (in_array($this->group, UserGroupCache::getGroups()) && $this->perms {1} & (1 << $position)) {
+            return true;
+        } else if ($this->perms {2} & (1 << $position)) {
+            return true;
+        }
+        return false;
     }
 
     public function formatBytes($bytes) {
@@ -61,6 +76,8 @@ class DirectoryInfo {
 class UserGroupCache {
     protected static $userCache = [];
     protected static $groupCache = [];
+    protected static $groups;
+    protected static $execUser = "www-data";
 
     public static function resolveUser($uid) {
         if (!isset(self::$userCache[$uid])) {
@@ -73,7 +90,19 @@ class UserGroupCache {
         if (!isset(self::$groupCache[$gid])) {
             self::$groupCache[$gid] = posix_getgrgid($gid)["name"];
         }
-
         return self::$groupCache[$gid];
+    }
+
+    public function getUser() {
+        return self::$execUser;
+    }
+
+    public static function getGroups() {
+        if (!isset(self::$groups)) {
+            $user = self::$execUser;
+            $groups = substr(exec("groups {$user} | cut -d':' -f2"), 1);
+            self::$groups = explode(" ", $groups);
+        }
+        return self::$groups;
     }
 }

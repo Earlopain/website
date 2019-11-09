@@ -1,6 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById("currentfolder").addEventListener("keydown", event => {
-        console.log(event);
         if (event.keyCode === 13) {
             getFolderContent();
         }
@@ -8,28 +7,6 @@ window.addEventListener('DOMContentLoaded', () => {
     getFolderContent();
 });
 
-class OctalPermissions {
-    constructor(octal) {
-        this.user = octal.charAt(0);
-        this.group = octal.charAt(1);
-        this.other = octal.charAt(2);
-    }
-
-    userPerms() {
-        return this.humanReadable(this.user);
-    }
-
-    humanReadable(value) {
-        const isReadable = value % 4 === 0;
-        const isWritable = value % 2 === 0;
-        const isExecutable = value % 1 === 0;
-        let result = "";
-        result += isReadable ? "r" : "-";
-        result += isWritable ? "w" : "-";
-        result += isExecutable ? "x" : "-";
-        return result;
-    }
-}
 
 function generateFileEntry(file) {
     let row = document.createElement("tr");
@@ -59,6 +36,8 @@ function generateFileEntry(file) {
     row.appendChild(createTableColumn(file.group, "group"));
     row.appendChild(createTableColumn(file.perms, "perms"));
     row.appendChild(createTableColumn(file.isDir ? "" : file.size, "size"));
+    row.appendChild(createTableColumn(file.isReadable), "readable");
+    row.appendChild(createTableColumn(file.isWriteable), "writeable");
 
     return row;
 }
