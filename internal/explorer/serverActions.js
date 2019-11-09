@@ -22,44 +22,50 @@ async function getFolderContent() {
 async function downloadSelection() {
     const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
     const files = document.getElementById("filecontents").childNodes;
-    let postData = { folder: folderPath, ids: [] };
+    let ids = [];
     for (const file of files) {
         if (file.childNodes[0].checked)
-            postData.ids.push(file.id.substring(4));
+            ids.push(file.id.substring(4));
     }
-    const zipFile = await serverRequest(postData, "downloadselection", true);
-    let a = document.createElement("a");
-    let url = window.URL.createObjectURL(zipFile);
-    a.href = url;
-    a.download = "files.zip";
-    a.click();
-    window.URL.revokeObjectURL(url);
+    postDownload({action: "downloadselection", folder: folderPath, ids: ids.join(",")});
 }
 
-async function serverRequest(postData, type, isBinary = false) {
+function postDownload(postData) {
+    console.log(postData);
+    let form = document.createElement("form");
+    for (const name of Object.keys(postData)) {
+        const value = postData[name];
+        let input = document.createElement("input");
+        input.type = "text";
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    }
+    form.method = "post";
+    form.action = "webInterface.php";
+    form.id = "tempform";
+
+    document.body.appendChild(form);
+    document.getElementById("tempform").submit();
+    document.getElementById("tempform").remove();
+}
+
+async function serverRequest(postData, type) {
     postData.action = type;
-    const result = await httpPOST("webInterface.php", postData, isBinary);
+    const result = await httpPOST("webInterface.php", postData);
     return result;
 }
 
-function httpPOST(url, formDataJSON, isBinary = false) {
+function httpPOST(url, formDataJSON) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
-        if (isBinary) {
-            xmlHttp.responseType = "arraybuffer";
-        }
         let formData = new FormData();
         Object.keys(formDataJSON).forEach(key => {
             formData.append(key, formDataJSON[key])
         });
         xmlHttp.open("POST", url, true); // false for synchronous request
         xmlHttp.onload = event => {
-            if (isBinary) {
-                resolve(new Blob([event.target.response], {type: "octet/stream"}));
-            }
-            else {
                 resolve(event.target.responseText);
-            }
         };
         xmlHttp.send(formData);
     });
