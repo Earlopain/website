@@ -24,28 +24,42 @@ async function downloadSelection() {
     const files = document.getElementById("filecontents").childNodes;
     let postData = { folder: folderPath, ids: [] };
     for (const file of files) {
-        if(file.childNodes[0].checked)
+        if (file.childNodes[0].checked)
             postData.ids.push(file.id.substring(4));
     }
-    serverRequest(postData, "downloadselection");
+    const zipFile = await serverRequest(postData, "downloadselection", true);
+    let a = document.createElement("a");
+    let url = window.URL.createObjectURL(zipFile);
+    a.href = url;
+    a.download = "files.zip";
+    a.click();
+    window.URL.revokeObjectURL(url);
 }
 
-async function serverRequest(postData, type) {
+async function serverRequest(postData, type, isBinary = false) {
     postData.action = type;
-    const result = await httpPOST("webInterface.php", postData);
+    const result = await httpPOST("webInterface.php", postData, isBinary);
     return result;
 }
 
-function httpPOST(url, formDataJSON) {
+function httpPOST(url, formDataJSON, isBinary = false) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
+        if (isBinary) {
+            xmlHttp.responseType = "arraybuffer";
+        }
         let formData = new FormData();
         Object.keys(formDataJSON).forEach(key => {
             formData.append(key, formDataJSON[key])
         });
         xmlHttp.open("POST", url, true); // false for synchronous request
         xmlHttp.onload = event => {
-            resolve(event.target.responseText);
+            if (isBinary) {
+                resolve(new Blob([event.target.response], {type: "octet/stream"}));
+            }
+            else {
+                resolve(event.target.responseText);
+            }
         };
         xmlHttp.send(formData);
     });

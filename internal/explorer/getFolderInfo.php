@@ -3,15 +3,17 @@
 class DirectoryEntry
 {
     public $fileName;
+    public $absolutePath;
     public $index;
     public $isDir;
     public $size;
     public $perms;
     public $user;
     public $group;
-    function __construct(SplFileInfo $fileInfo, $index)
+    function __construct(SplFileInfo $fileInfo, $realPath, $index)
     {
         $this->fileName = $fileInfo->getBasename();
+        $this->absolutePath = $realPath;
         $this->index = $index;
         $this->isDir = $fileInfo->isDir();
         $this->size = $this->isDir ? -1 : $this->formatBytes($fileInfo->getSize());
@@ -44,9 +46,11 @@ class DirectoryInfo
             $dir = new DirectoryIterator($path);
             $counter = 0;
             foreach ($dir as $fileInfo) {
-                if($getAll || array_search($counter, $idList) !== false)
-                if (!$fileInfo->isDot() && $fileInfo->getRealPath() !== false) {
-                    $this->entries[] = new DirectoryEntry($fileInfo, $counter);
+                if ($getAll || array_search($counter, $idList) !== false) {
+                    $realPath = $fileInfo->getRealPath();
+                    if (!$fileInfo->isDot() && $realPath !== false) {
+                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter);
+                    }
                 }
                 $counter++;
             }
