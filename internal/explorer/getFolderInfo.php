@@ -18,8 +18,8 @@ class DirectoryEntry {
         $this->isDir = $fileInfo->isDir();
         $this->size = $this->isDir ? -1 : $this->formatBytes($fileInfo->getSize());
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
-        $this->user = posix_getpwuid($fileInfo->getOwner())["name"];
-        $this->group = posix_getgrgid($fileInfo->getGroup())["name"];
+        $this->user = UserGroupCache::resolveUser($fileInfo->getOwner());
+        $this->group = UserGroupCache::resolveUser($fileInfo->getGroup());
         $this->infoObject = $fileInfo;
     }
 
@@ -55,5 +55,25 @@ class DirectoryInfo {
         }
         $this->entriesCount = count($this->entries);
         $this->currentFolder = realpath($path);
+    }
+}
+
+class UserGroupCache {
+    protected static $userCache = [];
+    protected static $groupCache = [];
+
+    public static function resolveUser($uid) {
+        if (!isset(self::$userCache[$uid])) {
+            self::$userCache[$uid] = posix_getpwuid($uid)["name"];
+        }
+        return self::$userCache[$uid];
+    }
+
+    public static function resolveGroup($gid) {
+        if (!isset(self::$groupCache[$gid])) {
+            self::$groupCache[$gid] = posix_getgrgid($gid)["name"];
+        }
+
+        return self::$groupCache[$gid];
     }
 }
