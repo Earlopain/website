@@ -16,17 +16,17 @@ function generateFileEntry(file) {
     checkbox.classList.add("checkbox");
     checkbox.type = "checkbox";
     row.appendChild(checkbox);
-    let fileNameColumn = createTableColumn(file.fileName, "filename");
+    let fileNameColumn = createTableColumn(file.fileName);
     addFolderEventListener(fileNameColumn, file);
     addFileEditEventListener(fileNameColumn, file);
     row.appendChild(fileNameColumn);
-    row.appendChild(createTableColumn(file.fileName.split(".").pop(), "fileext"));
-    row.appendChild(createTableColumn(file.user, "user"));
-    row.appendChild(createTableColumn(file.group, "group"));
-    row.appendChild(createTableColumn(file.perms, "perms"));
-    row.appendChild(createTableColumn(file.isDir ? "" : file.size, "size"));
-    row.appendChild(createTableColumn(file.isReadable), "readable");
-    row.appendChild(createTableColumn(file.isWriteable), "writeable");
+    row.appendChild(createTableColumn(file.isDir || file.fileName.startsWith(".") ? "": file.fileName.split(".").pop()));
+    row.appendChild(createTableColumn(file.user));
+    row.appendChild(createTableColumn(file.group));
+    row.appendChild(createTableColumn(file.perms));
+    row.appendChild(createTableColumn(file.isDir ? "" : file.size));
+    row.appendChild(createTableColumn(file.isReadable));
+    row.appendChild(createTableColumn(file.isWriteable));
 
     return row;
 }
@@ -57,9 +57,8 @@ function addFileEditEventListener(element, file) {
     }
 }
 
-function createTableColumn(content, className) {
+function createTableColumn(content) {
     let col = document.createElement("td");
-    col.classList.add(className);
     col.classList.add("column");
     col.innerHTML = content;
     return col;
