@@ -25,18 +25,18 @@
 </head>
 
 <body>
+    <div id="toprow">
+        <input id="currentfolder" type="text" value="/">
+        <input type="button" value="download" onclick="downloadSelection()">
+        <input type="button" value="delete">
+        <input type="button" value="upload">
+    </div>
     <div id="container">
-        <div id="toprow">
-            <input id="currentfolder" type="text" value="/">
-            <input type="button" value="download" onclick="downloadSelection()">
-            <input type="button" value="delete">
-            <input type="button" value="upload">
-        </div>
         <table id="table">
             <colgroup span="5"></colgroup>
             <tr class="tableheader">
                 <th></th>
-                <th>Name</th>
+                <th style="max-width: 200px;">Name</th>
                 <th>User</th>
                 <th>Group</th>
                 <th>Perms</th>
@@ -47,6 +47,9 @@
             <tbody id="filecontents">
             </tbody>
         </table>
+        <div id="editor">
+            test
+        </div>
     </div>
 </body>
 

@@ -16,6 +16,11 @@
 
 .column {
     white-space:nowrap;
+    overflow: hidden;
+}
+
+.filename {
+    max-width: 200px;
 }
 
 tr:not(.tableheader):nth-child(odd) {
@@ -28,6 +33,7 @@ tr:not(.tableheader):nth-child(even) {
 
 #table {
     border-collapse: collapse;
+    display: inline-block;
  }
  
  #table td {
@@ -43,6 +49,9 @@ tr:not(.tableheader):nth-child(even) {
      text-align: left;
  }
 
-.inline {
+
+#editor {
+    color: red;
     display: inline-block;
+    vertical-align: top;
 }
