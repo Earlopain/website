@@ -58,7 +58,7 @@ async function serverRequest(postData, type) {
     return result;
 }
 
-function httpPOST(url, formDataJSON, callback) {
+function httpPOST(url, formDataJSON = {}) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
         let formData = new FormData();
