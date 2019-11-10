@@ -1,6 +1,7 @@
 let currentlyOpenFile;
 let currentlyOpenFileDir;
-let firstCall = true;
+let lastClickedFile;
+let lastClickedFileDir;
 
 let mimesTypes = {
     "textarea": ["text/", "application/x-csh", "application/json", "application/php", "application/x-sh", "application/xml"],
@@ -10,12 +11,16 @@ let mimesTypes = {
 }
 
 async function showFile(file, folderPath) {
+    if ((currentlyOpenFile === file && currentlyOpenFileDir === folderPath) || (lastClickedFile === file && lastClickedFileDir === folderPath)) {
+        return;
+    }
+    lastClickedFile = file;
+    lastClickedFileDir = folderPath;
     let editor = document.getElementById("editor");
     const folderBase64 = encodeURI(btoa(folderPath));
     const url = "fileProxy.php?folder=" + folderBase64 + "&id=" + file.index;
     const mimeType = await httpHEAD(url);
     const elementType = getMimeType(mimeType);
-    console.log(elementType);
     if (elementType === "unsupported") {
         return;
     }
