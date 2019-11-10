@@ -9,7 +9,7 @@ let mimesTypes = {
     "video": ["video/", "application/ogg"]
 }
 
-async function editFile(file, folderPath) {
+async function showFile(file, folderPath) {
     currentlyOpenFile = file;
     currentlyOpenFileDir = folderPath;
     const folderBase64 = encodeURI(btoa(folderPath));

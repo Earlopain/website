@@ -52,7 +52,7 @@ function addFileEditEventListener(element, file) {
     if (!file.isDir && file.isReadable) {
         element.addEventListener("click", () => {
             const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
-            editFile(file, folderPath);
+            showFile(file, folderPath);
         })
     }
 }
