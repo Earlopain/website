@@ -54,7 +54,7 @@ tr:not(#tableheader):nth-child(even) {
     display: inline-block;
     vertical-align: top;
     position: fixed;
-    width: auto;
+    height: 100%;
 }
 
 #editor > *:first-child {
