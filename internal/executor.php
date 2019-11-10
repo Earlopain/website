@@ -20,32 +20,46 @@ if (isset($_POST["command"])) {
 }
 
 function getCommand() {
+    $command = "";
+    var_dump($_POST["command"]);
     switch ($_POST["command"]) {
         case 'plexrestart':
-            return "sudo service plexmediaserver restart";
+            $command = "sudo service plexmediaserver restart";
+            break;
         case 'plexrefreshcomics':
-            return "node /media/plex/cronjobs/e621comics/e621PoolDownloader.js";
+            $command = "node /media/plex/cronjobs/e621comics/e621PoolDownloader.js";
+            break;
         case 'plextagimages':
-            return "node /media/plex/cronjobs/filetagger/plexTagNewImages.js";
+            $command = "node /media/plex/cronjobs/filetagger/plexTagNewImages.js";
+            break;
         case 'plexfixdates':
-            return wrapPlexStop("sudo node /media/plex/software/plexFixDateAdded.js");
+            $command = wrapPlexStop("sudo node /media/plex/software/plexFixDateAdded.js");
+            break;
         case 'plexfixnames':
-            return wrapPlexStop("sudo node /media/plex/software/plexFixFileNames.js");
+            $command = wrapPlexStop("sudo node /media/plex/software/plexFixFileNames.js");
+            break;
         case 'apache2restart':
-            return "sudo service apache2 restart";
+            $command = "sudo service apache2 restart";
+            break;
         case 'deezerdl':
             $filePath = "/media/plex/software/deezerdl/downloadLinks.txt";
             file_put_contents($filePath, $_POST["link"]);
-            return "cd /media/plex/software/deezerdl && ./SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -d all";
+            $command = "cd /media/plex/software/deezerdl && ./SMLoader -q MP3_320 -p /media/plex/plexmedia/Music -d all";
+            break;
         case 'e621dl':
-            return "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
+            $command = "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
+            break;
         case 'musicvideo':
-            return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
+            $command = youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
+            break;
         case 'shortmovie':
-            return youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
+            $command = youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
+            break;
         default:
-            return "echo test";
+            $command = "echo test";
+            break;
     }
+    return $command . " 2>&1";
 }
 
 function youtubedl($targetFormat) {
