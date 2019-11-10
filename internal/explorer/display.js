@@ -5,6 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
     getFolderContent();
+    registerTableSort();
 });
 
 
