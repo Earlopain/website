@@ -57,6 +57,6 @@ tr:not(#tableheader):nth-child(even) {
     width: auto;
 }
 
-video {
+#editor > *:first-child {
     width: 100%;
 }
