@@ -59,7 +59,7 @@ function getCommand() {
             $command = "echo test";
             break;
     }
-    return $command . " 2>&1";
+    return $command . " 2>&1 && echo DONE";
 }
 
 function youtubedl($targetFormat) {
