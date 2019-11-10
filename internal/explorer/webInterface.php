@@ -10,6 +10,11 @@ switch ($_POST["action"]) {
     case 'downloadselection':
         createZipAndEcho();
         break;
+    case 'getsinglefile':
+        $dir = new DirectoryInfo($_POST["folder"], explode(",", $_POST["ids"]));
+        $file = $dir->entries[0];
+        readfile($file->absolutePath);
+        break;
 }
 
 function createZipAndEcho() {

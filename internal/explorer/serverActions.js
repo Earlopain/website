@@ -37,7 +37,6 @@ async function downloadSelection() {
 }
 
 function postDownload(postData) {
-    console.log(postData);
     let form = document.createElement("form");
     for (const name of Object.keys(postData)) {
         const value = postData[name];

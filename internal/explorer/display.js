@@ -15,9 +15,23 @@ function generateFileEntry(file) {
     checkbox.classList.add("checkbox");
     checkbox.type = "checkbox";
     row.appendChild(checkbox);
-    let fileName = createTableColumn(file.fileName, "filename");
+    let fileNameColumn = createTableColumn(file.fileName, "filename");
+    addFolderEventListener(fileNameColumn, file);
+    addFileEditEventListener(fileNameColumn, file);
+    row.appendChild(fileNameColumn);
+    row.appendChild(createTableColumn(file.user, "user"));
+    row.appendChild(createTableColumn(file.group, "group"));
+    row.appendChild(createTableColumn(file.perms, "perms"));
+    row.appendChild(createTableColumn(file.isDir ? "" : file.size, "size"));
+    row.appendChild(createTableColumn(file.isReadable), "readable");
+    row.appendChild(createTableColumn(file.isWriteable), "writeable");
+
+    return row;
+}
+
+function addFolderEventListener(element, file) {
     if (file.isDir && file.isExecutable) {
-        fileName.addEventListener("click", () => {
+        element.addEventListener("click", () => {
             const current = document.getElementById("currentfolder").value;
             let addition;
             if (current.slice(-1) === "/") {
@@ -30,16 +44,15 @@ function generateFileEntry(file) {
             getFolderContent();
         })
     }
-    row.appendChild(fileName);
-    row.appendChild(fileName);
-    row.appendChild(createTableColumn(file.user, "user"));
-    row.appendChild(createTableColumn(file.group, "group"));
-    row.appendChild(createTableColumn(file.perms, "perms"));
-    row.appendChild(createTableColumn(file.isDir ? "" : file.size, "size"));
-    row.appendChild(createTableColumn(file.isReadable), "readable");
-    row.appendChild(createTableColumn(file.isWriteable), "writeable");
+}
 
-    return row;
+function addFileEditEventListener(element, file) {
+    if (!file.isDir && file.isReadable) {
+        element.addEventListener("click", () => {
+            const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
+            editFile(file, folderPath);
+        })
+    }
 }
 
 function createTableColumn(content, className) {
