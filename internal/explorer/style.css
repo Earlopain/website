@@ -54,4 +54,10 @@ tr:not(.tableheader):nth-child(even) {
     color: red;
     display: inline-block;
     vertical-align: top;
+    position: absolute;
+}
+
+.imageview {
+    width: 100%;
+    height: 100%;
 }

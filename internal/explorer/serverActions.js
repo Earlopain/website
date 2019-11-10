@@ -57,20 +57,31 @@ function postDownload(postData) {
 
 async function serverRequest(postData, type) {
     postData.action = type;
-    const result = await httpPOST("webInterface.php", postData);
+    const result = await httpPOST("webInterface.php", postData, (event, resolve) => {
+        resolve(event.target.responseText);
+    });
     return result;
 }
 
-function httpPOST(url, formDataJSON) {
+async function serverRequestMimeType(postData, type) {
+    postData.action = type;
+    const result = await httpPOST("webInterface.php", postData, (event, resolve, xmlHttp) => {
+        const mimeType = xmlHttp.getResponseHeader("Content-Type");
+        resolve([event.target.responseText, mimeType]);
+    });
+    return result;
+}
+
+function httpPOST(url, formDataJSON, callback) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
         let formData = new FormData();
         Object.keys(formDataJSON).forEach(key => {
             formData.append(key, formDataJSON[key])
         });
-        xmlHttp.open("POST", url, true); // false for synchronous request
+        xmlHttp.open("POST", url, true);
         xmlHttp.onload = event => {
-            resolve(event.target.responseText);
+            callback(event, resolve, xmlHttp);
         };
         xmlHttp.send(formData);
     });
