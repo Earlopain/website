@@ -10,14 +10,16 @@ let mimesTypes = {
 }
 
 async function showFile(file, folderPath) {
-    currentlyOpenFile = file;
-    currentlyOpenFileDir = folderPath;
+    let editor = document.getElementById("editor");
     const folderBase64 = encodeURI(btoa(folderPath));
     const url = "fileProxy.php?folder=" + folderBase64 + "&id=" + file.index;
     const mimeType = await httpHEAD(url);
-    let editor = document.getElementById("editor");
-    editor.innerHTML = "";
     const elementType = getMimeType(mimeType);
+    console.log(elementType);
+    if (elementType === "unsupported") {
+        return;
+    }
+    editor.innerHTML = "";
     let mediaElement = document.createElement(elementType);
     if (elementType === "textarea") {
         const data = await httpPOST(url);
@@ -34,14 +36,21 @@ async function showFile(file, folderPath) {
         }
     }
     editor.appendChild(mediaElement);
+    currentlyOpenFile = file;
+    currentlyOpenFileDir = folderPath;
 }
 
 function getMimeType(mime) {
     for (const mimeString of Object.keys(mimesTypes)) {
-        const entries = mimesTypes[mimeString];
+        const entries = mimesTypes[mimeString].slice();
+        const firstEntry = entries.shift();
+        if (mime.startsWith(firstEntry)) {
+            return mimeString;
+        }
         for (const entry of entries) {
-            if (mime.includes(entry))
+            if (mime === entry) {
                 return mimeString;
+            }
         }
     }
     return "unsupported";
