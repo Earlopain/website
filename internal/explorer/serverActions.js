@@ -3,14 +3,11 @@ async function getFolderContent() {
     response = JSON.parse(await serverRequest({ path: folderPath }, "getfolder"));
     document.getElementById("currentfolder").value = response.currentFolder;
     response.entries = response.entries.sort((a, b) => {
-        return a.fileName > b.fileName ? 1 : -1;
-    });
-    response.entries = response.entries.sort((a, b) => {
-        if (a.isDir && !b.isDir)
-            return -1;
-        else if (!a.isDir && b.isDir)
-            return 1;
-        return 0;
+        if ((a.isDir === b.isDir)) {
+            return a.fileName.localeCompare(b.fileName, undefined, {numeric: true, sensitivity: "base"});
+        } else {
+            return -1 * (a.isDir - b.isDir);
+        }
     });
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
