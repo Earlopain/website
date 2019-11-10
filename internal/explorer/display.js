@@ -19,6 +19,7 @@ function generateFileEntry(file) {
     addFolderEventListener(fileNameColumn, file);
     addFileEditEventListener(fileNameColumn, file);
     row.appendChild(fileNameColumn);
+    row.appendChild(createTableColumn(file.fileName.split(".").pop(), "fileext"));
     row.appendChild(createTableColumn(file.user, "user"));
     row.appendChild(createTableColumn(file.group, "group"));
     row.appendChild(createTableColumn(file.perms, "perms"));

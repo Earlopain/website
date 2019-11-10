@@ -23,11 +23,11 @@
     max-width: 200px;
 }
 
-tr:not(.tableheader):nth-child(odd) {
+tr:not(#tableheader):nth-child(odd) {
     background-color: #3A3A3A;
 }
 
-tr:not(.tableheader):nth-child(even) {
+tr:not(#tableheader):nth-child(even) {
     background-color: #333333;
 }
 
@@ -40,7 +40,7 @@ tr:not(.tableheader):nth-child(even) {
     padding: 1px 5px 1px 5px; 
  }
 
- .tableheader > th {
+ #tableheader > th {
      width: 0px;
      padding-right: 10px;
  }
