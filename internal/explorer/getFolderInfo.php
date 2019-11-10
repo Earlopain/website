@@ -9,6 +9,7 @@ class DirectoryEntry {
     public $perms;
     public $isWriteable;
     public $isReadable;
+    public $isExecutable;
     public $user;
     public $group;
     public $infoObject;
@@ -24,6 +25,7 @@ class DirectoryEntry {
         $this->group = UserGroupCache::resolveUser($fileInfo->getGroup());
         $this->isReadable = $this->permissionCheck(2);
         $this->isWriteable = $this->permissionCheck(1);
+        $this->isExecutable = $this->permissionCheck(0);
         $this->infoObject = $fileInfo;
     }
 

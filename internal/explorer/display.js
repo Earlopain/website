@@ -16,7 +16,7 @@ function generateFileEntry(file) {
     checkbox.type = "checkbox";
     row.appendChild(checkbox);
     let fileName = createTableColumn(file.fileName, "filename");
-    if (file.isDir) {
+    if (file.isDir && file.isExecutable) {
         fileName.addEventListener("click", () => {
             const current = document.getElementById("currentfolder").value;
             let addition;

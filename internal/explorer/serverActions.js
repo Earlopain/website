@@ -15,7 +15,7 @@ async function getFolderContent() {
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
     if (response.currentFolder !== "/") {
-        let fakeFile = { fileName: "..", group: "", user: "", isDir: true, perms: "", size: -1, isReadable: "", isWriteable: "" };
+        let fakeFile = { fileName: "..", group: "", user: "", isDir: true, perms: "", size: -1, isReadable: "", isWriteable: "", isExecutable: true };
         container.appendChild(generateFileEntry(fakeFile));
     }
 
