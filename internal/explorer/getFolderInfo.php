@@ -58,7 +58,7 @@ class DirectoryEntry {
         $this->size = $this->isDir ? -1 : $this->formatBytes($fileInfo->getSize());
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = UserGroupCache::resolveUser($fileInfo->getOwner());
-        $this->group = UserGroupCache::resolveUser($fileInfo->getGroup());
+        $this->group = UserGroupCache::resolveGroup($fileInfo->getGroup());
         $this->isReadable = $this->permissionCheck(2);
         $this->isWriteable = $this->permissionCheck(1);
         $this->isExecutable = $this->permissionCheck(0);
