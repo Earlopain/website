@@ -10,15 +10,6 @@ switch ($_POST["action"]) {
     case 'downloadselection':
         createZipAndEcho();
         break;
-    case 'getsinglefile':
-        $dir = new DirectoryInfo($_POST["folder"], explode(",", $_POST["ids"]));
-        $file = $dir->entries[0];
-        header('Content-Type: ' . mime_content_type($file->absolutePath)); 
-
-        $data = file_get_contents($file->absolutePath);
-        $base64 = base64_encode($data);
-        echo $base64;
-        break;
 }
 
 function createZipAndEcho() {

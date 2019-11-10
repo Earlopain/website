@@ -57,18 +57,7 @@ function postDownload(postData) {
 
 async function serverRequest(postData, type) {
     postData.action = type;
-    const result = await httpPOST("webInterface.php", postData, (event, resolve) => {
-        resolve(event.target.responseText);
-    });
-    return result;
-}
-
-async function serverRequestMimeType(postData, type) {
-    postData.action = type;
-    const result = await httpPOST("webInterface.php", postData, (event, resolve, xmlHttp) => {
-        const mimeType = xmlHttp.getResponseHeader("Content-Type");
-        resolve([event.target.responseText, mimeType]);
-    });
+    const result = await httpPOST("webInterface.php", postData);
     return result;
 }
 
@@ -81,8 +70,19 @@ function httpPOST(url, formDataJSON, callback) {
         });
         xmlHttp.open("POST", url, true);
         xmlHttp.onload = event => {
-            callback(event, resolve, xmlHttp);
+            resolve(event.target.responseText);
         };
         xmlHttp.send(formData);
+    });
+}
+
+function httpHEAD(url) {
+    return new Promise(resolve => {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("HEAD", url, true);
+        xmlHttp.onload = event => {
+            resolve(xmlHttp.getResponseHeader("Content-Type"));
+        };
+        xmlHttp.send();
     });
 }
