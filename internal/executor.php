@@ -65,7 +65,7 @@ function getCommand() {
 function youtubedl($targetFormat) {
     $filePath = "/media/plex/software/tempfiles/youtubedl.txt";
     file_put_contents($filePath, $_POST["link"]);
-    return "youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '{$targetFormat}'";
+    return "export LC_ALL=en_US.UTF-8 && youtube-dl -f webm --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '{$targetFormat}'";
 }
 
 function wrapPlexStop($command) {
