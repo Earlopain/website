@@ -2,12 +2,10 @@ let currentOrder = [];
 let sortType = ["none", "string", "string", "string", "string", "string", "size", "string", "string"];
 
 function registerTableSort() {
-    let counter = 0;
     for (const header of document.getElementById("tableheader").children) {
         header.addEventListener("click", () => sortColum(header.cellIndex));
-        currentOrder.push(1);
-        counter++;
     }
+    currentOrder = Array(sortType.length).fill(-1);
 }
 
 function sortColum(index) {
@@ -25,12 +23,12 @@ function sortColum(index) {
             break;
         case "size":
                 allEntries = allEntries.sort(sizeSort.bind(index));
-
         default:
             break;
     }
-
-    currentOrder[index] *= -1;
+    let previousValue = currentOrder[index];
+    currentOrder = Array(sortType.length).fill(1);
+    currentOrder[index] = previousValue * -1;
     container.appendChild(dotdot);
 
     for (const entry of allEntries) {
@@ -46,7 +44,7 @@ function convertToBytes(input) {
 }
 
 function stringSort(a, b) {
-    return currentOrder[this] * ('' + a.children[this].innerText).localeCompare(b.children[this].innerText, undefined, {numeric: true, sensitivity: "base"});
+    return currentOrder[this] * a.children[this].innerText.localeCompare(b.children[this].innerText, undefined, {numeric: true, sensitivity: "base"});
 }
 
 function sizeSort(a, b) {
