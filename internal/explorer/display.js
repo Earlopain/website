@@ -43,7 +43,15 @@ function addFolderEventListener(element, file) {
             else {
                 addition = "/" + file.fileName;
             }
-            document.getElementById("currentfolder").value += addition;
+            if(addition === "/.."){
+                const value = document.getElementById("currentfolder").value;
+                const splitted = value.split("/");
+                splitted.pop();
+                document.getElementById("currentfolder").value = splitted.join("/");
+            }
+            else {
+                document.getElementById("currentfolder").value += addition;
+            }
             getFolderContent();
         })
     }
