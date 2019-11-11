@@ -1,5 +1,5 @@
 <?php
-
+setlocale(LC_ALL, "en_US.UTF-8");
 class DirectoryEntry {
     /**
      * @var string
@@ -51,6 +51,7 @@ class DirectoryEntry {
     public $infoObject;
 
     public function __construct(SplFileInfo $fileInfo, string $realPath, int $index) {
+
         $this->fileName = $fileInfo->getBasename();
         $this->absolutePath = $realPath;
         $this->index = $index;
