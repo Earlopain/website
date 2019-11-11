@@ -8,7 +8,6 @@ window.addEventListener('DOMContentLoaded', () => {
     registerTableSort();
 });
 
-
 function generateFileEntry(file) {
     let row = document.createElement("tr");
     row.id = "file" + file.index;
@@ -27,7 +26,6 @@ function generateFileEntry(file) {
     row.appendChild(createTableColumn(file.isDir ? "" : file.size));
     row.appendChild(createTableColumn(file.isReadable));
     row.appendChild(createTableColumn(file.isWriteable));
-
     return row;
 }
 
@@ -37,10 +35,10 @@ function addFolderEventListener(element, file) {
             const current = document.getElementById("currentfolder").value;
             let addition;
             if (current.slice(-1) === "/") {
-                addition = file.fileName
+                addition = file.fileName;
             }
             else {
-                addition = "/" + file.fileName
+                addition = "/" + file.fileName;
             }
             document.getElementById("currentfolder").value += addition;
             getFolderContent();
