@@ -34,9 +34,6 @@ function getCommand() {
         case 'plexfixdates':
             $command = wrapPlexStop("sudo node /media/plex/software/plexFixDateAdded.js");
             break;
-        case 'plexfixnames':
-            $command = wrapPlexStop("sudo node /media/plex/software/plexFixFileNames.js");
-            break;
         case 'apache2restart':
             $command = "sudo service apache2 restart";
             break;
