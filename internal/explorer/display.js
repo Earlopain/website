@@ -4,12 +4,17 @@ window.addEventListener('DOMContentLoaded', () => {
             getFolderContent();
         }
     });
+    window.addEventListener("popstate", loadFromUrl);
+    loadFromUrl();
+    registerTableSort();
+});
+
+function loadFromUrl() {
     const currentUrl = new URL(location.href);
     const folder = currentUrl.searchParams.get("folder");
     document.getElementById("currentfolder").value = folder === null ? "/" : atob(folder);
-    getFolderContent();
-    registerTableSort();
-});
+    getFolderContent(false);
+}
 
 function generateFileEntry(file) {
     let row = document.createElement("tr");
@@ -22,7 +27,7 @@ function generateFileEntry(file) {
     addFolderEventListener(fileNameColumn, file);
     addFileEditEventListener(fileNameColumn, file);
     row.appendChild(fileNameColumn);
-    row.appendChild(createTableColumn(file.isDir || file.fileName.startsWith(".") ? "": file.fileName.split(".").pop()));
+    row.appendChild(createTableColumn(file.isDir || file.fileName.startsWith(".") ? "" : file.fileName.split(".").pop()));
     row.appendChild(createTableColumn(file.user));
     row.appendChild(createTableColumn(file.group));
     row.appendChild(createTableColumn(file.perms));
@@ -43,7 +48,7 @@ function addFolderEventListener(element, file) {
             else {
                 addition = "/" + file.fileName;
             }
-            if(addition === "/.."){
+            if (addition === "/..") {
                 const value = document.getElementById("currentfolder").value;
                 const splitted = value.split("/");
                 splitted.pop();

@@ -1,13 +1,16 @@
-async function getFolderContent() {
+async function getFolderContent(pushToHistory = true) {
     const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
     response = JSON.parse(await serverRequest({ path: folderPath }, "getfolder"));
     document.getElementById("currentfolder").value = response.currentFolder;
-    const currentUrl = new URL(location.href);
-    currentUrl.searchParams.set("folder", btoa(response.currentFolder));
-    window.history.pushState({}, null, currentUrl.href);
+    if (pushToHistory) {
+        const currentUrl = new URL(location.href);
+        currentUrl.searchParams.set("folder", btoa(response.currentFolder));
+        window.history.pushState({}, null, currentUrl.href);
+    }
+
     response.entries = response.entries.sort((a, b) => {
         if ((a.isDir === b.isDir)) {
-            return a.fileName.localeCompare(b.fileName, undefined, {numeric: true, sensitivity: "base"});
+            return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
         } else {
             return -1 * (a.isDir - b.isDir);
         }
