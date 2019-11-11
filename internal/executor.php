@@ -21,7 +21,6 @@ if (isset($_POST["command"])) {
 
 function getCommand() {
     $command = "";
-    var_dump($_POST["command"]);
     switch ($_POST["command"]) {
         case 'plexrestart':
             $command = "sudo service plexmediaserver restart";
