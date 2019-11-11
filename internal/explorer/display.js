@@ -4,6 +4,9 @@ window.addEventListener('DOMContentLoaded', () => {
             getFolderContent();
         }
     });
+    const currentUrl = new URL(location.href);
+    const folder = currentUrl.searchParams.get("folder");
+    document.getElementById("currentfolder").value = folder === null ? "/" : atob(folder);
     getFolderContent();
     registerTableSort();
 });
