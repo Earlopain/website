@@ -51,7 +51,6 @@ class DirectoryEntry {
     public $infoObject;
 
     public function __construct(SplFileInfo $fileInfo, string $realPath, int $index) {
-
         $this->fileName = $fileInfo->getBasename();
         $this->absolutePath = $realPath;
         $this->index = $index;
@@ -116,6 +115,11 @@ class DirectoryInfo {
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);
             $counter = 0;
+            if ($path !== "/") {
+                $parentFolder = new SplFileInfo($path . "/..");
+                $this->entries[] = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), $counter++);
+            }
+
             foreach ($dir as $fileInfo) {
                 if ($getAll || array_search($counter, $idList) !== false) {
                     $realPath = $fileInfo->getRealPath();
