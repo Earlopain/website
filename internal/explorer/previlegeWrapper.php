@@ -5,7 +5,10 @@ if (!isset($_REQUEST{"action"})) {
 switch ($_REQUEST["action"]) {
     case "validatePassword":
         $result = sudoExec($_REQUEST["action"], $_REQUEST["user"], $_REQUEST["password"]);
-        echo $result;
+        if ($result !== "false") {
+            session_start();
+            $_SESSION["uid"] = $result;
+        }
         break;
 }
 
