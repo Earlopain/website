@@ -1,6 +1,6 @@
 async function getFolderContent(pushToHistory = true) {
     const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
-    response = JSON.parse(await httpPOST("previlegeWrapper.php", { path: folderPath, action: "getdir" }));
+    response = JSON.parse(await serverRequest("getdir", { path: folderPath }));
     document.getElementById("currentfolder").value = response.currentFolder;
     if (pushToHistory) {
         const currentUrl = new URL(location.href);
@@ -32,7 +32,7 @@ async function downloadSelection() {
         if (file.childNodes[0].checked)
             ids.push(file.id.substring(4));
     }
-    postDownload({ action: "downloadselection", folder: folderPath, ids: ids.join(",") });
+    postDownload({ action: "zipselection", folder: folderPath, ids: ids.join(",") });
 }
 
 function postDownload(postData) {
@@ -42,11 +42,11 @@ function postDownload(postData) {
         let input = document.createElement("input");
         input.type = "text";
         input.name = name;
-        input.value = value;
+        input.value = btoa(value);
         form.appendChild(input);
     }
     form.method = "post";
-    form.action = "webInterface.php";
+    form.action = "previlegeWrapper.php";
     form.id = "tempform";
 
     document.body.appendChild(form);
@@ -54,15 +54,15 @@ function postDownload(postData) {
     document.getElementById("tempform").remove();
 }
 
-function login() {
+async function login() {
     const user = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    httpPOST("previlegeWrapper.php", { action: "validatePassword", user: user, password: password });
+    await serverRequest("validatePassword", { user: user, password: password });
 }
 
-async function serverRequest(postData, type) {
+async function serverRequest(type, postData) {
     postData.action = type;
-    const result = await httpPOST("webInterface.php", postData);
+    const result = await httpPOST("previlegeWrapper.php", postData);
     return result;
 }
 
@@ -71,7 +71,7 @@ function httpPOST(url, formDataJSON = {}) {
         let xmlHttp = new XMLHttpRequest();
         let formData = new FormData();
         Object.keys(formDataJSON).forEach(key => {
-            formData.append(key, formDataJSON[key])
+            formData.append(key, btoa(formDataJSON[key]))
         });
         xmlHttp.open("POST", url, true);
         xmlHttp.onload = event => {

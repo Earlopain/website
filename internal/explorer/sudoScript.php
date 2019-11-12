@@ -1,13 +1,17 @@
 <?php
-$action = $argv[1];
 
-switch ($action) {
+$argv = prepareArgs($argv);
+
+switch ($argv[1]) {
     case "validatePassword":
         login($argv);
         break;
     case "getdir":
         getdir($argv);
-    break;
+        break;
+    case "zipselection":
+        zipSelection($argv);
+        break;
 }
 
 function getdir($argv) {
@@ -18,8 +22,46 @@ function getdir($argv) {
     echo json_encode($dir);
 }
 
+function zipSelection($argv) {
+    require_once "getFolderInfo.php";
+    $path = $argv[2];
+    $ids = $argv[3];
+    $uid = $argv[4];
+    $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
+    $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
+    $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
+    $zip = new ZipArchive();
+    $zip->open($zipPath, ZipArchive::OVERWRITE | ZipArchive::CREATE);
+    if ($dir->currentFolder !== "/") {
+        array_shift($dir->entries);
+    }
+    foreach ($dir->entries as $file) {
+        if (!$file->infoObject->isReadable()) {
+            continue;
+        }
+        if (!$file->isDir) {
+            $zip->addFile($file->absolutePath, $file->fileName);
+        } else {
+            $folderPath = dirname($file->absolutePath);
+            $offset = strlen(substr($file->absolutePath, 0, strlen($folderPath)));
+            $subdir = new RecursiveDirectoryIterator($file->absolutePath, RecursiveDirectoryIterator::SKIP_DOTS);
+            $subdirfiles = new RecursiveIteratorIterator($subdir, RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
+            foreach ($subdirfiles as $subfile) {
+                if (!$subfile->isReadable() || $subfile->isDir()) {
+                    continue;
+                }
+                $realpath = $subfile->getRealPath();
+                $zip->addFile($realpath, substr($realpath, $offset));
+            }
+        }
+    }
+    $zip->close();
+    flush();
+    echo $zipPath;
+}
+
 function login($argv) {
-    set_error_handler(function() {die("false");}, E_ALL); 
+    set_error_handler(function() {die("false");}, E_ALL);
     $user = $argv[2];
     $password = $argv[3];
     $file = fopen("/etc/shadow", "r");
@@ -50,4 +92,11 @@ function exitProcess($file) {
         fclose($file);
     }
     exit();
+}
+
+function prepareArgs($args) {
+    foreach ($args as $key => $value) {
+        $args[$key] = base64_decode($value);
+    }
+    return $args;
 }
