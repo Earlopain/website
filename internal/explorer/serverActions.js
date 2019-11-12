@@ -63,6 +63,7 @@ async function login() {
     const user = document.getElementById("username").value;
     const password = document.getElementById("password").value;
     await serverRequest("validatePassword", { user: user, password: password });
+    getFolderContent(false);
 }
 
 async function serverRequest(type, postData) {
