@@ -50,7 +50,7 @@ class DirectoryEntry {
      */
     public $infoObject;
 
-    public function __construct(SplFileInfo $fileInfo, string $realPath, int $index) {
+    public function __construct(SplFileInfo $fileInfo, string $realPath, int $index, string $userName) {
         $this->fileName = $fileInfo->getBasename();
         $this->absolutePath = $realPath;
         $this->index = $index;
@@ -59,9 +59,9 @@ class DirectoryEntry {
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = UserGroupCache::resolveUser($fileInfo->getOwner());
         $this->group = UserGroupCache::resolveGroup($fileInfo->getGroup());
-        $this->isReadable = $this->permissionCheck(2);
-        $this->isWriteable = $this->permissionCheck(1);
-        $this->isExecutable = $this->permissionCheck(0);
+        $this->isReadable = $this->permissionCheck(2, $userName);
+        $this->isWriteable = $this->permissionCheck(1, $userName);
+        $this->isExecutable = $this->permissionCheck(0, $userName);
         $this->infoObject = $fileInfo;
     }
     /**
@@ -70,10 +70,10 @@ class DirectoryEntry {
      * @param  integer $position
      * @return bool
      */
-    private function permissionCheck(int $position): bool {
-        if ($this->user === UserGroupCache::getUser() && $this->perms {0} & (1 << $position)) {
+    private function permissionCheck(int $position, string $userName): bool {
+        if ($this->user === $userName && $this->perms {0} & (1 << $position)) {
             return true;
-        } else if (in_array($this->group, UserGroupCache::getGroups()) && $this->perms {1} & (1 << $position)) {
+        } else if (in_array($this->group, UserGroupCache::getGroups($userName)) && $this->perms {1} & (1 << $position)) {
             return true;
         } else if ($this->perms {2} & (1 << $position)) {
             return true;
@@ -110,21 +110,22 @@ class DirectoryInfo {
      */
     public $currentFolder;
 
-    public function __construct(string $path, array $idList = []) {
+    public function __construct(string $path, int $uid, array $idList = []) {
+        $userContext = posix_getpwuid($uid)["name"];
         $getAll = count($idList) === 0;
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);
             $counter = 0;
             if ($path !== "/") {
                 $parentFolder = new SplFileInfo($path . "/..");
-                $this->entries[] = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), $counter++);
+                $this->entries[] = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), $counter++, $userContext);
             }
 
             foreach ($dir as $fileInfo) {
                 if ($getAll || array_search($counter, $idList) !== false) {
                     $realPath = $fileInfo->getRealPath();
                     if (!$fileInfo->isDot() && $realPath !== false) {
-                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter);
+                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter, $userContext);
                     }
                 }
                 $counter++;
@@ -144,14 +145,7 @@ class UserGroupCache {
      * @var array
      */
     protected static $groupCache = [];
-    /**
-     * @var string[]
-     */
-    protected static $groups;
-    /**
-     * @var string
-     */
-    protected static $execUser = "www-data";
+    protected static $groups = [];
 
     /**
      * Converts user id into user string
@@ -178,24 +172,15 @@ class UserGroupCache {
         return self::$groupCache[$gid];
     }
     /**
-     * Gets the currently executing user
-     *
-     * @return string
-     */
-    public function getUser(): string {
-        return self::$execUser;
-    }
-    /**
      * Gets the groups the current user is a member of
      *
      * @return string[]
      */
-    public static function getGroups(): array{
-        if (!isset(self::$groups)) {
-            $user = self::$execUser;
-            $groups = substr(exec("groups {$user} | cut -d':' -f2"), 1);
-            self::$groups = explode(" ", $groups);
+    public static function getGroups(string $userName) {
+        if (!isset(self::$groups[$userName])) {
+            $groups = substr(exec("groups {$userName} | cut -d':' -f2"), 1);
+            self::$groups[$userName] = explode(" ", $groups);
         }
-        return self::$groups;
+        return self::$groups[$userName];
     }
 }
