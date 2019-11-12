@@ -75,8 +75,8 @@ function login($argv) {
             $passwordSplit = explode("$", $split[1]);
             $algorithm = $passwordSplit[1];
             $salt = $passwordSplit[2];
-            $compairAgainst = exec("openssl passwd -{$algorithm} -salt '{$salt}' '{$password}'");
-            if (strcmp($compairAgainst, $split[1]) !== 0) {
+            $compareAgainst = crypt($password, "$" . $algorithm . "$" . $salt . "$");
+            if (strcmp($compareAgainst, $split[1]) !== 0) {
                 exitProcess($file);
             }
             echo posix_getpwnam($user)["uid"];
