@@ -1,6 +1,11 @@
 async function getFolderContent(pushToHistory = true) {
     const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
     response = JSON.parse(await serverRequest("getdir", { path: folderPath }));
+    if (response.entries.length === 0) {
+        document.getElementById("currentfolder").value = "/";
+        getFolderContent();
+        return;
+    }
     document.getElementById("currentfolder").value = response.currentFolder;
     if (pushToHistory) {
         const currentUrl = new URL(location.href);
