@@ -3,13 +3,14 @@ $action = $argv[1];
 
 switch ($action) {
     case "validatePassword":
-        login();
+        login($argv);
         break;
     case "getdir":
         break;
 }
 
-function login() {
+function login($argv) {
+    set_error_handler(function() {die("false");}, E_ALL); 
     $user = $argv[2];
     $password = $argv[3];
     $file = fopen("/etc/shadow", "r");
@@ -27,7 +28,7 @@ function login() {
             if (strcmp($compairAgainst, $split[1]) !== 0) {
                 exitProcess($file);
             }
-            echo $user;
+            echo posix_getpwnam($user)["uid"];
             exit();
         }
     }
