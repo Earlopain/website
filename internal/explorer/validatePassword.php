@@ -1,4 +1,4 @@
-    <?php
+<?php
 $user = $argv[1];
 $password = $argv[2];
 $file = fopen("/etc/shadow", "r");
@@ -12,7 +12,7 @@ while (!feof($file)) {
         $passwordSplit = explode("$", $split[1]);
         $algorithm = $passwordSplit[1];
         $salt = $passwordSplit[2];
-        $compairAgainst = exec("openssl passwd -{$algorithm} -salt {$salt} {$password}");
+        $compairAgainst = exec("openssl passwd -{$algorithm} -salt '{$salt}' '{$password}'");
         if (strcmp($compairAgainst, $split[1]) !== 0) {
             exitProcess($file);
         }
