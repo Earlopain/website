@@ -6,7 +6,16 @@ switch ($action) {
         login($argv);
         break;
     case "getdir":
-        break;
+        getdir($argv);
+    break;
+}
+
+function getdir($argv) {
+    require_once "getFolderInfo.php";
+    $path = $argv[2];
+    $uid = $argv[3];
+    $dir = new DirectoryInfo($path, $uid);
+    echo json_encode($dir);
 }
 
 function login($argv) {

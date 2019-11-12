@@ -1,6 +1,6 @@
 async function getFolderContent(pushToHistory = true) {
     const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
-    response = JSON.parse(await serverRequest({ path: folderPath }, "getfolder"));
+    response = JSON.parse(await httpPOST("previlegeWrapper.php", { path: folderPath, action: "getdir" }));
     document.getElementById("currentfolder").value = response.currentFolder;
     if (pushToHistory) {
         const currentUrl = new URL(location.href);
@@ -57,7 +57,7 @@ function postDownload(postData) {
 function login() {
     const user = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    httpPOST("previlegeWrapper.php", {action: "validatePassword", user: user, password: password});
+    httpPOST("previlegeWrapper.php", { action: "validatePassword", user: user, password: password });
 }
 
 async function serverRequest(postData, type) {

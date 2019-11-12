@@ -112,6 +112,7 @@ class DirectoryInfo {
 
     public function __construct(string $path, int $uid, array $idList = []) {
         $userContext = posix_getpwuid($uid)["name"];
+        posix_setuid($uid);
         $getAll = count($idList) === 0;
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);
