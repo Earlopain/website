@@ -32,8 +32,8 @@ function generateFileEntry(file) {
     row.appendChild(createTableColumn(file.group));
     row.appendChild(createTableColumn(file.perms));
     row.appendChild(createTableColumn(file.isDir ? "" : file.size));
-    row.appendChild(createTableColumn(file.isReadable));
-    row.appendChild(createTableColumn(file.isWriteable));
+    row.appendChild(createTableColumn(file.isDir ? file.isExecutable : file.isReadable));
+    row.appendChild(createTableColumn(file.isDir ? file.isExecutable && file.isWriteable : file.isWriteable));
     return row;
 }
 
