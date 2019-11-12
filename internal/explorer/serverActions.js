@@ -54,6 +54,12 @@ function postDownload(postData) {
     document.getElementById("tempform").remove();
 }
 
+function login() {
+    const user = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    httpPOST("previlegeWrapper.php", {action: "validatePassword", user: user, password: password});
+}
+
 async function serverRequest(postData, type) {
     postData.action = type;
     const result = await httpPOST("webInterface.php", postData);

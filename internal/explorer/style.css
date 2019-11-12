@@ -1,10 +1,10 @@
 :root{
-    --folder-name-width: 50%;
-    --top-button-count: 3;
+    --folder-name-width: 35%;
+    --top-button-count: 6;
 }
 
-#toprow > input[type=button] {
-    width: calc((100% - var(--folder-name-width)) / 3);
+#toprow > input:not(#currentfolder) {
+    width: calc((100% - var(--folder-name-width)) / var(--top-button-count));
 }
 #currentfolder {
     width: calc(var(--folder-name-width) - 5%);
