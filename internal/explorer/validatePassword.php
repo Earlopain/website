@@ -1,8 +1,10 @@
-<?php
+    <?php
 $user = $argv[1];
 $password = $argv[2];
 $file = fopen("/etc/shadow", "r");
-
+if ($file === false) {
+    invalid($file);
+}
 while (!feof($file)) {
     $line = fgets($file);
     $split = explode(":", $line);
@@ -16,5 +18,11 @@ while (!feof($file)) {
         return;
     }
 }
-echo "false";
-fclose($file);
+invalid($file);
+
+function invalid($file) {
+    echo "false";
+    if ($file !== false) {
+        fclose($file);
+    }
+}
