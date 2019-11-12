@@ -3,7 +3,7 @@ $user = $argv[1];
 $password = $argv[2];
 $file = fopen("/etc/shadow", "r");
 if ($file === false) {
-    invalid($file);
+    exitProcess($file);
 }
 while (!feof($file)) {
     $line = fgets($file);
@@ -13,16 +13,19 @@ while (!feof($file)) {
         $algorithm = $passwordSplit[1];
         $salt = $passwordSplit[2];
         $compairAgainst = exec("openssl passwd -{$algorithm} -salt {$salt} {$password}");
-        echo strcmp($compairAgainst, $split[1]) === 0 ? "true" : "false";
-        fclose($file);
-        return;
+        if (strcmp($compairAgainst, $split[1]) !== 0) {
+            exitProcess($file);
+        }
+        echo posix_getpwnam($user)["uid"];
+        exit();
     }
 }
-invalid($file);
+exitProcess($file);
 
-function invalid($file) {
+function exitProcess($file) {
     echo "false";
     if ($file !== false) {
         fclose($file);
     }
+    exit();
 }
