@@ -1,33 +1,26 @@
 <?php
-//remove and file location from args
-array_shift($argv);
 $argv = prepareArgs($argv);
 
-switch ($argv[0]) {
+switch (array_shift($argv)) {
     case "validatePassword":
-        login($argv);
+        login($argv[0], $argv[1]);
         break;
     case "getdir":
-        getdir($argv);
+        getdir($argv[0], $argv[1]);
         break;
     case "zipselection":
-        zipSelection($argv);
+        zipSelection($argv[0], $argv[1], $argv[2]);
         break;
 }
 
-function getdir($argv) {
+function getdir($uid, $path) {
     require_once "getFolderInfo.php";
-    $uid = $argv[1];
-    $path = $argv[2];
     $dir = new DirectoryInfo($path, $uid);
     echo json_encode($dir);
 }
 
-function zipSelection($argv) {
+function zipSelection($uid, $path, $ids) {
     require_once "getFolderInfo.php";
-    $uid = $argv[1];
-    $path = $argv[2];
-    $ids = $argv[3];
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
@@ -61,10 +54,8 @@ function zipSelection($argv) {
     echo $zipPath;
 }
 
-function login($argv) {
+function login($user, $password) {
     set_error_handler(function () {die("false");}, E_ALL);
-    $user = $argv[1];
-    $password = $argv[2];
     $file = fopen("/etc/shadow", "r");
     if ($file === false) {
         loginFail($file);
@@ -96,8 +87,10 @@ function loginFail($file) {
 }
 
 function prepareArgs($args) {
+    //Remove first parameter which is executing script file location
+    array_shift($args);
     foreach ($args as $key => $value) {
-        $args[$key] = base64_decode($value, true);
+        $args[$key] = base64_decode($value);
     }
     return $args;
 }
