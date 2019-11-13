@@ -61,12 +61,12 @@ function zipSelection($argv) {
 }
 
 function login($argv) {
-    set_error_handler(function() {die("false");}, E_ALL);
+    set_error_handler(function () {die("false");}, E_ALL);
     $user = $argv[2];
     $password = $argv[3];
     $file = fopen("/etc/shadow", "r");
     if ($file === false) {
-        exitProcess($file);
+        loginFail($file);
     }
     while (!feof($file)) {
         $line = fgets($file);
@@ -77,16 +77,16 @@ function login($argv) {
             $salt = $passwordSplit[2];
             $compareAgainst = crypt($password, "$" . $algorithm . "$" . $salt . "$");
             if (strcmp($compareAgainst, $split[1]) !== 0) {
-                exitProcess($file);
+                loginFail($file);
             }
             echo posix_getpwnam($user)["uid"];
             exit();
         }
     }
-    exitProcess($file);
+    loginFail($file);
 }
 
-function exitProcess($file) {
+function loginFail($file) {
     echo "false";
     if ($file !== false) {
         fclose($file);
@@ -96,7 +96,10 @@ function exitProcess($file) {
 
 function prepareArgs($args) {
     foreach ($args as $key => $value) {
-        $args[$key] = base64_decode($value);
+        $args[$key] = base64_decode($value, true);
+        if ($args[$key] === false) {
+            die("Invalid base64 string\n" . $args[$key]);
+        }
     }
     return $args;
 }
