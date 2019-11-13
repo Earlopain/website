@@ -72,8 +72,16 @@ function postDownload(postData) {
 async function login() {
     const user = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    await serverRequest("validatePassword", { user: user, password: password });
-    getFolderContent(false);
+    return await serverRequest("validatePassword", { user: user, password: password });
+}
+
+async function loginAndGotoIndex() {
+    const status = await login();
+    if(status !== "false"){
+        location.href = "index.php";
+    }else {
+        alert("Wrong credentials");
+    }
 }
 
 async function serverRequest(type, postData) {

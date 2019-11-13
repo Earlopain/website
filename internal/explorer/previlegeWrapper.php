@@ -9,6 +9,7 @@ switch (base64_decode($_REQUEST["action"])) {
         if ($result !== "false") {
             $_SESSION["uid"] = $result;
         }
+        echo $result;
         break;
     case "getdir":
         $result = sudoExec(getUid(), $_REQUEST["path"]);
@@ -27,7 +28,7 @@ switch (base64_decode($_REQUEST["action"])) {
 }
 
 function getUid() {
-    if(isset($_SESSION["uid"])){
+    if(!isset($_SESSION["uid"])){
         die("Not logged in");
     }
     return base64_encode($_SESSION["uid"]);

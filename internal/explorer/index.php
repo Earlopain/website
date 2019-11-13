@@ -1,3 +1,11 @@
+<?php
+    session_start();
+    if(!isset($_SESSION["uid"])){
+        header("Location: login.html");
+        die();
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
