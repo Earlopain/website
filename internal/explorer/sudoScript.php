@@ -1,8 +1,9 @@
 <?php
-
+//remove and file location from args
+array_shift($argv);
 $argv = prepareArgs($argv);
 
-switch ($argv[1]) {
+switch ($argv[0]) {
     case "validatePassword":
         login($argv);
         break;
@@ -16,17 +17,17 @@ switch ($argv[1]) {
 
 function getdir($argv) {
     require_once "getFolderInfo.php";
-    $uid = $argv[2];
-    $path = $argv[3];
+    $uid = $argv[1];
+    $path = $argv[2];
     $dir = new DirectoryInfo($path, $uid);
     echo json_encode($dir);
 }
 
 function zipSelection($argv) {
     require_once "getFolderInfo.php";
-    $uid = $argv[2];
-    $path = $argv[3];
-    $ids = $argv[4];
+    $uid = $argv[1];
+    $path = $argv[2];
+    $ids = $argv[3];
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
@@ -98,7 +99,7 @@ function prepareArgs($args) {
     foreach ($args as $key => $value) {
         $args[$key] = base64_decode($value, true);
         if ($args[$key] === false) {
-            die("Invalid base64 string\n" . $args[$key]);
+            die("Invalid base64 string\n" . $value);
         }
     }
     return $args;
