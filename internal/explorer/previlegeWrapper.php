@@ -1,6 +1,7 @@
 <?php
 if (!isset($_REQUEST{"action"})) {
-    die("Action missing");
+    require_once "htmlHelper.php";
+    redirectToFolderOfFile();
 }
 session_start();
 switch (base64_decode($_REQUEST["action"])) {

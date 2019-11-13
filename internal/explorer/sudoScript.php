@@ -1,4 +1,8 @@
 <?php
+if (!isset($argv)) {
+    require_once "htmlHelper.php";
+    redirectToFolderOfFile();
+}
 $argv = prepareArgs($argv);
 
 switch (array_shift($argv)) {

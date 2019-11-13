@@ -17,3 +17,9 @@ function generateHeadBoilerplate() {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <?php
 }
+
+function redirectToFolderOfFile() {
+    $currentUrl = explode("/", $_SERVER["REQUEST_URI"]);
+    array_pop($currentUrl);
+    header("Location: " . implode("/", $currentUrl));
+}

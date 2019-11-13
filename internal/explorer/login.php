@@ -1,9 +1,8 @@
 <?php
 session_start();
 if (isset($_SESSION["uid"])) {
-    $currentUrl = explode("/", $_SERVER["REQUEST_URI"]);
-    array_pop($currentUrl);
-    header("Location: " . implode("/", $currentUrl));
+    require_once "htmlHelper.php";
+    redirectToFolderOfFile();
 }
 ?>
 <!DOCTYPE html>
