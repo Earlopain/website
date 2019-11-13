@@ -78,7 +78,7 @@ async function login() {
 async function loginAndGotoIndex() {
     const status = await login();
     if(status !== "false"){
-        location.href = "index.php";
+        location.href = location.href.split("/").slice(0, -1).join("/");
     }else {
         alert("Wrong credentials");
     }
