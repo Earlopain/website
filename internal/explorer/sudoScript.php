@@ -63,8 +63,8 @@ function zipSelection($argv) {
 
 function login($argv) {
     set_error_handler(function () {die("false");}, E_ALL);
-    $user = $argv[2];
-    $password = $argv[3];
+    $user = $argv[1];
+    $password = $argv[2];
     $file = fopen("/etc/shadow", "r");
     if ($file === false) {
         loginFail($file);
