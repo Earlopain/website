@@ -17,7 +17,7 @@ async function getFolderContent(pushToHistory = true) {
         if ((a.isDir === b.isDir)) {
             return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
         } else {
-            return -1 * (a.isDir - b.isDir);
+            return b.isDir - a.isDir;
         }
     });
     let container = document.getElementById("filecontents");
