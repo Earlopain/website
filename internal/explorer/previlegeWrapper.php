@@ -27,7 +27,10 @@ switch (base64_decode($_REQUEST["action"])) {
 }
 
 function getUid() {
-    return base64_encode(isset($_SESSION["uid"]) ? $_SESSION["uid"] : posix_getpwnam("nobody")["uid"]);
+    if(isset($_SESSION["uid"])){
+        die("Not logged in");
+    }
+    return base64_encode($_SESSION["uid"]);
 }
 
 function sudoExec(...$args) {
