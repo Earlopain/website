@@ -11,11 +11,11 @@ switch (base64_decode($_REQUEST["action"])) {
         }
         break;
     case "getdir":
-        $result = sudoExec($_REQUEST["path"], getUid());
+        $result = sudoExec(getUid(), $_REQUEST["path"]);
         echo $result;
         break;
     case "zipselection":
-        $tempFilePath = sudoExec($_REQUEST["folder"], $_REQUEST["ids"], getUid());
+        $tempFilePath = sudoExec(getUid(), $_REQUEST["folder"], $_REQUEST["ids"]);
         $date = date_create();
         $filename = date_format($date, 'Y-m-d_H-i-s');
         header('Content-Type: application/zip');

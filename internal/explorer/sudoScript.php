@@ -16,17 +16,17 @@ switch ($argv[1]) {
 
 function getdir($argv) {
     require_once "getFolderInfo.php";
-    $path = $argv[2];
-    $uid = $argv[3];
+    $uid = $argv[2];
+    $path = $argv[3];
     $dir = new DirectoryInfo($path, $uid);
     echo json_encode($dir);
 }
 
 function zipSelection($argv) {
     require_once "getFolderInfo.php";
-    $path = $argv[2];
-    $ids = $argv[3];
-    $uid = $argv[4];
+    $uid = $argv[2];
+    $path = $argv[3];
+    $ids = $argv[4];
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
