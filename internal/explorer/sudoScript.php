@@ -98,9 +98,6 @@ function loginFail($file) {
 function prepareArgs($args) {
     foreach ($args as $key => $value) {
         $args[$key] = base64_decode($value, true);
-        if ($args[$key] === false) {
-            die("Invalid base64 string\n" . $value);
-        }
     }
     return $args;
 }

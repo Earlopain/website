@@ -28,7 +28,7 @@ switch (base64_decode($_REQUEST["action"])) {
 }
 
 function getUid() {
-    if(!isset($_SESSION["uid"])){
+    if (!isset($_SESSION["uid"])) {
         die("Not logged in");
     }
     return base64_encode($_SESSION["uid"]);
@@ -37,6 +37,10 @@ function getUid() {
 function sudoExec(...$args) {
     $argString = "";
     foreach ($args as $string) {
+        $decoded = base64_decode($string, true);
+        if ($decoded === false) {
+            die("Invalid base64 string\n" . $string);
+        }
         $argString .= "'" . $string . "' ";
     }
     $action = $_REQUEST["action"];
