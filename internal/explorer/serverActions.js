@@ -33,11 +33,21 @@ async function downloadSelection() {
     const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
     const files = document.getElementById("filecontents").childNodes;
     let ids = [];
+    let nonDownloadable = [];
     for (const file of files) {
-        if (file.childNodes[0].checked)
+        if (file.childNodes[0].checked && file.childNodes[7].textContent === "true"){
             ids.push(file.id.substring(4));
+        }
+        else if(file.childNodes[0].checked) {
+            nonDownloadable.push(file.childNodes[1].textContent);
+        }
     }
-    postDownload({ action: "zipselection", folder: folderPath, ids: ids.join(",") });
+    if(ids.length > 0){
+        postDownload({ action: "zipselection", folder: folderPath, ids: ids.join(",") });
+    }
+    if(nonDownloadable.length > 0){
+        alert("These items are not downloadable because of permissions\n\n" + nonDownloadable.join("\n"));
+    }
 }
 
 function postDownload(postData) {
