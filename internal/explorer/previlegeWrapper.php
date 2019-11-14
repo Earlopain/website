@@ -29,11 +29,11 @@ switch (base64_decode($_REQUEST["action"])) {
     case "getsinglefile":
         $uid = Session::getUid();
         $mimeType = sudoExec(base64_encode("getmime"), $uid, $_REQUEST["folder"], $_REQUEST["id"]);
-        if (base64_decode($_REQUEST["mimeonly"]) === "true") {
+        if (isset($_REQUEST["mimeonly"])) {
             echo $mimeType;
         } else {
-            header('Content-Type: ' . $mimeType);
-            $chunkSize = 1024 * pow(8, 1);
+            header("Content-Type: " . $mimeType);
+            $chunkSize = 1024 * pow(8, 5);
             $start = 0;
             while (true) {
                 $bits = sudoExec(base64_encode("getsinglefile"), $uid, $_REQUEST["folder"], $_REQUEST["id"], base64_encode($start), base64_encode($chunkSize));
@@ -52,7 +52,7 @@ class Session {
     protected static $uid;
 
     public static function getUid() {
-        if(!isset(self::$uid)){
+        if (!isset(self::$uid)) {
             session_start();
             if (!isset($_SESSION["uid"])) {
                 die("Not logged in");
