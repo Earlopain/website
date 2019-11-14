@@ -101,6 +101,7 @@ class DirectoryInfo {
      * @var DirectoryEntry[]
      */
     public $entries = [];
+    public $parentFolder;
     /**
      * @var integer
      */
@@ -116,12 +117,12 @@ class DirectoryInfo {
         $getAll = count($idList) === 0;
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);
-            $counter = 0;
             if ($path !== "/") {
                 $parentFolder = new SplFileInfo($path . "/..");
-                $this->entries[] = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), $counter++, $userContext);
+                $this->parentFolder = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1, $userContext);
             }
-
+            
+            $counter = 0;
             foreach ($dir as $fileInfo) {
                 if ($getAll || array_search($counter, $idList) !== false) {
                     $realPath = $fileInfo->getRealPath();

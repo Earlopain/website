@@ -18,8 +18,10 @@ async function showFile(file, folderPath) {
     lastClickedFileDir = folderPath;
     let editor = document.getElementById("editor");
     const folderBase64 = encodeURI(btoa(folderPath));
-    const url = "fileProxy.php?folder=" + folderBase64 + "&id=" + file.index;
-    const mimeType = await httpHEAD(url);
+    const url = "previlegeWrapper.php?action=getsinglefile&folder=" + folderBase64 + "&id=" + btoa(file.index);
+    const mimeType = await serverRequest("getsinglefile", { folder: folderPath, id: file.index, mimeonly: true });
+    console.log(mimeType);
+    return;
     const elementType = getMimeType(mimeType);
     if (elementType === "unsupported") {
         return;
@@ -32,7 +34,7 @@ async function showFile(file, folderPath) {
     }
     else {
         mediaElement.controls = true;
-        mediaElement.src = url;
+        mediaElement.src = url + "&mimeonly=" + btoa("false");
         mediaElement.onload = function () {
             if (mediaElement.height > mediaElement.width) {
                 mediaElement.style.height = '100%';

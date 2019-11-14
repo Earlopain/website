@@ -15,6 +15,18 @@ switch (array_shift($argv)) {
     case "zipselection":
         zipSelection($argv[0], $argv[1], $argv[2]);
         break;
+    case "getsinglefile":
+        getSingleFileFragment($argv[0], $argv[1], $argv[2]);
+        break;
+    case "getmime":
+        require_once "getFolderInfo.php";
+        $dir = new DirectoryInfo($argv[1], intval($argv[0]), [$argv[2]]);
+        $file = $dir->entries[0];
+        echo mime_content_type($file->absolutePath);
+        break;
+}
+
+function getSingleFileFragment($uid, $byteStart, $byteStop) {
 }
 
 function getdir($uid, $path) {
@@ -30,9 +42,6 @@ function zipSelection($uid, $path, $ids) {
     $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
     $zip = new ZipArchive();
     $zip->open($zipPath, ZipArchive::OVERWRITE | ZipArchive::CREATE);
-    if ($dir->currentFolder !== "/") {
-        array_shift($dir->entries);
-    }
     foreach ($dir->entries as $file) {
         if (!$file->infoObject->isReadable()) {
             continue;

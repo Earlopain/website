@@ -22,7 +22,10 @@ async function getFolderContent(pushToHistory = true) {
     });
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
-
+    if(response.currentFolder !== "/"){
+        const parentFolder = generateFileEntry(response.parentFolder)
+        container.appendChild(parentFolder);
+    }
     for (const entry of response.entries) {
         const element = generateFileEntry(entry);
         container.appendChild(element)
@@ -102,16 +105,5 @@ function httpPOST(url, formDataJSON = {}) {
             resolve(event.target.responseText);
         };
         xmlHttp.send(formData);
-    });
-}
-
-function httpHEAD(url) {
-    return new Promise(resolve => {
-        let xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("HEAD", url, true);
-        xmlHttp.onload = event => {
-            resolve(xmlHttp.getResponseHeader("Content-Type"));
-        };
-        xmlHttp.send();
     });
 }
