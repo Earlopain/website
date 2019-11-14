@@ -4,7 +4,6 @@ if (!isset($_REQUEST{"action"})) {
     redirectToFolderOfFile();
 }
 $action = $_REQUEST["action"];
-session_start();
 switch (base64_decode($_REQUEST["action"])) {
     case "validatePassword":
         $result = sudoExec($action, $_REQUEST["user"], $_REQUEST["password"]);
@@ -14,11 +13,11 @@ switch (base64_decode($_REQUEST["action"])) {
         echo $result;
         break;
     case "getdir":
-        $result = sudoExec($action, getUid(), $_REQUEST["path"]);
+        $result = sudoExec($action, Session::getUid(), $_REQUEST["path"]);
         echo $result;
         break;
     case "zipselection":
-        $tempFilePath = sudoExec($action, getUid(), $_REQUEST["folder"], $_REQUEST["ids"]);
+        $tempFilePath = sudoExec($action, Session::getUid(), $_REQUEST["folder"], $_REQUEST["ids"]);
         $date = date_create();
         $filename = date_format($date, 'Y-m-d_H-i-s');
         header('Content-Type: application/zip');
@@ -28,7 +27,7 @@ switch (base64_decode($_REQUEST["action"])) {
         unlink($tempFilePath);
         break;
     case "getsinglefile":
-        $uid = getUid();
+        $uid = Session::getUid();
         $mimeType = sudoExec(base64_encode("getmime"), $uid, $_REQUEST["folder"], $_REQUEST["id"]);
         if (base64_decode($_REQUEST["mimeonly"]) === "true") {
             echo $mimeType;
@@ -49,11 +48,20 @@ switch (base64_decode($_REQUEST["action"])) {
         break;
 }
 
-function getUid() {
-    if (!isset($_SESSION["uid"])) {
-        die("Not logged in");
+class Session {
+    protected static $uid;
+
+    public static function getUid() {
+        if(!isset(self::$uid)){
+            session_start();
+            if (!isset($_SESSION["uid"])) {
+                die("Not logged in");
+            }
+            self::$uid = base64_encode($_SESSION["uid"]);
+            session_write_close();
+        }
+        return self::$uid;
     }
-    return base64_encode($_SESSION["uid"]);
 }
 
 function sudoExec(...$args) {
