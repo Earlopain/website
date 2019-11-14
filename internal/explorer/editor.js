@@ -18,10 +18,8 @@ async function showFile(file, folderPath) {
     lastClickedFileDir = folderPath;
     let editor = document.getElementById("editor");
     const folderBase64 = encodeURI(btoa(folderPath));
-    const url = "previlegeWrapper.php?action=getsinglefile&folder=" + folderBase64 + "&id=" + btoa(file.index);
-    const mimeType = await serverRequest("getsinglefile", { folder: folderPath, id: file.index, mimeonly: true });
-    console.log(mimeType);
-    return;
+    const url = "previlegeWrapper.php?action=" + btoa("getsinglefile") + "&folder=" + folderBase64 + "&id=" + btoa(file.index);
+    const mimeType = await serverRequest("getsinglefile", { folder: folderPath, id: file.index, mimeonly: "true" });
     const elementType = getMimeType(mimeType);
     if (elementType === "unsupported") {
         return;

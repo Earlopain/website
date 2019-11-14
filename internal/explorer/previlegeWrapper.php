@@ -30,10 +30,21 @@ switch (base64_decode($_REQUEST["action"])) {
     case "getsinglefile":
         $uid = getUid();
         $mimeType = sudoExec(base64_encode("getmime"), $uid, $_REQUEST["folder"], $_REQUEST["id"]);
-        echo $mimeType;
-        header('Content-Type: ' . $mimeType);
-        if (base64_decode($_REQUEST["mimeonly"] !== "true")) {
-            readfile($file->absolutePath);
+        if (base64_decode($_REQUEST["mimeonly"]) === "true") {
+            echo $mimeType;
+        } else {
+            header('Content-Type: ' . $mimeType);
+            $chunkSize = 1024 * pow(8, 1);
+            $start = 0;
+            while (true) {
+                $bits = sudoExec(base64_encode("getsinglefile"), $uid, $_REQUEST["folder"], $_REQUEST["id"], base64_encode($start), base64_encode($chunkSize));
+                echo $bits;
+                if (strlen($bits) !== $chunkSize) {
+                    break;
+                }
+                @flush();
+                $start += $chunkSize;
+            }
         }
         break;
 }
