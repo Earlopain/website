@@ -25,7 +25,7 @@
         <input type="button" value="delete">
         <input type="button" value="upload">
         <input type="text" id="username">
-        <input type="text" id="password">
+        <input type="password" id="password">
         <input type="button" value="login" onclick="login()">
     </div>
     <div id="container">

@@ -16,7 +16,7 @@ if (isset($_SESSION["uid"])) {
 <label for="username">Username:</label>
 <input type="text" id="username">
 <label for="password">Password:</label>
-<input type="text" id="password">
+<input type="password" id="password">
 <button onclick="loginAndGotoIndex()">Login</button>
 <body>
 </body>
