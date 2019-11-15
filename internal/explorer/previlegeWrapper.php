@@ -8,6 +8,7 @@ switch (base64_decode($_REQUEST["action"])) {
     case "validatePassword":
         $result = sudoExec($action, $_REQUEST["user"], $_REQUEST["password"]);
         if ($result !== "false") {
+            session_start();
             $_SESSION["uid"] = $result;
         }
         echo $result;
