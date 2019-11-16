@@ -34,15 +34,23 @@ switch (base64_decode($_REQUEST["action"])) {
             echo $mimeType;
         } else {
             header("Content-Type: " . $mimeType);
-            $chunkSize = 1024 * pow(8, 5);
+            $chunkSize = 8192;
             $start = 0;
+            $command = generateCommand(base64_encode("getsinglefile"), $uid, $_REQUEST["folder"], $_REQUEST["id"]);
+            $process = proc_open($command, [0 => ["pipe", "r"], 1 => ["pipe", "w"]], $pipes);
             while (true) {
-                $bits = sudoExec(base64_encode("getsinglefile"), $uid, $_REQUEST["folder"], $_REQUEST["id"], base64_encode($start), base64_encode($chunkSize));
+                fwrite($pipes[0], $start . "\n");
+                fwrite($pipes[0], $chunkSize . "\n");
+                $bits = fread($pipes[1], $chunkSize);
                 echo $bits;
+                @flush();
                 if (strlen($bits) !== $chunkSize) {
+                    fwrite($pipes[0], "-1\n");
+                    fclose($pipes[0]);
+                    fclose($pipes[1]);
+                    proc_close($process);
                     break;
                 }
-                @flush();
                 $start += $chunkSize;
             }
         }
@@ -66,6 +74,10 @@ class Session {
 }
 
 function sudoExec(...$args) {
+    return shell_exec(generateCommand(...$args));
+}
+
+function generateCommand(...$args) {
     $argString = "";
     foreach ($args as $string) {
         $decoded = base64_decode($string, true);
@@ -74,6 +86,5 @@ function sudoExec(...$args) {
         }
         $argString .= "'" . $string . "' ";
     }
-    $string = "sudo php -f /media/plex/html/internal/explorer/sudoScript.php " . $argString;
-    return shell_exec($string);
+    return "sudo php -f /media/plex/html/internal/explorer/sudoScript.php " . $argString;
 }

@@ -16,7 +16,7 @@ switch (array_shift($argv)) {
         zipSelection($argv[0], $argv[1], $argv[2]);
         break;
     case "getsinglefile":
-        getSingleFileFragment($argv[0], $argv[1], $argv[2], intval($argv[3]), intval($argv[4]));
+        getSingleFile($argv[0], $argv[1], $argv[2]);
         break;
     case "getmime":
         require_once "getFolderInfo.php";
@@ -26,13 +26,22 @@ switch (array_shift($argv)) {
         break;
 }
 
-function getSingleFileFragment($uid, $folder, $id, $byteStart, $length) {
+function getSingleFile($uid, $folder, $id) {
     require_once "getFolderInfo.php";
     $dir = new DirectoryInfo($folder, $uid, [$id]);
     $file = $dir->entries[0];
+    $stdin = fopen('php://stdin', 'r');
     $fd = fopen($file->absolutePath, "r");
-    fseek($fd, $byteStart);
-    echo fread($fd, $length);
+    while (true) {
+        $start = intval(fgets($stdin));
+        if ($start === -1) {
+            break;
+        }
+        $length = intval(fgets($stdin));
+        fseek($fd, $start);
+        fwrite(STDOUT, fread($fd, $length));
+        fflush(STDOUT);
+    }
 }
 
 function getdir($uid, $path) {
