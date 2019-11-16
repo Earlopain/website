@@ -111,7 +111,7 @@ class DirectoryInfo {
      */
     public $currentFolder;
 
-    public function __construct(string $path, int $uid, array $idList = []) {
+    public function __construct(int $uid, string $path, array $idList = []) {
         $userContext = posix_getpwuid($uid)["name"];
         posix_setuid($uid);
         $getAll = count($idList) === 0;

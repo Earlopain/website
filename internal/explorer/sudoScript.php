@@ -20,7 +20,7 @@ switch (array_shift($argv)) {
         break;
     case "getmime":
         require_once "getFolderInfo.php";
-        $dir = new DirectoryInfo($argv[1], intval($argv[0]), [$argv[2]]);
+        $dir = new DirectoryInfo(intval($argv[0]), $argv[1], [$argv[2]]);
         $file = $dir->entries[0];
         echo mime_content_type($file->absolutePath);
         break;
@@ -28,7 +28,7 @@ switch (array_shift($argv)) {
 
 function getSingleFile($uid, $folder, $id) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($folder, $uid, [$id]);
+    $dir = new DirectoryInfo($uid, $folder, [$id]);
     $file = $dir->entries[0];
     $stdin = fopen('php://stdin', 'r');
     $fd = fopen($file->absolutePath, "r");
@@ -46,15 +46,15 @@ function getSingleFile($uid, $folder, $id) {
 
 function getdir($uid, $path) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($path, $uid);
+    $dir = new DirectoryInfo($uid, $path);
     echo json_encode($dir);
 }
 
 function zipSelection($uid, $path, $ids) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
+    $dir = new DirectoryInfo($uid, $path, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
-    $dir = new DirectoryInfo($path, $uid, explode(",", $ids));
+    $dir = new DirectoryInfo($uid, $path, explode(",", $ids));
     $zip = new ZipArchive();
     $zip->open($zipPath, ZipArchive::OVERWRITE | ZipArchive::CREATE);
     foreach ($dir->entries as $file) {
