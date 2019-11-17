@@ -4,9 +4,10 @@ if (!isset($_REQUEST{"action"})) {
     redirectToFolderOfFile();
 }
 
-checkSessionStatus();
 $action = $_REQUEST["action"];
-switch (base64_decode($_REQUEST["action"])) {
+$actionClearText = base64_decode($_REQUEST["action"]);
+checkSessionStatus($actionClearText);
+switch ($actionClearText) {
     case "validatePassword":
         $result = sudoExec($action, $_REQUEST["user"], $_REQUEST["password"]);
         if ($result !== "false") {
@@ -76,9 +77,6 @@ class Session {
     public static function getUid() {
         if (!isset(self::$uid)) {
             session_start();
-            if (!isset($_SESSION["uid"])) {
-                die("Not logged in");
-            }
             self::$uid = base64_encode($_SESSION["uid"]);
             session_write_close();
         }
@@ -102,8 +100,14 @@ function generateCommand(...$args) {
     return "sudo php -f /media/plex/html/internal/explorer/sudoScript.php " . $argString;
 }
 
-function checkSessionStatus() {
+function checkSessionStatus($action) {
+    if($action === "validatePassword") {
+        return;
+    }
     session_start();
+    if (!isset($_SESSION["uid"])) {
+        die("Not logged in");
+    }
     $lifetime = 3600;
     if (isset($_SESSION['lastactivity']) && (time() - $_SESSION['lastactivity'] > $lifetime)) {
         session_unset();
