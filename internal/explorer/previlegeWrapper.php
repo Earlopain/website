@@ -10,12 +10,16 @@ switch (base64_decode($_REQUEST["action"])) {
         if ($result !== "false") {
             session_start();
             $_SESSION["uid"] = $result;
+            $_SESSION["username"] = base64_decode($_REQUEST["user"]);
         }
         echo $result;
         break;
     case "getdir":
-        $result = sudoExec($action, Session::getUid(), $_REQUEST["path"]);
-        echo $result;
+        $folder = sudoExec($action, Session::getUid(), $_REQUEST["path"]);
+        $result = new stdClass();
+        $result->folder = json_decode($folder);
+        $result->username = $_SESSION["username"];
+        echo json_encode($result);
         break;
     case "zipselection":
         $tempFilePath = sudoExec($action, Session::getUid(), $_REQUEST["folder"], $_REQUEST["ids"]);

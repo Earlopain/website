@@ -28,6 +28,7 @@
         <input type="password" id="password">
         <input type="button" value="login" onclick="login()">
     </div>
+    <span>Logged in as: <span id="loggedinas"></span></span>
     <div id="container">
         <table id="table">
             <colgroup span="5"></colgroup>
