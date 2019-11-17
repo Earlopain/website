@@ -9,8 +9,9 @@ function registerTableSort() {
 }
 
 function sortColum(index) {
-    if(sortType[index] === "none")
+    if (sortType[index] === "none") {
         return;
+    }
     let container = document.getElementById("filecontents");
     let allEntries = container.children;
 
@@ -22,7 +23,7 @@ function sortColum(index) {
             allEntries = allEntries.sort(stringSort.bind(index));
             break;
         case "size":
-                allEntries = allEntries.sort(sizeSort.bind(index));
+            allEntries = allEntries.sort(sizeSort.bind(index));
         default:
             break;
     }
@@ -37,14 +38,14 @@ function sortColum(index) {
 }
 
 function convertToBytes(input) {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const units = ["B", "KB", "MB", "GB", "TB"];
     const split = input.split(" ");
     const index = units.indexOf(split[1]);
-    return split[0] *= Math.pow(1024, index);
+    return split[0] * Math.pow(1024, index);
 }
 
 function stringSort(a, b) {
-    return currentOrder[this] * a.children[this].innerText.localeCompare(b.children[this].innerText, undefined, {numeric: true, sensitivity: "base"});
+    return currentOrder[this] * a.children[this].innerText.localeCompare(b.children[this].innerText, undefined, { numeric: true, sensitivity: "base" });
 }
 
 function sizeSort(a, b) {

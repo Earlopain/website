@@ -4,11 +4,11 @@ let lastClickedFile;
 let lastClickedFileDir;
 
 let mimesTypes = {
-    "textarea": ["text/", "application/x-csh", "application/json", "application/php", "application/x-sh", "application/xml"],
-    "img": ["image/"],
-    "audio": ["audio/"],
-    "video": ["video/", "application/ogg"]
-}
+    textarea: ["text/", "application/x-csh", "application/json", "application/php", "application/x-sh", "application/xml"],
+    img: ["image/"],
+    audio: ["audio/"],
+    video: ["video/", "application/ogg"]
+};
 
 async function showFile(file, folderPath) {
     if ((currentlyOpenFile === file && currentlyOpenFileDir === folderPath) || (lastClickedFile === file && lastClickedFileDir === folderPath)) {
@@ -29,16 +29,15 @@ async function showFile(file, folderPath) {
     if (elementType === "textarea") {
         const data = await httpPOST(url);
         mediaElement.innerHTML = data;
-    }
-    else {
+    } else {
         mediaElement.controls = true;
         mediaElement.src = url;
         mediaElement.onload = function () {
             if (mediaElement.height > mediaElement.width) {
-                mediaElement.style.height = '100%';
-                mediaElement.style.width = 'auto';
+                mediaElement.style.height = "100%";
+                mediaElement.style.width = "auto";
             }
-        }
+        };
     }
     editor.appendChild(mediaElement);
     currentlyOpenFile = file;

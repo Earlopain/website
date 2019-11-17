@@ -15,7 +15,7 @@ async function getFolderContent(pushToHistory = true) {
     }
 
     response.folder.entries = response.folder.entries.sort((a, b) => {
-        if ((a.isDir === b.isDir)) {
+        if (a.isDir === b.isDir) {
             return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
         } else {
             return b.isDir - a.isDir;
@@ -24,12 +24,12 @@ async function getFolderContent(pushToHistory = true) {
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
     if (response.folder.currentFolder !== "/") {
-        const parentFolder = generateFileEntry(response.folder.parentFolder)
+        const parentFolder = generateFileEntry(response.folder.parentFolder);
         container.appendChild(parentFolder);
     }
     for (const entry of response.folder.entries) {
         const element = generateFileEntry(entry);
-        container.appendChild(element)
+        container.appendChild(element);
     }
 }
 
@@ -41,8 +41,7 @@ async function downloadSelection() {
     for (const file of files) {
         if (file.childNodes[0].checked && file.childNodes[7].textContent === "true") {
             ids.push(file.id.substring(4));
-        }
-        else if (file.childNodes[0].checked) {
+        } else if (file.childNodes[0].checked) {
             nonDownloadable.push(file.childNodes[1].textContent);
         }
     }
@@ -107,7 +106,7 @@ function httpPOST(url, formDataJSON = {}) {
         let xmlHttp = new XMLHttpRequest();
         let formData = new FormData();
         Object.keys(formDataJSON).forEach(key => {
-            formData.append(key, btoa(formDataJSON[key]))
+            formData.append(key, btoa(formDataJSON[key]));
         });
         xmlHttp.open("POST", url, true);
         xmlHttp.onload = event => {

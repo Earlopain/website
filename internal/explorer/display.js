@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("currentfolder").addEventListener("keydown", event => {
         if (event.keyCode === 13) {
             getFolderContent();
@@ -44,8 +44,7 @@ function addFolderEventListener(element, file) {
             let addition;
             if (current.slice(-1) === "/") {
                 addition = file.fileName;
-            }
-            else {
+            } else {
                 addition = "/" + file.fileName;
             }
             if (addition === "/..") {
@@ -53,12 +52,11 @@ function addFolderEventListener(element, file) {
                 const splitted = value.split("/");
                 splitted.pop();
                 document.getElementById("currentfolder").value = splitted.join("/");
-            }
-            else {
+            } else {
                 document.getElementById("currentfolder").value += addition;
             }
             getFolderContent();
-        })
+        });
     }
 }
 
@@ -67,7 +65,7 @@ function addFileEditEventListener(element, file) {
         element.addEventListener("click", () => {
             const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
             showFile(file, folderPath);
-        })
+        });
     }
 }
 
@@ -80,7 +78,8 @@ function createTableColumn(content) {
 
 function removeTrailingSlash(element) {
     element.value = element.value.replace(/\/$/, "");
-    if (element.value === "")
+    if (element.value === "") {
         element.value = "/";
+    }
     return element.value;
 }
