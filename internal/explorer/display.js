@@ -5,6 +5,17 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
     window.addEventListener("popstate", loadFromUrl);
+    const slider = document.getElementById("filenameslider");
+    slider.value = document.getElementById("tableheader").children[1].getBoundingClientRect().width;
+    slider.addEventListener("input", event => {
+        const newWidth = event.currentTarget.value + "px";
+        const header = document.getElementById("tableheader").children[1];
+        header.style.width = newWidth;
+        const allEntries = document.getElementById("filecontents").children;
+        for (const entry of allEntries) {
+            entry.children[1].style.width = newWidth;
+        }
+    });
     loadFromUrl();
     registerTableSort();
 });

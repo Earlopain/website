@@ -35,6 +35,9 @@ if (!isset($_SESSION["uid"])) {
             <div class="divcontainer">
                 Logged in as: <span id="loggedinas"></span>
             </div>
+            <div class="slidecontainer">
+                <input type="range" min="50" max="500" class="slider" id="filenameslider">
+            </div>
         </div>
         <table class="table">
             <colgroup span="5"></colgroup>
