@@ -1,22 +1,31 @@
 :root {
-    --folder-name-width: 35%;
     --top-button-count: 6;
+    --tabletop-margin: 5px;
+    --editor-margin: 7px;
 }
 
 * {
     font-family: Verdana, sans-serif;
 }
 
-.toprow > input:not(#currentfolder) {
-    width: calc((100% - var(--folder-name-width)) / var(--top-button-count));
-}
-
 #currentfolder {
-    width: calc(var(--folder-name-width) - 5%);
+    width: calc(100% - var(--tabletop-margin));
 }
 
-#statusbar {
-    padding-top: 5px;
+.divcontainer {
+    margin-bottom: var(--tabletop-margin);
+}
+
+.options > * {
+    width: calc((100% - var(--top-button-count) * var(--tabletop-margin)) / var(--top-button-count));
+    float: left;
+    margin-right: var(--tabletop-margin);
+    margin-bottom: var(--tabletop-margin);
+}
+
+.tabletoprow input {
+    box-sizing: border-box;
+    height: 25px;
 }
 
 .table {
@@ -51,6 +60,10 @@
     text-align: left;
 }
 
+.table th:last-child {
+    padding-right: 0px;
+}
+
 .table tr {
     white-space: nowrap;
     display: inline-flex;
@@ -63,6 +76,8 @@
     vertical-align: top;
     position: fixed;
     height: 100%;
+    top: 0px;
+    margin: calc(var(--editor-margin));
 }
 
 #editor > *:first-child {

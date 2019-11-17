@@ -19,37 +19,41 @@ if (!isset($_SESSION["uid"])) {
 </head>
 
 <body>
-    <div class="toprow">
-        <input id="currentfolder" type="text" value="/">
-        <input type="button" value="download" onclick="downloadSelection()">
-        <input type="button" value="delete">
-        <input type="button" value="upload">
-        <input type="text" id="username">
-        <input type="password" id="password">
-        <input type="button" value="login" onclick="loginAndReloadFolder()">
-    </div>
-    <div id="statusbar"><span>Logged in as: <span id="loggedinas"></span></span></div>
-    <div id="container">
-        <div class="tablecontainer">
-            <table class="table">
-                <colgroup span="5"></colgroup>
-                <tr id="tableheader">
-                    <th class="checkbox"></th>
-                    <th class="filename">Name</th>
-                    <th class="ext">Ext</th>
-                    <th class="user">User</th>
-                    <th class="group">Group</th>
-                    <th class="perms">Perms</th>
-                    <th class="size">Size</th>
-                    <th class="readable">Readable</th>
-                    <th class="writeable">Writable</th>
-                </tr>
-                <tbody id="filecontents">
-                </tbody>
-            </table>
+    <div class="tablecontainer">
+        <div class="tabletoprow">
+            <div class="divcontainer">
+                <input id="currentfolder" type="text" value="/">
+            </div>
+            <div class="divcontainer options">
+                <input type="button" value="download" onclick="downloadSelection()">
+                <input type="button" value="delete">
+                <input type="button" value="upload">
+                <input type="text" id="username">
+                <input type="password" id="password">
+                <input type="button" value="login" onclick="loginAndReloadFolder()">
+            </div>
+            <div class="divcontainer">
+                Logged in as: <span id="loggedinas"></span>
+            </div>
         </div>
-        <div id="editor"></div>
+        <table class="table">
+            <colgroup span="5"></colgroup>
+            <tr id="tableheader">
+                <th class="checkbox"></th>
+                <th class="filename">Name</th>
+                <th class="ext">Ext</th>
+                <th class="user">User</th>
+                <th class="group">Group</th>
+                <th class="perms">Perms</th>
+                <th class="size">Size</th>
+                <th class="readable">Readable</th>
+                <th class="writeable">Writable</th>
+            </tr>
+            <tbody id="filecontents">
+            </tbody>
+        </table>
     </div>
+    <div id="editor"></div>
 </body>
 
 </html>

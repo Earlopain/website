@@ -34,7 +34,7 @@ async function showFile(file, folderPath) {
         mediaElement.src = url;
         mediaElement.onload = function () {
             if (mediaElement.height > mediaElement.width) {
-                mediaElement.style.height = "100%";
+                mediaElement.style.height = "calc(100% - var(--editor-margin) * 2)";
                 mediaElement.style.width = "auto";
             }
         };
