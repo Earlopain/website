@@ -28,10 +28,10 @@ function generateFileEntry(file) {
     addFileEditEventListener(fileNameColumn, file);
     row.appendChild(fileNameColumn);
     row.appendChild(createTableColumn("ext", file.isDir || file.fileName.startsWith(".") ? "" : file.fileName.split(".").pop()));
+    row.appendChild(createTableColumn("size", file.isDir ? "" : file.size));
     row.appendChild(createTableColumn("user", file.user));
     row.appendChild(createTableColumn("group", file.group));
     row.appendChild(createTableColumn("perms", file.perms));
-    row.appendChild(createTableColumn("size", file.isDir ? "" : file.size));
     row.appendChild(createTableColumn("readable", file.isDir ? file.isExecutable : file.isReadable));
     row.appendChild(createTableColumn("writeable", file.isDir ? file.isExecutable && file.isWriteable : file.isWriteable));
     return row;
