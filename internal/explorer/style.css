@@ -14,7 +14,7 @@
 .table {
     border-collapse: collapse;
     display: block;
-    overflow-x: scroll;
+    width: min-content;
 }
 
 .table tr:not(#tableheader):nth-child(odd) {
@@ -28,24 +28,26 @@
 .tablecontainer {
     max-width: 50%;
     display: inline-block;
+    overflow: auto;
 }
 
 .table td, .table th, .table .checkbox {
     white-space: nowrap;
     overflow: hidden;
     display: inline-block;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .table th {
     text-align: left;
-    margin-left: -2px;
-    margin-right: -2px;
 }
 
 .table tr {
     white-space: nowrap;
+    display: inline-flex;
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
 #editor {
@@ -65,19 +67,12 @@
 
 .filename {
     width: 125px;
-    max-width: 125px;
-    padding-top: 3px;
-    padding-bottom: 3px;
 }
 th.filename {
     padding-left: 0px;
 }
 
-.user, .group {
-    width: 100px;
-}
-
-.size {
+.user, .group, .size {
     width: 90px;
 }
 

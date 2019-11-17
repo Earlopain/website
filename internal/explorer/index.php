@@ -30,7 +30,7 @@ if (!isset($_SESSION["uid"])) {
     </div>
     <span>Logged in as: <span id="loggedinas"></span></span>
     <div id="container">
-        <div class="tablecontainer" style="max-width: 50%;">
+        <div class="tablecontainer">
             <table class="table">
                 <colgroup span="5"></colgroup>
                 <tr id="tableheader">
