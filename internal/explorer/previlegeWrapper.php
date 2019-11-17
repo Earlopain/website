@@ -3,6 +3,8 @@ if (!isset($_REQUEST{"action"})) {
     require_once "htmlHelper.php";
     redirectToFolderOfFile();
 }
+
+checkSessionStatus();
 $action = $_REQUEST["action"];
 switch (base64_decode($_REQUEST["action"])) {
     case "validatePassword":
@@ -11,6 +13,7 @@ switch (base64_decode($_REQUEST["action"])) {
             session_start();
             $_SESSION["uid"] = $result;
             $_SESSION["username"] = base64_decode($_REQUEST["user"]);
+            $_SESSION['created'] = time();
         }
         echo $result;
         break;
@@ -97,4 +100,20 @@ function generateCommand(...$args) {
         $argString .= "'" . $string . "' ";
     }
     return "sudo php -f /media/plex/html/internal/explorer/sudoScript.php " . $argString;
+}
+
+function checkSessionStatus() {
+    session_start();
+    $lifetime = 3600;
+    if (isset($_SESSION['lastactivity']) && (time() - $_SESSION['lastactivity'] > $lifetime)) {
+        session_unset();
+        session_destroy();
+        header("Location: login.php");
+    }
+    $_SESSION['lastactivity'] = time();
+    if (time() - $_SESSION['created'] > $lifetime) {
+        session_regenerate_id(true);
+        $_SESSION['created'] = time();
+    }
+    session_write_close();
 }
