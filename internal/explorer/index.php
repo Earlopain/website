@@ -35,14 +35,14 @@ if (!isset($_SESSION["uid"])) {
                 <colgroup span="5"></colgroup>
                 <tr id="tableheader">
                     <th class="checkbox"></th>
-                    <th>Name</th>
-                    <th>Ext</th>
-                    <th>User</th>
-                    <th>Group</th>
-                    <th>Perms</th>
-                    <th>Size</th>
-                    <th>Readable</th>
-                    <th>Writable</th>
+                    <th class="filename">Name</th>
+                    <th class="ext">Ext</th>
+                    <th class="user">User</th>
+                    <th class="group">Group</th>
+                    <th class="perms">Perms</th>
+                    <th class="size">Size</th>
+                    <th class="readable">Readable</th>
+                    <th class="writeable">Writable</th>
                 </tr>
                 <tbody id="filecontents">
                 </tbody>

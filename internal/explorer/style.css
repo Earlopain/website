@@ -1,7 +1,6 @@
 :root {
     --folder-name-width: 35%;
     --top-button-count: 6;
-    --checkbox-width: 16px;
 }
 
 .toprow > input:not(#currentfolder) {
@@ -10,11 +9,6 @@
 
 #currentfolder {
     width: calc(var(--folder-name-width) - 5%);
-}
-
-.checkbox {
-    margin: 6px;
-    width: var(--checkbox-width);
 }
 
 .table {
@@ -36,19 +30,18 @@
     display: inline-block;
 }
 
-.table td, .table th {
+.table td, .table th, .table .checkbox {
     white-space: nowrap;
     overflow: hidden;
-    width: 150px;
     display: inline-block;
-}
-
-.table td {
-    padding: 1px 5px 1px 5px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .table th {
     text-align: left;
+    margin-left: -2px;
+    margin-right: -2px;
 }
 
 .table tr {
@@ -64,4 +57,34 @@
 
 #editor > *:first-child {
     width: 100%;
+}
+
+.checkbox {
+    width: 16px;
+}
+
+.filename {
+    width: 125px;
+    max-width: 125px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+th.filename {
+    padding-left: 0px;
+}
+
+.user, .group {
+    width: 100px;
+}
+
+.size {
+    width: 90px;
+}
+
+.ext, .perms {
+    width: 50px;
+}
+
+.readable, .writeable {
+    width: 75px;
 }
