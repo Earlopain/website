@@ -40,10 +40,10 @@ function getSingleFile($uid, $folder, $id) {
     $fd = fopen($file->absolutePath, "r");
     while (true) {
         $start = intval(fgets($stdin));
-        if ($start === -1) {
+        $length = intval(fgets($stdin));
+        if ($start < 0 || $length < 1) {
             break;
         }
-        $length = intval(fgets($stdin));
         fseek($fd, $start);
         fwrite(STDOUT, fread($fd, $length));
         fflush(STDOUT);
