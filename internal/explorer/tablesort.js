@@ -1,5 +1,5 @@
 let currentOrder = [];
-let sortType = ["none", "string", "string", "string", "string", "string", "size", "string", "string"];
+let sortType = ["none", "string", "string", "size", "string", "string", "string", "string", "string"];
 
 function registerTableSort() {
     for (const header of document.getElementById("tableheader").children) {
