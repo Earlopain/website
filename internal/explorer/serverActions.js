@@ -23,7 +23,7 @@ async function getFolderContent(pushToHistory = true) {
     });
     let container = document.getElementById("filecontents");
     container.innerHTML = "";
-    if(response.folder.currentFolder !== "/"){
+    if (response.folder.currentFolder !== "/") {
         const parentFolder = generateFileEntry(response.folder.parentFolder)
         container.appendChild(parentFolder);
     }
@@ -39,17 +39,17 @@ async function downloadSelection() {
     let ids = [];
     let nonDownloadable = [];
     for (const file of files) {
-        if (file.childNodes[0].checked && file.childNodes[7].textContent === "true"){
+        if (file.childNodes[0].checked && file.childNodes[7].textContent === "true") {
             ids.push(file.id.substring(4));
         }
-        else if(file.childNodes[0].checked) {
+        else if (file.childNodes[0].checked) {
             nonDownloadable.push(file.childNodes[1].textContent);
         }
     }
-    if(ids.length > 0){
+    if (ids.length > 0) {
         postDownload({ action: "zipselection", folder: folderPath, ids: ids.join(",") });
     }
-    if(nonDownloadable.length > 0){
+    if (nonDownloadable.length > 0) {
         alert("These items are not downloadable because of permissions\n\n" + nonDownloadable.join("\n"));
     }
 }
@@ -73,19 +73,27 @@ function postDownload(postData) {
     document.getElementById("tempform").remove();
 }
 
-async function login() {
+async function login(successCallback = () => { }) {
     const user = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    return await serverRequest("validatePassword", { user: user, password: password });
-}
-
-async function loginAndGotoIndex() {
-    const status = await login();
-    if(status !== "false"){
-        location.href = location.href.split("/").slice(0, -1).join("/");
-    }else {
+    const status = await serverRequest("validatePassword", { user: user, password: password });
+    if (status !== "false") {
+        successCallback();
+    } else {
         alert("Wrong credentials");
     }
+}
+
+function loginAndGotoIndex() {
+    login(() => {
+        location.href = location.href.split("/").slice(0, -1).join("/");
+    });
+}
+
+function loginAndReloadFolder() {
+    login(() => {
+        getFolderContent(false);
+    });
 }
 
 async function serverRequest(type, postData) {

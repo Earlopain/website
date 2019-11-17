@@ -26,7 +26,7 @@
         <input type="button" value="upload">
         <input type="text" id="username">
         <input type="password" id="password">
-        <input type="button" value="login" onclick="login()">
+        <input type="button" value="login" onclick="loginAndReloadFolder()">
     </div>
     <span>Logged in as: <span id="loggedinas"></span></span>
     <div id="container">
