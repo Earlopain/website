@@ -22,7 +22,13 @@ switch (base64_decode($_REQUEST["action"])) {
         echo json_encode($result);
         break;
     case "zipselection":
+        ignore_user_abort(true);
+        set_time_limit(0);
         $tempFilePath = sudoExec($action, Session::getUid(), $_REQUEST["folder"], $_REQUEST["ids"]);
+        if (connection_status() !== CONNECTION_NORMAL) {
+            unlink($tempFilePath);
+            break;
+        }
         $date = date_create();
         $filename = date_format($date, 'Y-m-d_H-i-s');
         header('Content-Type: application/zip');
