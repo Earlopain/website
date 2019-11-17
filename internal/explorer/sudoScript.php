@@ -6,14 +6,8 @@ if (!isset($argv)) {
 $argv = prepareArgs($argv);
 
 switch (array_shift($argv)) {
-    case "validatePassword":
-        login($argv[0], $argv[1]);
-        break;
     case "getdir":
-        getdir($argv[0], $argv[1]);
-        break;
-    case "zipselection":
-        zipSelection($argv[0], $argv[1], $argv[2]);
+        getDir($argv[0], $argv[1]);
         break;
     case "getsinglefile":
         getSingleFile($argv[0], $argv[1], $argv[2]);
@@ -24,6 +18,18 @@ switch (array_shift($argv)) {
         $file = $dir->entries[0];
         echo mime_content_type($file->absolutePath);
         break;
+    case "validatePassword":
+        login($argv[0], $argv[1]);
+        break;
+    case "zipselection":
+        zipSelection($argv[0], $argv[1], $argv[2]);
+        break;
+}
+
+function getDir($uid, $path) {
+    require_once "getFolderInfo.php";
+    $dir = new DirectoryInfo($uid, $path);
+    echo json_encode($dir);
 }
 
 function getSingleFile($uid, $folder, $id) {
@@ -44,10 +50,35 @@ function getSingleFile($uid, $folder, $id) {
     }
 }
 
-function getdir($uid, $path) {
-    require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($uid, $path);
-    echo json_encode($dir);
+function login($user, $password) {
+    set_error_handler(function () {die("false");}, E_ALL);
+    $file = fopen("/etc/shadow", "r");
+    if ($file === false) {
+        loginFail($file);
+    }
+    while (!feof($file)) {
+        $line = fgets($file);
+        $split = explode(":", $line);
+        if ($split[0] === $user) {
+            $passwordSplit = explode("$", $split[1]);
+            $algorithm = $passwordSplit[1];
+            $salt = $passwordSplit[2];
+            $compareAgainst = crypt($password, "$" . $algorithm . "$" . $salt . "$");
+            if (strcmp($compareAgainst, $split[1]) !== 0) {
+                loginFail($file);
+            }
+            echo posix_getpwnam($user)["uid"];
+            exit();
+        }
+    }
+    loginFail($file);
+}
+function loginFail($file) {
+    echo "false";
+    if ($file !== false) {
+        fclose($file);
+    }
+    exit();
 }
 
 function zipSelection($uid, $path, $ids) {
@@ -80,38 +111,6 @@ function zipSelection($uid, $path, $ids) {
     $zip->close();
     flush();
     echo $zipPath;
-}
-
-function login($user, $password) {
-    set_error_handler(function () {die("false");}, E_ALL);
-    $file = fopen("/etc/shadow", "r");
-    if ($file === false) {
-        loginFail($file);
-    }
-    while (!feof($file)) {
-        $line = fgets($file);
-        $split = explode(":", $line);
-        if ($split[0] === $user) {
-            $passwordSplit = explode("$", $split[1]);
-            $algorithm = $passwordSplit[1];
-            $salt = $passwordSplit[2];
-            $compareAgainst = crypt($password, "$" . $algorithm . "$" . $salt . "$");
-            if (strcmp($compareAgainst, $split[1]) !== 0) {
-                loginFail($file);
-            }
-            echo posix_getpwnam($user)["uid"];
-            exit();
-        }
-    }
-    loginFail($file);
-}
-
-function loginFail($file) {
-    echo "false";
-    if ($file !== false) {
-        fclose($file);
-    }
-    exit();
 }
 
 function prepareArgs($args) {
