@@ -1,8 +1,8 @@
 <?php
-    session_start();
-    if(!isset($_SESSION["uid"])){
-        header("Location: login.php");
-    }
+session_start();
+if (!isset($_SESSION["uid"])) {
+    header("Location: login.php");
+}
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +19,7 @@
 </head>
 
 <body>
-    <div id="toprow">
+    <div class="toprow">
         <input id="currentfolder" type="text" value="/">
         <input type="button" value="download" onclick="downloadSelection()">
         <input type="button" value="delete">
@@ -30,22 +30,24 @@
     </div>
     <span>Logged in as: <span id="loggedinas"></span></span>
     <div id="container">
-        <table id="table">
-            <colgroup span="5"></colgroup>
-            <tr id="tableheader">
-                <th></th>
-                <th style="max-width: 200px;">Name</th>
-                <th>Ext</th>
-                <th>User</th>
-                <th>Group</th>
-                <th>Perms</th>
-                <th>Size</th>
-                <th>Readable</th>
-                <th>Writable</th>
-            </tr>
-            <tbody id="filecontents">
-            </tbody>
-        </table>
+        <div class="tablecontainer" style="max-width: 50%;">
+            <table class="table">
+                <colgroup span="5"></colgroup>
+                <tr id="tableheader">
+                    <th class="checkbox"></th>
+                    <th>Name</th>
+                    <th>Ext</th>
+                    <th>User</th>
+                    <th>Group</th>
+                    <th>Perms</th>
+                    <th>Size</th>
+                    <th>Readable</th>
+                    <th>Writable</th>
+                </tr>
+                <tbody id="filecontents">
+                </tbody>
+            </table>
+        </div>
         <div id="editor"></div>
     </div>
 </body>

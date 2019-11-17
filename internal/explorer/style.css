@@ -1,54 +1,59 @@
-:root{
+:root {
     --folder-name-width: 35%;
     --top-button-count: 6;
+    --checkbox-width: 16px;
 }
 
-#toprow > input:not(#currentfolder) {
+.toprow > input:not(#currentfolder) {
     width: calc((100% - var(--folder-name-width)) / var(--top-button-count));
 }
+
 #currentfolder {
     width: calc(var(--folder-name-width) - 5%);
 }
 
 .checkbox {
     margin: 6px;
+    width: var(--checkbox-width);
 }
 
-.column {
-    white-space:nowrap;
-    overflow: hidden;
+.table {
+    border-collapse: collapse;
+    display: block;
+    overflow-x: scroll;
 }
 
-.filename {
-    max-width: 200px;
+.table tr:not(#tableheader):nth-child(odd) {
+    background-color: #3a3a3a;
 }
 
-tr:not(#tableheader):nth-child(odd) {
-    background-color: #3A3A3A;
-}
-
-tr:not(#tableheader):nth-child(even) {
+.table tr:not(#tableheader):nth-child(even) {
     background-color: #333333;
 }
 
-#table {
-    border-collapse: collapse;
+.tablecontainer {
+    max-width: 50%;
     display: inline-block;
- }
- 
- #table td {
-    padding: 1px 5px 1px 5px; 
- }
+}
 
- #tableheader > th {
-     width: 0px;
-     padding-right: 10px;
- }
+.table td, .table th {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 150px;
+    display: inline-block;
+}
 
- #table th {
-     text-align: left;
- }
+.table td {
+    padding: 1px 5px 1px 5px;
+}
 
+.table th {
+    text-align: left;
+}
+
+.table tr {
+    white-space: nowrap;
+}
 
 #editor {
     display: inline-block;
