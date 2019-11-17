@@ -15,7 +15,7 @@ if (isset($_SESSION["uid"])) {
     <title>Login Page</title>
 </head>
 <body>
-    <form class="loginform" onsubmit="return false">
+    <form class="loginform" onsubmit="loginAndGotoIndex(); return false">
         <div>
             <label for="username">Username</label>
             <input type="text" id="username">
@@ -25,7 +25,7 @@ if (isset($_SESSION["uid"])) {
             <input type="password" id="password" autocomplete="off">
         </div>
         <div>
-            <input type="submit" onclick="loginAndGotoIndex()" value="Login"></button>
+            <input type="submit" value="Login"></button>
         </div>
     </form>
 </body>
