@@ -28,7 +28,7 @@ if (!isset($_SESSION["uid"])) {
         <input type="password" id="password">
         <input type="button" value="login" onclick="loginAndReloadFolder()">
     </div>
-    <span>Logged in as: <span id="loggedinas"></span></span>
+    <div id="statusbar"><span>Logged in as: <span id="loggedinas"></span></span></div>
     <div id="container">
         <div class="tablecontainer">
             <table class="table">

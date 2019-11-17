@@ -11,6 +11,10 @@
     width: calc(var(--folder-name-width) - 5%);
 }
 
+#statusbar {
+    padding-top: 5px;
+}
+
 .table {
     border-collapse: collapse;
     display: block;
