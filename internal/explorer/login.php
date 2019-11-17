@@ -11,14 +11,23 @@ if (isset($_SESSION["uid"])) {
 <head>
     <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
     <script src="serverActions.js"></script>
+    <link rel="stylesheet" type="text/css" href="loginstyle.css">
     <title>Login Page</title>
 </head>
-<label for="username">Username:</label>
-<input type="text" id="username">
-<label for="password">Password:</label>
-<input type="password" id="password">
-<button onclick="loginAndGotoIndex()">Login</button>
 <body>
+    <form class="loginform" onsubmit="return false">
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username">
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="off">
+        </div>
+        <div>
+            <input type="submit" onclick="loginAndGotoIndex()" value="Login"></button>
+        </div>
+    </form>
 </body>
 
 </html>

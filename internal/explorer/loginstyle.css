@@ -1,0 +1,42 @@
+label, input {
+    display: block;
+}
+  
+* {
+    font-family: Verdana, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+.loginform {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loginform > div {
+    margin-bottom: 20px;
+}
+
+.loginform > div > label {
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.loginform > div > input {
+    height: 30px;
+    width: 225px;
+}
+
+.loginform > div > input[type=submit] {
+    border: 0;
+    font-size: 18px;
+    height: 35px;
+    width: 225px;
+    background-color: green;
+}

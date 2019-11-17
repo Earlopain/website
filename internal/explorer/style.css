@@ -3,6 +3,10 @@
     --top-button-count: 6;
 }
 
+* {
+    font-family: Verdana, sans-serif;
+}
+
 .toprow > input:not(#currentfolder) {
     width: calc((100% - var(--folder-name-width)) / var(--top-button-count));
 }
