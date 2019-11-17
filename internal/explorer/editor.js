@@ -16,6 +16,7 @@ async function showFile(file, folderPath) {
     }
     lastClickedFile = file;
     lastClickedFileDir = folderPath;
+    document.getElementById("currentlyviewing").innerHTML = ", viewing: " + file.fileName;
     let editor = document.getElementById("editor");
     const folderBase64 = encodeURI(btoa(folderPath));
     const url = "previlegeWrapper.php?action=" + btoa("getsinglefile") + "&folder=" + folderBase64 + "&id=" + btoa(file.index);

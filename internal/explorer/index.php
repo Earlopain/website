@@ -33,7 +33,7 @@ if (!isset($_SESSION["uid"])) {
                 <input type="button" value="login" onclick="loginAndReloadFolder()">
             </div>
             <div class="divcontainer">
-                Logged in as: <span id="loggedinas"></span>
+                Logged in as: <span id="loggedinas"></span><span id="currentlyviewing"></span>
             </div>
             <div class="slidecontainer">
                 <input type="range" min="50" max="500" class="slider" id="filenameslider">
