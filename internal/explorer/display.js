@@ -27,6 +27,40 @@ function loadFromUrl() {
     getFolderContent(false);
 }
 
+async function displayCurrentFolder(pushToHistory = true) {
+    const folderPath = removeTrailingSlash(document.getElementById("currentfolder").value);
+    response = JSON.parse(await serverRequest("getdir", { path: folderPath }));
+    if (response.folder.entries.length === 0) {
+        document.getElementById("currentfolder").value = "/";
+        displayCurrentFolder();
+        return;
+    }
+    document.getElementById("loggedinas").innerHTML = response.username;
+    if (pushToHistory) {
+        const currentUrl = new URL(location.href);
+        currentUrl.searchParams.set("folder", btoa(response.folder.currentFolder));
+        window.history.pushState({}, null, currentUrl.href);
+    }
+
+    response.folder.entries = response.folder.entries.sort((a, b) => {
+        if (a.isDir === b.isDir) {
+            return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
+        } else {
+            return b.isDir - a.isDir;
+        }
+    });
+    let container = document.getElementById("filecontents");
+    container.innerHTML = "";
+    if (response.folder.currentFolder !== "/") {
+        const parentFolder = generateFileEntry(response.folder.parentFolder);
+        container.appendChild(parentFolder);
+    }
+    for (const entry of response.folder.entries) {
+        const element = generateFileEntry(entry);
+        container.appendChild(element);
+    }
+}
+
 function generateFileEntry(file) {
     let row = document.createElement("tr");
     row.id = "file" + file.index;
