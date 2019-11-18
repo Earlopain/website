@@ -1,5 +1,5 @@
 async function downloadSelection() {
-    const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
+    const folderPath = removeTrailingSlash(document.getElementById("currentfolder").value);
     const files = document.getElementById("filecontents").childNodes;
     let ids = [];
     let nonDownloadable = [];
@@ -56,7 +56,7 @@ function loginAndGotoIndex() {
 
 function loginAndReloadFolder() {
     login(() => {
-        getFolderContent(false);
+        displayCurrentFolder(false);
     });
 }
 

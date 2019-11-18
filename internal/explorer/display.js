@@ -1,7 +1,7 @@
 window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("currentfolder").addEventListener("keydown", event => {
         if (event.keyCode === 13) {
-            getFolderContent();
+            displayCurrentFolder();
         }
     });
     window.addEventListener("popstate", loadFromUrl);
@@ -24,7 +24,7 @@ function loadFromUrl() {
     const currentUrl = new URL(location.href);
     const folder = currentUrl.searchParams.get("folder");
     document.getElementById("currentfolder").value = folder === null ? "/" : atob(folder);
-    getFolderContent(false);
+    displayCurrentFolder(false);
 }
 
 async function displayCurrentFolder(pushToHistory = true) {
@@ -85,22 +85,16 @@ function generateFileEntry(file) {
 function addFolderEventListener(element, file) {
     if (file.isDir && file.isExecutable) {
         element.addEventListener("click", () => {
-            const current = document.getElementById("currentfolder").value;
-            let addition;
-            if (current.slice(-1) === "/") {
-                addition = file.fileName;
-            } else {
-                addition = "/" + file.fileName;
-            }
-            if (addition === "/..") {
-                const value = document.getElementById("currentfolder").value;
-                const splitted = value.split("/");
+            const current = removeTrailingSlash(document.getElementById("currentfolder").value);
+            if (file.fileName === "..") {
+                const splitted = current.split("/");
                 splitted.pop();
-                document.getElementById("currentfolder").value = splitted.join("/");
+                document.getElementById("currentfolder").value = splitted.length === 1 ? "/" : splitted.join("/");
             } else {
-                document.getElementById("currentfolder").value += addition;
+                let addition = current === "/" ? "" : "/";
+                document.getElementById("currentfolder").value = current + addition + file.fileName;
             }
-            getFolderContent();
+            displayCurrentFolder();
         });
     }
 }
@@ -108,7 +102,7 @@ function addFolderEventListener(element, file) {
 function addFileEditEventListener(element, file) {
     if (!file.isDir && file.isReadable) {
         element.addEventListener("click", () => {
-            const folderPath = removeTrailingSlash(document.getElementById("currentfolder"));
+            const folderPath = removeTrailingSlash(document.getElementById("currentfolder").value);
             showFile(file, folderPath);
         });
     }
@@ -121,10 +115,6 @@ function createTableColumn(type, content) {
     return col;
 }
 
-function removeTrailingSlash(element) {
-    element.value = element.value.replace(/\/$/, "");
-    if (element.value === "") {
-        element.value = "/";
-    }
-    return element.value;
+function removeTrailingSlash(value) {
+    return value === "/" ? "/" : value.replace(/[\/]*$/, "");
 }
