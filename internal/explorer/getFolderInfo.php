@@ -8,6 +8,10 @@ class DirectoryEntry {
     /**
      * @var string
      */
+    public $ext;
+    /**
+     * @var string
+     */
     public $absolutePath;
     /**
      * @var int
@@ -28,11 +32,11 @@ class DirectoryEntry {
     /**
      * @var bool
      */
-    public $isWriteable;
+    public $isReadable;
     /**
      * @var bool
      */
-    public $isReadable;
+    public $isWriteable;
     /**
      * @var bool
      */
@@ -55,13 +59,17 @@ class DirectoryEntry {
         $this->absolutePath = $realPath;
         $this->index = $index;
         $this->isDir = $fileInfo->isDir();
+        $this->ext = $this->isDir ? "" : $fileInfo->getExtension();
         $this->size = $this->isDir ? -1 : $this->formatBytes($fileInfo->getSize());
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = UserGroupCache::resolveUser($fileInfo->getOwner());
         $this->group = UserGroupCache::resolveGroup($fileInfo->getGroup());
-        $this->isReadable = $this->permissionCheck(2, $userName);
-        $this->isWriteable = $this->permissionCheck(1, $userName);
-        $this->isExecutable = $this->permissionCheck(0, $userName);
+        $readableBitSet = $this->permissionCheck(2, $userName);
+        $writeableBitSet = $this->permissionCheck(1, $userName);
+        $executableBitSet = $this->permissionCheck(0, $userName);
+        $this->isReadable = $this->isDir ? $executableBitSet : $readableBitSet;
+        $this->isWriteable = $this->isDir ? $executableBitSet && $writeableBitSet : $writeableBitSet;
+        $this->isExecutable = $executableBitSet;
         $this->infoObject = $fileInfo;
     }
     /**
@@ -121,7 +129,7 @@ class DirectoryInfo {
                 $parentFolder = new SplFileInfo($path . "/..");
                 $this->parentFolder = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1, $userContext);
             }
-            
+
             $counter = 0;
             foreach ($dir as $fileInfo) {
                 if ($getAll || array_search($counter, $idList) !== false) {
