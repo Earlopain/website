@@ -17,7 +17,7 @@ function sortColum(index) {
 
     allEntries = [...allEntries].slice();
     container.innerHTML = "";
-    const dotdot = allEntries.shift();
+    const dotdot = getCurrentFolderPath() !== "/" ? allEntries.shift() : undefined;
     switch (sortType[index]) {
         case "string":
             allEntries = allEntries.sort(stringSort.bind(index));
@@ -30,7 +30,9 @@ function sortColum(index) {
     let previousValue = currentOrder[index];
     currentOrder = Array(sortType.length).fill(1);
     currentOrder[index] = previousValue * -1;
-    container.appendChild(dotdot);
+    if(dotdot !== undefined) {
+        container.appendChild(dotdot);
+    }
 
     for (const entry of allEntries) {
         container.appendChild(entry);
