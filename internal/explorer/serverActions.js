@@ -1,5 +1,5 @@
 async function downloadSelection() {
-    const folderPath = removeTrailingSlash(document.getElementById("currentfolder").value);
+    const folderPath = getCurrentFolderPath();
     const files = document.getElementById("filecontents").childNodes;
     let ids = [];
     let nonDownloadable = [];

@@ -23,15 +23,15 @@ window.addEventListener("DOMContentLoaded", () => {
 function loadFromUrl() {
     const currentUrl = new URL(location.href);
     const folder = currentUrl.searchParams.get("folder");
-    document.getElementById("currentfolder").value = folder === null ? "/" : atob(folder);
+    setCurrentFolderPath(folder === null ? "/" : atob(folder));
     displayCurrentFolder(false);
 }
 
 async function displayCurrentFolder(pushToHistory = true) {
-    const folderPath = removeTrailingSlash(document.getElementById("currentfolder").value);
+    const folderPath = getCurrentFolderPath();
     response = JSON.parse(await serverRequest("getdir", { path: folderPath }));
     if (response.folder.entries.length === 0) {
-        document.getElementById("currentfolder").value = "/";
+        setCurrentFolderPath("/");
         displayCurrentFolder();
         return;
     }
@@ -85,14 +85,14 @@ function generateFileEntry(file) {
 function addFolderEventListener(element, file) {
     if (file.isDir && file.isExecutable) {
         element.addEventListener("click", () => {
-            const current = removeTrailingSlash(document.getElementById("currentfolder").value);
+            const current = getCurrentFolderPath();
             if (file.fileName === "..") {
                 const splitted = current.split("/");
                 splitted.pop();
-                document.getElementById("currentfolder").value = splitted.length === 1 ? "/" : splitted.join("/");
+                setCurrentFolderPath(splitted.length === 1 ? "/" : splitted.join("/"));
             } else {
                 let addition = current === "/" ? "" : "/";
-                document.getElementById("currentfolder").value = current + addition + file.fileName;
+                setCurrentFolderPath(current + addition + file.fileName);
             }
             displayCurrentFolder();
         });
@@ -102,8 +102,7 @@ function addFolderEventListener(element, file) {
 function addFileEditEventListener(element, file) {
     if (!file.isDir && file.isReadable) {
         element.addEventListener("click", () => {
-            const folderPath = removeTrailingSlash(document.getElementById("currentfolder").value);
-            showFile(file, folderPath);
+            showFile(file, getCurrentFolderPath());
         });
     }
 }
@@ -117,4 +116,12 @@ function createTableColumn(type, content) {
 
 function removeTrailingSlash(value) {
     return value === "/" ? "/" : value.replace(/[\/]*$/, "");
+}
+
+function getCurrentFolderPath() {
+    return removeTrailingSlash(document.getElementById("currentfolder").value);
+}
+
+function setCurrentFolderPath(folder) {
+    document.getElementById("currentfolder").value = folder;
 }
