@@ -1,57 +1,18 @@
 <?php
 setlocale(LC_ALL, "en_US.UTF-8");
 class DirectoryEntry {
-    /**
-     * @var string
-     */
     public $fileName;
-    /**
-     * @var string
-     */
     public $ext;
-    /**
-     * @var string
-     */
     public $absolutePath;
-    /**
-     * @var int
-     */
     public $index;
-    /**
-     * @var bool
-     */
     public $isDir;
-    /**
-     * @var int
-     */
     public $size;
-    /**
-     * @var string
-     */
     public $perms;
-    /**
-     * @var bool
-     */
     public $isReadable;
-    /**
-     * @var bool
-     */
     public $isWriteable;
-    /**
-     * @var bool
-     */
     public $isExecutable;
-    /**
-     * @var string
-     */
     public $user;
-    /**
-     * @var string
-     */
     public $group;
-    /**
-     * @var SplFileInfo
-     */
     public $infoObject;
 
     public function __construct(SplFileInfo $fileInfo, string $realPath, int $index, string $userName) {
@@ -105,18 +66,9 @@ class DirectoryEntry {
 }
 
 class DirectoryInfo {
-    /**
-     * @var DirectoryEntry[]
-     */
     public $entries = [];
     public $parentFolder;
-    /**
-     * @var integer
-     */
     public $entriesCount = 0;
-    /**
-     * @var string
-     */
     public $currentFolder;
 
     public function __construct(int $uid, string $path, array $idList = []) {
@@ -147,13 +99,7 @@ class DirectoryInfo {
 }
 
 class UserGroupCache {
-    /**
-     * @var array
-     */
     protected static $userCache = [];
-    /**
-     * @var array
-     */
     protected static $groupCache = [];
     protected static $groups = [];
 
