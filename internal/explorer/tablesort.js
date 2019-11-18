@@ -45,7 +45,9 @@ function convertToBytes(input) {
 }
 
 function stringSort(a, b) {
-    return currentOrder[this] * a.children[this].innerText.localeCompare(b.children[this].innerText, undefined, { numeric: true, sensitivity: "base" });
+    a = a.children[this].innerText;
+    b = b.children[this].innerText;
+    return currentOrder[this] * a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
 }
 
 function sizeSort(a, b) {
