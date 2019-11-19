@@ -6,7 +6,7 @@ if (!isset($_REQUEST{"action"})) {
 
 $action = $_REQUEST["action"];
 $actionClearText = base64_decode($_REQUEST["action"]);
-checkSessionStatus($actionClearText);
+Session::checkSessionStatus($actionClearText);
 switch ($actionClearText) {
     case "validatePassword":
         $result = sudoExec($action, $_REQUEST["user"], $_REQUEST["password"]);
@@ -75,12 +75,30 @@ class Session {
     protected static $uid;
 
     public static function getUid() {
-        if (!isset(self::$uid)) {
-            session_start();
-            self::$uid = base64_encode($_SESSION["uid"]);
-            session_write_close();
-        }
         return self::$uid;
+    }
+
+    public static function checkSessionStatus($action) {
+        if($action === "validatePassword") {
+            return;
+        }
+        session_start();
+        if (!isset($_SESSION["uid"])) {
+            die("Not logged in");
+        }
+        self::$uid = $_SESSION["uid"];
+        $lifetime = 3600;
+        if (isset($_SESSION['lastactivity']) && (time() - $_SESSION['lastactivity'] > $lifetime)) {
+            session_unset();
+            session_destroy();
+            header("Location: login.php");
+        }
+        $_SESSION['lastactivity'] = time();
+        if (time() - $_SESSION['created'] > $lifetime) {
+            session_regenerate_id(true);
+            $_SESSION['created'] = time();
+        }
+        session_write_close();
     }
 }
 
@@ -98,26 +116,4 @@ function generateCommand(...$args) {
         $argString .= "'" . $string . "' ";
     }
     return "sudo php -f /media/plex/html/internal/explorer/sudoScript.php " . $argString;
-}
-
-function checkSessionStatus($action) {
-    if($action === "validatePassword") {
-        return;
-    }
-    session_start();
-    if (!isset($_SESSION["uid"])) {
-        die("Not logged in");
-    }
-    $lifetime = 3600;
-    if (isset($_SESSION['lastactivity']) && (time() - $_SESSION['lastactivity'] > $lifetime)) {
-        session_unset();
-        session_destroy();
-        header("Location: login.php");
-    }
-    $_SESSION['lastactivity'] = time();
-    if (time() - $_SESSION['created'] > $lifetime) {
-        session_regenerate_id(true);
-        $_SESSION['created'] = time();
-    }
-    session_write_close();
 }
