@@ -12,10 +12,12 @@ class DirectoryEntry {
     public $isWriteable;
     public $isExecutable;
     public $user;
+    public $userString;
     public $group;
+    public $groupString;
     public $infoObject;
 
-    public function __construct(SplFileInfo $fileInfo, string $realPath, int $index, string $userName) {
+    public function __construct(SplFileInfo $fileInfo, string $realPath, int $index) {
         $this->fileName = $fileInfo->getBasename();
         $this->absolutePath = $realPath;
         $this->index = $index;
@@ -23,11 +25,13 @@ class DirectoryEntry {
         $this->ext = $this->isDir ? "" : $fileInfo->getExtension();
         $this->size = $this->isDir ? -1 : $this->formatBytes($fileInfo->getSize());
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
-        $this->user = UserGroupCache::resolveUser($fileInfo->getOwner());
-        $this->group = UserGroupCache::resolveGroup($fileInfo->getGroup());
-        $readableBitSet = $this->permissionCheck(2, $userName);
-        $writeableBitSet = $this->permissionCheck(1, $userName);
-        $executableBitSet = $this->permissionCheck(0, $userName);
+        $this->user = $fileInfo->getOwner();
+        $this->userString = UserGroupCache::resolveUser($this->user);
+        $this->group = $fileInfo->getGroup();
+        $this->groupString = UserGroupCache::resolveGroup($this->group);
+        $readableBitSet = $this->permissionCheck(2);
+        $writeableBitSet = $this->permissionCheck(1);
+        $executableBitSet = $this->permissionCheck(0);
         $this->isReadable = $this->isDir ? $executableBitSet : $readableBitSet;
         $this->isWriteable = $this->isDir ? $executableBitSet && $writeableBitSet : $writeableBitSet;
         $this->isExecutable = $executableBitSet;
@@ -39,22 +43,17 @@ class DirectoryEntry {
      * @param  integer $position
      * @return bool
      */
-    private function permissionCheck(int $position, string $userName): bool {
-        if ($this->user === $userName && $this->perms {0} & (1 << $position)) {
+    private function permissionCheck(int $position): bool {
+        if ($this->user === UserGroupCache::getUser() && $this->perms {0} & (1 << $position)) {
             return true;
-        } else if (in_array($this->group, UserGroupCache::getGroups($userName)) && $this->perms {1} & (1 << $position)) {
+        } else if (in_array($this->group, UserGroupCache::getGroups()) && $this->perms {1} & (1 << $position)) {
             return true;
         } else if ($this->perms {2} & (1 << $position)) {
             return true;
         }
         return false;
     }
-    /**
-     * Turns byte count into human readable format
-     *
-     * @param  integer  $bytes
-     * @return string
-     */
+
     public function formatBytes(int $bytes): string {
         $units = array('B', 'KB', 'MB', 'GB', 'TB');
         $bytes = max($bytes, 0);
@@ -73,7 +72,6 @@ class DirectoryInfo {
 
     public function __construct(int $uid, string $path, array $idList = []) {
         $userContext = posix_getpwuid($uid);
-        $userName = $userContext["name"];
         posix_setgid($userContext["gid"]);
         posix_initgroups($userContext["name"], $userContext["gid"]);
         posix_setuid($uid);
@@ -82,7 +80,7 @@ class DirectoryInfo {
             $dir = new DirectoryIterator($path);
             if ($path !== "/") {
                 $parentFolder = new SplFileInfo($path . "/..");
-                $this->parentFolder = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1, $userName);
+                $this->parentFolder = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1);
             }
 
             $counter = 0;
@@ -90,7 +88,7 @@ class DirectoryInfo {
                 if ($getAll || array_search($counter, $idList) !== false) {
                     $realPath = $fileInfo->getRealPath();
                     if (!$fileInfo->isDot() && $realPath !== false) {
-                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter, $userName);
+                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter);
                     }
                 }
                 $counter++;
@@ -102,44 +100,36 @@ class DirectoryInfo {
 }
 
 class UserGroupCache {
-    protected static $userCache = [];
-    protected static $groupCache = [];
-    protected static $groups = [];
+    protected static $uid;
+    protected static $gids;
+    protected static $uidMap = [];
+    protected static $gidMap = [];
 
-    /**
-     * Converts user id into user string
-     *
-     * @param  int      $uid
-     * @return string
-     */
     public static function resolveUser(int $uid): string {
-        if (!isset(self::$userCache[$uid])) {
-            self::$userCache[$uid] = posix_getpwuid($uid)["name"];
+        if (!isset(self::$uidMap[$uid])) {
+            self::$uidMap[$uid] = posix_getpwuid($uid)["name"];
         }
-        return self::$userCache[$uid];
+        return self::$uidMap[$uid];
     }
-    /**
-     * Converts group id into group string
-     *
-     * @param  integer  $gid
-     * @return string
-     */
+
     public static function resolveGroup(int $gid): string {
-        if (!isset(self::$groupCache[$gid])) {
-            self::$groupCache[$gid] = posix_getgrgid($gid)["name"];
+        if (!isset(self::$gidMap[$gid])) {
+            self::$gidMap[$gid] = posix_getgrgid($gid)["name"];
         }
-        return self::$groupCache[$gid];
+        return self::$gidMap[$gid];
     }
-    /**
-     * Gets the groups the current user is a member of
-     *
-     * @return string[]
-     */
-    public static function getGroups(string $userName) {
-        if (!isset(self::$groups[$userName])) {
-            $groups = substr(exec("groups {$userName} | cut -d':' -f2"), 1);
-            self::$groups[$userName] = explode(" ", $groups);
+
+    public static function getUser(): int {
+        if (!isset(self::$uid)) {
+            self::$uid = posix_getuid();
         }
-        return self::$groups[$userName];
+        return self::$uid;
+    }
+
+    public static function getGroups() : array {
+        if (!isset(self::$gids)) {
+            self::$gids = posix_getgroups();
+        }
+        return self::$gids;
     }
 }

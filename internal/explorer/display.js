@@ -74,8 +74,8 @@ function generateFileEntry(file) {
     row.appendChild(fileNameColumn);
     row.appendChild(createTableColumn("ext", file.ext));
     row.appendChild(createTableColumn("size", file.isDir ? "" : file.size));
-    row.appendChild(createTableColumn("user", file.user));
-    row.appendChild(createTableColumn("group", file.group));
+    row.appendChild(createTableColumn("user", file.userString));
+    row.appendChild(createTableColumn("group", file.groupString));
     row.appendChild(createTableColumn("perms", file.perms));
     row.appendChild(createTableColumn("readable", file.isReadable));
     row.appendChild(createTableColumn("writeable", file.isWriteable));
