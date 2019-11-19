@@ -3,40 +3,39 @@ if (!isset($argv)) {
     require_once "htmlHelper.php";
     redirectToFolderOfFile();
 }
-$argv = prepareArgs($argv);
-
-switch (array_shift($argv)) {
+$json = json_decode(base64_decode($argv[1]));
+if($json->action !== "validatePassword") {
+    dropPrivileges($json->uid);
+}
+switch ($json->action) {
     case "getdir":
-        getDir($argv[0], $argv[1]);
+        getDir($json->folder);
         break;
     case "getsinglefile":
-        getSingleFile($argv[0], $argv[1], $argv[2]);
+        getSingleFile($json->folder, $json->id);
         break;
     case "getmime":
         require_once "getFolderInfo.php";
-        dropPrivileges(intval($argv[0]));
-        $dir = new DirectoryInfo($argv[1], [$argv[2]]);
+        $dir = new DirectoryInfo($json->folder, [$json->id]);
         $file = $dir->entries[0];
         echo mime_content_type($file->absolutePath);
         break;
     case "validatePassword":
-        login($argv[0], $argv[1]);
+        login($json->user, $json->password);
         break;
     case "zipselection":
-        zipSelection($argv[0], $argv[1], $argv[2]);
+        zipSelection($json->folder, $json->ids);
         break;
 }
 
-function getDir($uid, $path) {
+function getDir($path) {
     require_once "getFolderInfo.php";
-    dropPrivileges($uid);
     $dir = new DirectoryInfo($path);
     echo json_encode($dir);
 }
 
-function getSingleFile($uid, $folder, $id) {
+function getSingleFile($folder, $id) {
     require_once "getFolderInfo.php";
-    dropPrivileges(intval($argv[0]));
     $dir = new DirectoryInfo($folder, [$id]);
     $file = $dir->entries[0];
     $stdin = fopen('php://stdin', 'r');
@@ -84,9 +83,8 @@ function loginFail($file) {
     exit();
 }
 
-function zipSelection($uid, $path, $ids) {
+function zipSelection($path, $ids) {
     require_once "getFolderInfo.php";
-    dropPrivileges($uid);
     $dir = new DirectoryInfo($path, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
     $dir = new DirectoryInfo($path, explode(",", $ids));
@@ -115,15 +113,6 @@ function zipSelection($uid, $path, $ids) {
     $zip->close();
     flush();
     echo $zipPath;
-}
-
-function prepareArgs($args) {
-    //Remove first parameter which is executing script file location
-    array_shift($args);
-    foreach ($args as $key => $value) {
-        $args[$key] = base64_decode($value);
-    }
-    return $args;
 }
 
 function dropPrivileges($uid) {

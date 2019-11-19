@@ -29,7 +29,7 @@ function loadFromUrl() {
 
 async function displayCurrentFolder(pushToHistory = true) {
     const folderPath = getCurrentFolderPath();
-    response = JSON.parse(await serverRequest("getdir", { path: folderPath }));
+    response = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
     if (response.folder.entries.length === 0) {
         setCurrentFolderPath("/");
         displayCurrentFolder();

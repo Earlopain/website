@@ -1,25 +1,29 @@
 <?php
-if (!isset($_REQUEST{"action"})) {
+
+$json = base64_decode($_REQUEST["data"], true);
+
+if ($json === false) {
     require_once "htmlHelper.php";
     redirectToFolderOfFile();
 }
 
-$action = $_REQUEST["action"];
-$actionClearText = base64_decode($_REQUEST["action"]);
-Session::checkSessionStatus($actionClearText);
-switch ($actionClearText) {
+$json = json_decode($json);
+Session::checkSessionStatus($json->action);
+$json = jsonAddUid($json);
+
+switch ($json->action) {
     case "validatePassword":
-        $result = sudoExec($action, $_REQUEST["user"], $_REQUEST["password"]);
+        $result = sudoExec($json);
         if ($result !== "false") {
             session_start();
             $_SESSION["uid"] = $result;
-            $_SESSION["username"] = base64_decode($_REQUEST["user"]);
+            $_SESSION["username"] = $json->user;
             $_SESSION['created'] = time();
         }
         echo $result;
         break;
     case "getdir":
-        $folder = sudoExec($action, Session::getUid(), $_REQUEST["path"]);
+        $folder = sudoExec($json);
         $result = new stdClass();
         $result->folder = json_decode($folder);
         $result->username = $_SESSION["username"];
@@ -28,7 +32,7 @@ switch ($actionClearText) {
     case "zipselection":
         ignore_user_abort(true);
         set_time_limit(0);
-        $tempFilePath = sudoExec($action, Session::getUid(), $_REQUEST["folder"], $_REQUEST["ids"]);
+        $tempFilePath = sudoExec($json);
         if (connection_status() !== CONNECTION_NORMAL) {
             unlink($tempFilePath);
             break;
@@ -43,14 +47,14 @@ switch ($actionClearText) {
         break;
     case "getsinglefile":
         $uid = Session::getUid();
-        $mimeType = sudoExec(base64_encode("getmime"), $uid, $_REQUEST["folder"], $_REQUEST["id"]);
-        if (isset($_REQUEST["mimeonly"])) {
+        $mimeType = sudoExec($json, "getmime");
+        if (isset($json->mimeonly)) {
             echo $mimeType;
         } else {
             header("Content-Type: " . $mimeType);
             $chunkSize = 8192;
             $start = 0;
-            $command = generateCommand(base64_encode("getsinglefile"), $uid, $_REQUEST["folder"], $_REQUEST["id"]);
+            $command = generateCommand($json, "getsinglefile");
             $process = proc_open($command, [0 => ["pipe", "r"], 1 => ["pipe", "w"]], $pipes);
             while (true) {
                 fwrite($pipes[0], $start . "\n");
@@ -79,7 +83,7 @@ class Session {
     }
 
     public static function checkSessionStatus($action) {
-        if($action === "validatePassword") {
+        if ($action === "validatePassword") {
             return;
         }
         session_start();
@@ -102,18 +106,19 @@ class Session {
     }
 }
 
-function sudoExec(...$args) {
-    return shell_exec(generateCommand(...$args));
+function jsonAddUid($json) {
+    $json->uid = Session::getUid();
+    return $json;
 }
 
-function generateCommand(...$args) {
-    $argString = "";
-    foreach ($args as $string) {
-        $decoded = base64_decode($string, true);
-        if ($decoded === false) {
-            die("Invalid base64 string\n" . $string);
-        }
-        $argString .= "'" . $string . "' ";
+function sudoExec($json, $actionOverwrite = null) {
+    return shell_exec(generateCommand($json, $actionOverwrite));
+}
+
+function generateCommand($json, $actionOverwrite = null) {
+    if ($actionOverwrite !== null) {
+        $json->action = $actionOverwrite;
     }
-    return "sudo php -f /media/plex/html/internal/explorer/sudoScript.php " . $argString;
+    $data = base64_encode(json_encode($json));
+    return "sudo php -f /media/plex/html/internal/explorer/sudoScript.php '{$data}'";
 }

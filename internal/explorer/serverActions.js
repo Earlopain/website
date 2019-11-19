@@ -20,14 +20,11 @@ async function downloadSelection() {
 
 function postDownload(postData) {
     let form = document.createElement("form");
-    for (const name of Object.keys(postData)) {
-        const value = postData[name];
-        let input = document.createElement("input");
-        input.type = "text";
-        input.name = name;
-        input.value = btoa(value);
-        form.appendChild(input);
-    }
+    let input = document.createElement("input");
+    input.type = "text";
+    input.name = "data";
+    input.value = btoa(JSON.stringify(postData));
+    form.appendChild(input);
     form.method = "post";
     form.action = "previlegeWrapper.php";
     form.id = "tempform";
@@ -70,9 +67,7 @@ function httpPOST(url, formDataJSON = {}) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
         let formData = new FormData();
-        Object.keys(formDataJSON).forEach(key => {
-            formData.append(key, btoa(formDataJSON[key]));
-        });
+        formData.append("data", btoa(JSON.stringify(formDataJSON)));
         xmlHttp.open("POST", url, true);
         xmlHttp.onload = event => {
             resolve(event.target.responseText);
