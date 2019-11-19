@@ -72,14 +72,17 @@ class DirectoryInfo {
     public $currentFolder;
 
     public function __construct(int $uid, string $path, array $idList = []) {
-        $userContext = posix_getpwuid($uid)["name"];
+        $userContext = posix_getpwuid($uid);
+        $userName = $userContext["name"];
+        posix_setgid($userContext["gid"]);
+        posix_initgroups($userContext["name"], $userContext["gid"]);
         posix_setuid($uid);
         $getAll = count($idList) === 0;
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);
             if ($path !== "/") {
                 $parentFolder = new SplFileInfo($path . "/..");
-                $this->parentFolder = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1, $userContext);
+                $this->parentFolder = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1, $userName);
             }
 
             $counter = 0;
@@ -87,7 +90,7 @@ class DirectoryInfo {
                 if ($getAll || array_search($counter, $idList) !== false) {
                     $realPath = $fileInfo->getRealPath();
                     if (!$fileInfo->isDot() && $realPath !== false) {
-                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter, $userContext);
+                        $this->entries[] = new DirectoryEntry($fileInfo, $realPath, $counter, $userName);
                     }
                 }
                 $counter++;
