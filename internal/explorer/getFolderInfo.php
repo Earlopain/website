@@ -70,11 +70,7 @@ class DirectoryInfo {
     public $entriesCount = 0;
     public $currentFolder;
 
-    public function __construct(int $uid, string $path, array $idList = []) {
-        $userContext = posix_getpwuid($uid);
-        posix_setgid($userContext["gid"]);
-        posix_initgroups($userContext["name"], $userContext["gid"]);
-        posix_setuid($uid);
+    public function __construct(string $path, array $idList = []) {
         $getAll = count($idList) === 0;
         if (is_readable($path)) {
             $dir = new DirectoryIterator($path);

@@ -14,7 +14,8 @@ switch (array_shift($argv)) {
         break;
     case "getmime":
         require_once "getFolderInfo.php";
-        $dir = new DirectoryInfo(intval($argv[0]), $argv[1], [$argv[2]]);
+        dropPrivileges(intval($argv[0]));
+        $dir = new DirectoryInfo($argv[1], [$argv[2]]);
         $file = $dir->entries[0];
         echo mime_content_type($file->absolutePath);
         break;
@@ -28,13 +29,15 @@ switch (array_shift($argv)) {
 
 function getDir($uid, $path) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($uid, $path);
+    dropPrivileges($uid);
+    $dir = new DirectoryInfo($path);
     echo json_encode($dir);
 }
 
 function getSingleFile($uid, $folder, $id) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($uid, $folder, [$id]);
+    dropPrivileges(intval($argv[0]));
+    $dir = new DirectoryInfo($folder, [$id]);
     $file = $dir->entries[0];
     $stdin = fopen('php://stdin', 'r');
     $fd = fopen($file->absolutePath, "r");
@@ -83,9 +86,10 @@ function loginFail($file) {
 
 function zipSelection($uid, $path, $ids) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($uid, $path, explode(",", $ids));
+    dropPrivileges($uid);
+    $dir = new DirectoryInfo($path, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
-    $dir = new DirectoryInfo($uid, $path, explode(",", $ids));
+    $dir = new DirectoryInfo($path, explode(",", $ids));
     $zip = new ZipArchive();
     $zip->open($zipPath, ZipArchive::OVERWRITE | ZipArchive::CREATE);
     foreach ($dir->entries as $file) {
@@ -120,4 +124,11 @@ function prepareArgs($args) {
         $args[$key] = base64_decode($value);
     }
     return $args;
+}
+
+function dropPrivileges($uid) {
+    $userContext = posix_getpwuid($uid);
+    posix_setgid($userContext["gid"]);
+    posix_initgroups($userContext["name"], $userContext["gid"]);
+    posix_setuid($uid);
 }
