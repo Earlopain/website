@@ -19,7 +19,6 @@ async function showFile(file, folderPath) {
     document.getElementById("currentlyviewing").innerHTML = ", viewing: " + file.fileName;
     let editor = document.getElementById("editor");
     const json = { action: "getsinglefile", folder: folderPath, id: file.index };
-    const url = "previlegeWrapper.php?data=" + encodeURI(btoa(JSON.stringify(json)));
     const mimeType = await serverRequest("getsinglefile", { folder: folderPath, id: file.index, mimeonly: "true" });
     const elementType = getMimeType(mimeType);
     if (elementType === "unsupported") {
@@ -28,9 +27,10 @@ async function showFile(file, folderPath) {
     editor.innerHTML = "";
     let mediaElement = document.createElement(elementType);
     if (elementType === "textarea") {
-        const data = await httpPOST(url);
+        const data = await serverRequest("getsinglefile", json);
         mediaElement.innerHTML = data;
     } else {
+        const url = "previlegeWrapper.php?data=" + encodeURI(btoa(JSON.stringify(json)));
         mediaElement.controls = true;
         mediaElement.src = url;
         mediaElement.onload = function () {
