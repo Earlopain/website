@@ -99,7 +99,7 @@ function addFolderEventListener(element, file) {
 function addFileEditEventListener(element, file) {
     if (!file.isDir && file.isReadable) {
         element.addEventListener("click", () => {
-            showFile(file, getCurrentFolderPath());
+            editor.showFile(file, getCurrentFolderPath());
         });
     }
 }

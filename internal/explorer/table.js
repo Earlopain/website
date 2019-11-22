@@ -80,7 +80,6 @@ document.addEventListener('keydown', (event) => {
     else if (key === "Enter") {
         let currentFile;
         for (const file of previousResponse.folder.entries) {
-            console.log(getCurrentSelectedRow().id)
             if (file.index === parseInt(getCurrentSelectedRow().id.substring(4))) {
                 currentFile = file;
                 break;
@@ -94,7 +93,7 @@ document.addEventListener('keydown', (event) => {
             addStringToCurrentFolderPath(currentFile.fileName);
             displayCurrentFolder();
         } else {
-            showFile(currentFile, getCurrentFolderPath());
+            editor.showFile(currentFile, getCurrentFolderPath());
         }
     }
     getCurrentSelectedRow().classList.add("selectedtablerow");
