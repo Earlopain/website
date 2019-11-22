@@ -12,31 +12,31 @@ function sortColum(index) {
     if (sortType[index] === "none") {
         return;
     }
-    let container = document.getElementById("filecontents");
-    let allEntries = container.children;
 
-    allEntries = [...allEntries].slice();
-    container.innerHTML = "";
-    const dotdot = tableView.getCurrentFolderPath() !== "/" ? allEntries.shift() : undefined;
+    let entriesCopy = [...tableView.tableElements].slice();
+    tableView.removeAllEntires();
+    const dotdot = tableView.getCurrentFolderPath() !== "/" ? entriesCopy.shift() : undefined;
     switch (sortType[index]) {
         case "string":
-            allEntries = allEntries.sort(stringSort.bind(index));
+            entriesCopy = entriesCopy.sort(stringSort.bind(index));
             break;
         case "size":
-            allEntries = allEntries.sort(sizeSort.bind(index));
+            entriesCopy = entriesCopy.sort(sizeSort.bind(index));
         default:
             break;
     }
     let previousValue = currentOrder[index];
     currentOrder = Array(sortType.length).fill(1);
     currentOrder[index] = previousValue * -1;
+    let newTableBody = document.createElement("tbody");
     if (dotdot !== undefined) {
-        container.appendChild(dotdot);
+        newTableBody.appendChild(dotdot);
     }
 
-    for (const entry of allEntries) {
-        container.appendChild(entry);
+    for (const entry of entriesCopy) {
+        newTableBody.appendChild(entry);
     }
+    document.querySelector("#" + tableView.tableElementId).appendChild(newTableBody);
 }
 
 function convertToBytes(input) {

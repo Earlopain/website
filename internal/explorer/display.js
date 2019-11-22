@@ -48,7 +48,7 @@ class TableView {
             currentUrl.searchParams.set("folder", btoa(this.serverResponse.folder.currentFolder));
             window.history.pushState({}, null, currentUrl.href);
         }
-    
+
         this.serverResponse.folder.entries = this.serverResponse.folder.entries.sort((a, b) => {
             if (a.isDir === b.isDir) {
                 return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
@@ -56,8 +56,7 @@ class TableView {
                 return b.isDir - a.isDir;
             }
         });
-        let currentTableContent = document.querySelector(`#${this.tableElementId} tbody`);
-        currentTableContent !== null ? currentTableContent.remove() : null;
+        this.removeAllEntires();
 
         let newTableContent = document.createElement("tbody");
 
@@ -98,7 +97,7 @@ class TableView {
     addFolderEventListener(element, file) {
         if (file.isDir && file.isExecutable) {
             element.addEventListener("click", () => {
-    
+
                 this.addStringToCurrentFolderPath(file.fileName);
                 this.displayCurrentFolder();
             });
@@ -135,13 +134,20 @@ class TableView {
         const trailingSlashRemoved = currentValue === "/" ? "/" : currentValue.replace(/[\/]*$/, "")
         return trailingSlashRemoved;
     }
-    
+
     setCurrentFolderPath(folder) {
         document.getElementById(this.currentFolderElementId).value = folder;
     }
 
     getHeaders() {
         return document.querySelector(`#${this.tableElementId} thead tr`).children;
+    }
+
+    removeAllEntires() {
+        let currentTableContent = document.querySelector(`#${this.tableElementId} tbody`);
+        if (currentTableContent !== null) {
+            currentTableContent.remove()
+        }
     }
 }
 
