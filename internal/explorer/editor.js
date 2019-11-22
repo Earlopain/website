@@ -1,6 +1,7 @@
 class Editor {
-    constructor(elementId) {
-        this.elementId = elementId;
+    constructor(elementContainerId, currentlyViewingId) {
+        this.elementId = elementContainerId;
+        this.currentlyViewingId = currentlyViewingId;
         this.currentlyOpenFile = "";
         this.currentlyOpenFileDir = "";
         this.lastClickedFile = "";
@@ -20,7 +21,7 @@ class Editor {
         }
         this.lastClickedFile = file;
         this.lastClickedFileDir = folderPath;
-        document.getElementById("currentlyviewing").innerHTML = ", viewing: " + file.fileName;
+        document.getElementById(this.currentlyViewingId).innerHTML = ", viewing: " + file.fileName;
         let editor = document.getElementById(this.elementId);
         const json = { action: "getsinglefile", folder: folderPath, id: file.index };
         const mimeType = await serverRequest("getsinglefile", { folder: folderPath, id: file.index, mimeonly: "true" });
@@ -66,4 +67,4 @@ class Editor {
     }
 }
 
-let editor = new Editor("editor");
+let editor = new Editor("editor", "currentlyviewing");
