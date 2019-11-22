@@ -1,9 +1,8 @@
 async function downloadSelection() {
     const folderPath = tableView.getCurrentFolderPath();
-    const files = document.getElementById("filecontents").childNodes;
     let ids = [];
     let nonDownloadable = [];
-    for (const file of files) {
+    for (const file of tableView.tableElements) {
         if (file.childNodes[0].checked && file.childNodes[7].textContent === "true") {
             ids.push(file.id.substring(4));
         } else if (file.childNodes[0].checked) {
@@ -27,11 +26,10 @@ function postDownload(postData) {
     form.appendChild(input);
     form.method = "post";
     form.action = "previlegeWrapper.php";
-    form.id = "tempform";
 
     document.body.appendChild(form);
-    document.getElementById("tempform").submit();
-    document.getElementById("tempform").remove();
+    form.submit();
+    form.remove();
 }
 
 async function login(successCallback = () => { }) {
