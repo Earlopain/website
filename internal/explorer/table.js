@@ -58,28 +58,22 @@ function sizeSort(a, b) {
     return currentOrder[this] * (a - b);
 }
 
-let currentRowIndex = 0;
-
 document.addEventListener('keydown', (event) => {
     if (tableView.tableElements.length === 0) {
         return;
     }
-    getCurrentSelectedRow().classList.remove("selectedtablerow");
+    const currentSelected = document.querySelector(".selectedtablerow");
     const key = event.key;
     if (key === "ArrowUp") {
-        if (currentRowIndex > 0) {
-            currentRowIndex--;
-        }
+        setActive(currentSelected.previousElementSibling, currentSelected);
     }
     else if (key === "ArrowDown") {
-        if (currentRowIndex < tableView.tableElements.length - 1) {
-            currentRowIndex++;
-        }
+        setActive(currentSelected.nextSibling, currentSelected);
     }
     else if (key === "Enter") {
         let currentFile;
         for (const file of tableView.serverResponse.folder.entries) {
-            if (file.index === parseInt(getCurrentSelectedRow().id.substring(4))) {
+            if (file.index === parseInt(currentSelected.id.substring(4))) {
                 currentFile = file;
                 break;
             }
@@ -95,14 +89,16 @@ document.addEventListener('keydown', (event) => {
             editor.showFile(currentFile, tableView.getCurrentFolderPath());
         }
     }
-    getCurrentSelectedRow().classList.add("selectedtablerow");
 });
 
-function getCurrentSelectedRow() {
-    return tableView.tableElements[currentRowIndex];
+function setFirstEntryActive() {
+    const first = document.querySelector(`#${tableView.tableElementId} tbody tr:first-child`);
+    first.classList.add("selectedtablerow");
 }
 
-function setCurrentRows() {
-    tableView.tableElements[0].classList.add("selectedtablerow");
-    currentRowIndex = 0;
+function setActive(newElement, oldElement) {
+    if (newElement !== null) {
+        oldElement.classList.remove("selectedtablerow");
+        newElement.classList.add("selectedtablerow");
+    }
 }

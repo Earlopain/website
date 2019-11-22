@@ -70,7 +70,7 @@ class TableView {
         }
         this.tableElements = newTableContent.querySelectorAll(`tr`);
         document.querySelector("#" + this.tableElementId).appendChild(newTableContent);
-        setCurrentRows();
+        setFirstEntryActive();
     }
 
     generateFileElement(file) {
