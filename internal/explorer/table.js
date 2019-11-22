@@ -80,12 +80,17 @@ document.addEventListener('keydown', (event) => {
     else if (key === "Enter") {
         let currentFile;
         for (const file of previousResponse.folder.entries) {
+            console.log(getCurrentSelectedRow().id)
             if (file.index === parseInt(getCurrentSelectedRow().id.substring(4))) {
                 currentFile = file;
                 break;
             }
         }
-        if (currentFile.isDir) {
+        if(currentFile === undefined) {
+            addStringToCurrentFolderPath("..");
+            displayCurrentFolder();
+        }
+        else if (currentFile.isDir) {
             addStringToCurrentFolderPath(currentFile.fileName);
             displayCurrentFolder();
         } else {
