@@ -17,7 +17,7 @@ function sortColum(index) {
 
     allEntries = [...allEntries].slice();
     container.innerHTML = "";
-    const dotdot = getCurrentFolderPath() !== "/" ? allEntries.shift() : undefined;
+    const dotdot = tableView.getCurrentFolderPath() !== "/" ? allEntries.shift() : undefined;
     switch (sortType[index]) {
         case "string":
             allEntries = allEntries.sort(stringSort.bind(index));

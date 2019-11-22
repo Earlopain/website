@@ -1,7 +1,9 @@
 class TableView {
-    constructor() {
+    constructor(currentFolderElementId, currentUserElementId) {
+        this.currentFolderElementId = currentFolderElementId;
+        this.currentUserElementId = currentUserElementId;
         window.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("currentfolder").addEventListener("keydown", event => {
+            document.getElementById(this.currentFolderElementId).addEventListener("keydown", event => {
                 if (event.keyCode === 13) {
                     displayCurrentFolder();
                 }
@@ -39,7 +41,7 @@ class TableView {
             this.displayCurrentFolder();
             return;
         }
-        document.getElementById("loggedinas").innerHTML = this.fileData.username;
+        document.getElementById(this.currentUserElementId).innerHTML = this.fileData.username;
         if (pushToHistory) {
             const currentUrl = new URL(location.href);
             currentUrl.searchParams.set("folder", btoa(this.fileData.folder.currentFolder));
@@ -123,14 +125,14 @@ class TableView {
     }
 
     getCurrentFolderPath() {
-        const currentValue = document.getElementById("currentfolder").value;
+        const currentValue = document.getElementById(this.currentFolderElementId).value;
         const trailingSlashRemoved = currentValue === "/" ? "/" : currentValue.replace(/[\/]*$/, "")
         return trailingSlashRemoved;
     }
     
     setCurrentFolderPath(folder) {
-        document.getElementById("currentfolder").value = folder;
+        document.getElementById(this.currentFolderElementId).value = folder;
     }
 }
 
-let tableView = new TableView();
+let tableView = new TableView("currentfolder", "loggedinas");

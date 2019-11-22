@@ -1,5 +1,5 @@
 async function downloadSelection() {
-    const folderPath = getCurrentFolderPath();
+    const folderPath = tableView.getCurrentFolderPath();
     const files = document.getElementById("filecontents").childNodes;
     let ids = [];
     let nonDownloadable = [];
@@ -53,7 +53,7 @@ function loginAndGotoIndex() {
 
 function loginAndReloadFolder() {
     login(() => {
-        displayCurrentFolder(false);
+        tableView.displayCurrentFolder(false);
     });
 }
 
