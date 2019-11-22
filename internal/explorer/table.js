@@ -79,21 +79,21 @@ document.addEventListener('keydown', (event) => {
     }
     else if (key === "Enter") {
         let currentFile;
-        for (const file of previousResponse.folder.entries) {
+        for (const file of tableView.fileData.folder.entries) {
             if (file.index === parseInt(getCurrentSelectedRow().id.substring(4))) {
                 currentFile = file;
                 break;
             }
         }
         if(currentFile === undefined) {
-            addStringToCurrentFolderPath("..");
-            displayCurrentFolder();
+            tableView.addStringToCurrentFolderPath("..");
+            tableView.displayCurrentFolder();
         }
         else if (currentFile.isDir) {
-            addStringToCurrentFolderPath(currentFile.fileName);
-            displayCurrentFolder();
+            tableView.addStringToCurrentFolderPath(currentFile.fileName);
+            tableView.displayCurrentFolder();
         } else {
-            editor.showFile(currentFile, getCurrentFolderPath());
+            editor.showFile(currentFile, tableView.getCurrentFolderPath());
         }
     }
     getCurrentSelectedRow().classList.add("selectedtablerow");
