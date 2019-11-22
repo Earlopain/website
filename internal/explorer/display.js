@@ -1,7 +1,10 @@
 class TableView {
-    constructor(currentFolderElementId, currentUserElementId) {
+    constructor(tableElementId, currentFolderElementId, currentUserElementId) {
+        this.tableElementId = tableElementId;
         this.currentFolderElementId = currentFolderElementId;
         this.currentUserElementId = currentUserElementId;
+        this.serverResponse;
+        this.tableElements = [];
         window.addEventListener("DOMContentLoaded", () => {
             document.getElementById(this.currentFolderElementId).addEventListener("keydown", event => {
                 if (event.keyCode === 13) {
@@ -10,20 +13,18 @@ class TableView {
             });
             window.addEventListener("popstate", this.loadFromUrl);
             const slider = document.getElementById("filenameslider");
-            slider.value = document.getElementById("tableheader").children[1].getBoundingClientRect().width;
+            const fileNameHeader = document.querySelector(`#${this.tableElementId} th.filename`);
+            slider.value = fileNameHeader.getBoundingClientRect().width;
             slider.addEventListener("input", event => {
                 const newWidth = event.currentTarget.value + "px";
-                const header = document.getElementById("tableheader").children[1];
-                header.style.width = newWidth;
-                const allEntries = document.getElementById("filecontents").children;
-                for (const entry of allEntries) {
+                fileNameHeader.style.width = newWidth;
+                for (const entry of this.tableElements) {
                     entry.children[1].style.width = newWidth;
                 }
             });
             this.loadFromUrl();
             registerTableSort();
         });
-        this.fileData = [];
     }
 
     loadFromUrl() {
@@ -35,36 +36,37 @@ class TableView {
 
     async displayCurrentFolder(pushToHistory = true) {
         const folderPath = this.getCurrentFolderPath();
-        this.fileData = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
-        if (this.fileData.folder.entries.length === 0) {
+        this.serverResponse = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
+        if (this.serverResponse.folder.entries.length === 0) {
             this.setCurrentFolderPath("/");
             this.displayCurrentFolder();
             return;
         }
-        document.getElementById(this.currentUserElementId).innerHTML = this.fileData.username;
+        document.getElementById(this.currentUserElementId).innerHTML = this.serverResponse.username;
         if (pushToHistory) {
             const currentUrl = new URL(location.href);
-            currentUrl.searchParams.set("folder", btoa(this.fileData.folder.currentFolder));
+            currentUrl.searchParams.set("folder", btoa(this.serverResponse.folder.currentFolder));
             window.history.pushState({}, null, currentUrl.href);
         }
     
-        this.fileData.folder.entries = this.fileData.folder.entries.sort((a, b) => {
+        this.serverResponse.folder.entries = this.serverResponse.folder.entries.sort((a, b) => {
             if (a.isDir === b.isDir) {
                 return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
             } else {
                 return b.isDir - a.isDir;
             }
         });
-        let container = document.getElementById("filecontents");
+        let container = document.querySelector(`#${this.tableElementId} tbody:last-child`);
         container.innerHTML = "";
-        if (this.fileData.folder.currentFolder !== "/") {
-            const parentFolder = this.generateFileElement(this.fileData.folder.parentFolder);
+        if (this.serverResponse.folder.currentFolder !== "/") {
+            const parentFolder = this.generateFileElement(this.serverResponse.folder.parentFolder);
             container.appendChild(parentFolder);
         }
-        for (const entry of this.fileData.folder.entries) {
+        for (const entry of this.serverResponse.folder.entries) {
             const element = this.generateFileElement(entry);
             container.appendChild(element);
         }
+        this.tableElements = container.querySelectorAll(`tr`);
         setCurrentRows();
     }
 
@@ -133,6 +135,10 @@ class TableView {
     setCurrentFolderPath(folder) {
         document.getElementById(this.currentFolderElementId).value = folder;
     }
+
+    getHeaders() {
+        return document.querySelector(`#${this.tableElementId} tbody:first-child tr`).children;
+    }
 }
 
-let tableView = new TableView("currentfolder", "loggedinas");
+let tableView = new TableView("table", "currentfolder", "loggedinas");

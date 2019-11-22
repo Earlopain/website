@@ -2,7 +2,7 @@ let currentOrder = [];
 let sortType = ["none", "string", "string", "size", "string", "string", "string", "string", "string"];
 
 function registerTableSort() {
-    for (const header of document.getElementById("tableheader").children) {
+    for (const header of tableView.getHeaders()) {
         header.addEventListener("click", () => sortColum(header.cellIndex));
     }
     currentOrder = Array(sortType.length).fill(-1);
@@ -79,7 +79,7 @@ document.addEventListener('keydown', (event) => {
     }
     else if (key === "Enter") {
         let currentFile;
-        for (const file of tableView.fileData.folder.entries) {
+        for (const file of tableView.serverResponse.folder.entries) {
             if (file.index === parseInt(getCurrentSelectedRow().id.substring(4))) {
                 currentFile = file;
                 break;

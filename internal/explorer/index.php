@@ -39,9 +39,8 @@ if (!isset($_SESSION["uid"])) {
                 <input type="range" min="50" max="500" class="slider" id="filenameslider">
             </div>
         </div>
-        <table class="table">
-            <colgroup span="5"></colgroup>
-            <tr id="tableheader">
+        <table class="table" id="table">
+            <tr>
                 <th class="checkbox"></th>
                 <th class="filename">name</th>
                 <th class="ext">ext</th>
