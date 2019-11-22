@@ -59,10 +59,9 @@ function sizeSort(a, b) {
 }
 
 let currentRowIndex = 0;
-let allRows;
 
 document.addEventListener('keydown', (event) => {
-    if (allRows === undefined) {
+    if (tableView.tableElements.length === 0) {
         return;
     }
     getCurrentSelectedRow().classList.remove("selectedtablerow");
@@ -73,7 +72,7 @@ document.addEventListener('keydown', (event) => {
         }
     }
     else if (key === "ArrowDown") {
-        if (currentRowIndex < allRows.length - 1) {
+        if (currentRowIndex < tableView.tableElements.length - 1) {
             currentRowIndex++;
         }
     }
@@ -100,11 +99,10 @@ document.addEventListener('keydown', (event) => {
 });
 
 function getCurrentSelectedRow() {
-    return allRows[currentRowIndex];
+    return tableView.tableElements[currentRowIndex];
 }
 
 function setCurrentRows() {
-    allRows = document.querySelectorAll("#filecontents > tr");
-    allRows[0].classList.add("selectedtablerow");
+    tableView.tableElements[0].classList.add("selectedtablerow");
     currentRowIndex = 0;
 }

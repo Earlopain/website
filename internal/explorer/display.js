@@ -56,17 +56,21 @@ class TableView {
                 return b.isDir - a.isDir;
             }
         });
-        let container = document.querySelector(`#${this.tableElementId} tbody:last-child`);
-        container.innerHTML = "";
+        let currentTableContent = document.querySelector(`#${this.tableElementId} tbody`);
+        currentTableContent !== null ? currentTableContent.remove() : null;
+
+        let newTableContent = document.createElement("tbody");
+
         if (this.serverResponse.folder.currentFolder !== "/") {
             const parentFolder = this.generateFileElement(this.serverResponse.folder.parentFolder);
-            container.appendChild(parentFolder);
+            newTableContent.appendChild(parentFolder);
         }
         for (const entry of this.serverResponse.folder.entries) {
             const element = this.generateFileElement(entry);
-            container.appendChild(element);
+            newTableContent.appendChild(element);
         }
-        this.tableElements = container.querySelectorAll(`tr`);
+        this.tableElements = newTableContent.querySelectorAll(`tr`);
+        document.querySelector("#" + this.tableElementId).appendChild(newTableContent);
         setCurrentRows();
     }
 
@@ -137,7 +141,7 @@ class TableView {
     }
 
     getHeaders() {
-        return document.querySelector(`#${this.tableElementId} tbody:first-child tr`).children;
+        return document.querySelector(`#${this.tableElementId} thead tr`).children;
     }
 }
 

@@ -40,19 +40,19 @@ if (!isset($_SESSION["uid"])) {
             </div>
         </div>
         <table class="table" id="table">
-            <tr>
-                <th class="checkbox"></th>
-                <th class="filename">name</th>
-                <th class="ext">ext</th>
-                <th class="size">size</th>
-                <th class="user">user</th>
-                <th class="group">group</th>
-                <th class="perms">rwx</th>
-                <th class="readable">read</th>
-                <th class="writeable">write</th>
-            </tr>
-            <tbody id="filecontents">
-            </tbody>
+            <thead>
+                <tr>
+                    <th class="checkbox"></th>
+                    <th class="filename">name</th>
+                    <th class="ext">ext</th>
+                    <th class="size">size</th>
+                    <th class="user">user</th>
+                    <th class="group">group</th>
+                    <th class="perms">rwx</th>
+                    <th class="readable">read</th>
+                    <th class="writeable">write</th>
+                </tr>
+            </thead>
         </table>
     </div>
     <div id="editor"></div>
