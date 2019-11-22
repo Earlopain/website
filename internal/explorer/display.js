@@ -27,9 +27,12 @@ function loadFromUrl() {
     displayCurrentFolder(false);
 }
 
+let previousResponse;
+
 async function displayCurrentFolder(pushToHistory = true) {
     const folderPath = getCurrentFolderPath();
     response = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
+    previousResponse = response;
     if (response.folder.entries.length === 0) {
         setCurrentFolderPath("/");
         displayCurrentFolder();
@@ -59,6 +62,7 @@ async function displayCurrentFolder(pushToHistory = true) {
         const element = generateFileEntry(entry);
         container.appendChild(element);
     }
+    setCurrentRows();
 }
 
 function generateFileEntry(file) {
@@ -85,15 +89,8 @@ function generateFileEntry(file) {
 function addFolderEventListener(element, file) {
     if (file.isDir && file.isExecutable) {
         element.addEventListener("click", () => {
-            const current = getCurrentFolderPath();
-            if (file.fileName === "..") {
-                const splitted = current.split("/");
-                splitted.pop();
-                setCurrentFolderPath(splitted.length === 1 ? "/" : splitted.join("/"));
-            } else {
-                let addition = current === "/" ? "" : "/";
-                setCurrentFolderPath(current + addition + file.fileName);
-            }
+            
+            addStringToCurrentFolderPath(file.fileName);
             displayCurrentFolder();
         });
     }
@@ -104,6 +101,18 @@ function addFileEditEventListener(element, file) {
         element.addEventListener("click", () => {
             showFile(file, getCurrentFolderPath());
         });
+    }
+}
+
+function addStringToCurrentFolderPath(fileName) {
+    const current = getCurrentFolderPath();
+    if (fileName === "..") {
+        const splitted = current.split("/");
+        splitted.pop();
+        setCurrentFolderPath(splitted.length === 1 ? "/" : splitted.join("/"));
+    } else {
+        let addition = current === "/" ? "" : "/";
+        setCurrentFolderPath(current + addition + fileName);
     }
 }
 

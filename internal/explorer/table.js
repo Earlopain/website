@@ -30,7 +30,7 @@ function sortColum(index) {
     let previousValue = currentOrder[index];
     currentOrder = Array(sortType.length).fill(1);
     currentOrder[index] = previousValue * -1;
-    if(dotdot !== undefined) {
+    if (dotdot !== undefined) {
         container.appendChild(dotdot);
     }
 
@@ -56,4 +56,51 @@ function sizeSort(a, b) {
     a = convertToBytes(a.children[this].innerText);
     b = convertToBytes(b.children[this].innerText);
     return currentOrder[this] * (a - b);
+}
+
+let currentRowIndex = 0;
+let allRows;
+
+document.addEventListener('keydown', (event) => {
+    if (allRows === undefined) {
+        return;
+    }
+    getCurrentSelectedRow().classList.remove("selectedtablerow");
+    const key = event.key;
+    if (key === "ArrowUp") {
+        if (currentRowIndex > 0) {
+            currentRowIndex--;
+        }
+    }
+    else if (key === "ArrowDown") {
+        if (currentRowIndex < allRows.length - 1) {
+            currentRowIndex++;
+        }
+    }
+    else if (key === "Enter") {
+        let currentFile;
+        for (const file of previousResponse.folder.entries) {
+            if (file.index === parseInt(getCurrentSelectedRow().id.substring(4))) {
+                currentFile = file;
+                break;
+            }
+        }
+        if (currentFile.isDir) {
+            addStringToCurrentFolderPath(currentFile.fileName);
+            displayCurrentFolder();
+        } else {
+            showFile(currentFile, getCurrentFolderPath());
+        }
+    }
+    getCurrentSelectedRow().classList.add("selectedtablerow");
+});
+
+function getCurrentSelectedRow() {
+    return allRows[currentRowIndex];
+}
+
+function setCurrentRows() {
+    allRows = document.querySelectorAll("#filecontents > tr");
+    allRows[0].classList.add("selectedtablerow");
+    currentRowIndex = 0;
 }

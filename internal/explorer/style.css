@@ -34,11 +34,11 @@
     width: min-content;
 }
 
-.table tr:not(#tableheader):nth-child(odd) {
+.table tr:not(#tableheader, .selectedtablerow):nth-child(odd) {
     background-color: #3a3a3a;
 }
 
-.table tr:not(#tableheader):nth-child(even) {
+.table tr:not(#tableheader, .selectedtablerow):nth-child(even) {
     background-color: #333333;
 }
 
@@ -114,4 +114,8 @@ th.filename {
 
 .slider::-webkit-slider-thumb, .slider::-moz-range-thumb {
     background-color: #AAAAAA;
+}
+
+.selectedtablerow {
+    background-color: green;
 }

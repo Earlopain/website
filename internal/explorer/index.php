@@ -14,7 +14,7 @@ if (!isset($_SESSION["uid"])) {
     <script src="display.js"></script>
     <script src="serverActions.js"></script>
     <script src="editor.js"></script>
-    <script src="tablesort.js"></script>
+    <script src="table.js"></script>
     <title>Internal</title>
 </head>
 
