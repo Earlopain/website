@@ -37,6 +37,7 @@ class TableView {
     async displayCurrentFolder(pushToHistory = true) {
         const folderPath = this.getCurrentFolderPath();
         this.serverResponse = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
+        currentOrder = Array(sortType.length).fill(1);
         if (this.serverResponse.folder.parentFolder === null && this.serverResponse.folder.currentFolder !== "/") {
             return;
         }

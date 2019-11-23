@@ -6,6 +6,9 @@ function registerTableSort() {
         header.addEventListener("click", () => {
             const sorted = sortColumn(header.cellIndex);
             tableView.setTableEntries(sorted);
+            let previousValue = currentOrder[header.cellIndex];
+            currentOrder = Array(sortType.length).fill(1);
+            currentOrder[header.cellIndex] = previousValue * -1;
         });
     }
     currentOrder = Array(sortType.length).fill(1);
@@ -27,9 +30,6 @@ function sortColumn(index) {
         default:
             break;
     }
-    let previousValue = currentOrder[index];
-    currentOrder = Array(sortType.length).fill(1);
-    currentOrder[index] = previousValue * -1;
     if (dotdot !== undefined) {
         entriesCopy.unshift(dotdot);
     }
