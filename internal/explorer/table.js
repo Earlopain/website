@@ -20,10 +20,10 @@ function sortColumn(index) {
     const dotdot = tableView.getCurrentFolderPath() !== "/" ? entriesCopy.shift() : undefined;
     switch (sortType[index]) {
         case "string":
-            entriesCopy = entriesCopy.sort(stringSort.bind(index));
+            entriesCopy = entriesCopy.sort(folderSort(index, this.stringSort));
             break;
         case "size":
-            entriesCopy = entriesCopy.sort(sizeSort.bind(index));
+            entriesCopy = entriesCopy.sort(folderSort(index, this.sizeSort));
         default:
             break;
     }
@@ -43,30 +43,28 @@ function convertToBytes(input) {
     return split[0] * Math.pow(1024, index);
 }
 
-function stringSort(a, b) {
-    return folderSort(a, b, () => {
-        a = a.children[this].innerText;
-        b = b.children[this].innerText;
-        return currentOrder[this] * a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
-    });
+function stringSort(a, b, sortIndex) {
+    a = a.children[sortIndex].innerText;
+    b = b.children[sortIndex].innerText;
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
 }
 
-function sizeSort(a, b) {
-    return folderSort(a, b, () => {
-        a = convertToBytes(a.children[this].innerText);
-        b = convertToBytes(b.children[this].innerText);
-        return currentOrder[this] * (a - b);
-    });
+function sizeSort(a, b, sortIndex) {
+    a = convertToBytes(a.children[sortIndex].innerText);
+    b = convertToBytes(b.children[sortIndex].innerText);
+    return (a - b);
 }
 
-function folderSort(a, b, callback) {
-    const aIsDir = a.children[3].innerText === "";
-    const bIsDir = b.children[3].innerText === "";
-    if (aIsDir === bIsDir) {
-        return callback();
-    }
-    else {
-        return bIsDir - aIsDir;
+function folderSort(sortIndex, sortFunction) {
+    return (a, b) => {
+        const aIsDir = a.children[3].innerText === "";
+        const bIsDir = b.children[3].innerText === "";
+        if (aIsDir === bIsDir) {
+            return currentOrder[sortIndex] * sortFunction(a, b, sortIndex);
+        }
+        else {
+            return bIsDir - aIsDir;
+        }
     }
 }
 
