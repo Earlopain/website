@@ -47,9 +47,6 @@ class TableView {
             window.history.pushState({}, null, currentUrl.href);
         }
 
-
-        
-
         this.tableElements = [];
         if (this.serverResponse.folder.currentFolder !== "/") {
             this.tableElements.push(this.generateFileElement(this.serverResponse.folder.parentFolder));

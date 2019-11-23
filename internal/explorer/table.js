@@ -44,15 +44,34 @@ function convertToBytes(input) {
 }
 
 function stringSort(a, b) {
-    a = a.children[this].innerText;
-    b = b.children[this].innerText;
-    return currentOrder[this] * a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+    let [aIsDir, bIsDir] = getTypes(a, b);
+    if (aIsDir === bIsDir) {
+        a = a.children[this].innerText;
+        b = b.children[this].innerText;
+        return currentOrder[this] * a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+    }
+    else {
+        return bIsDir - aIsDir;
+    }
 }
 
 function sizeSort(a, b) {
-    a = convertToBytes(a.children[this].innerText);
-    b = convertToBytes(b.children[this].innerText);
-    return currentOrder[this] * (a - b);
+    let [aIsDir, bIsDir] = getTypes(a, b);
+    if (aIsDir === bIsDir) {
+        a = convertToBytes(a.children[this].innerText);
+        b = convertToBytes(b.children[this].innerText);
+        return currentOrder[this] * (a - b);
+    }
+    else {
+        return bIsDir - aIsDir;
+    }
+
+}
+
+function getTypes(a, b) {
+    aIsDir = a.children[3].innerText === "";
+    bIsDir = b.children[3].innerText === "";
+    return [aIsDir, bIsDir];
 }
 
 document.addEventListener('keydown', (event) => {
@@ -78,14 +97,14 @@ document.addEventListener('keydown', (event) => {
                 break;
             }
         }
-        if(currentFile === undefined) {
+        if (currentFile === undefined) {
             tableView.addStringToCurrentFolderPath("..");
             tableView.displayCurrentFolder();
         }
         else if (currentFile.isDir && currentFile.isExecutable && currentFile.isReadable) {
             tableView.addStringToCurrentFolderPath(currentFile.fileName);
             tableView.displayCurrentFolder();
-        } else if(!currentFile.isDir && currentFile.isReadable){
+        } else if (!currentFile.isDir && currentFile.isReadable) {
             editor.showFile(currentFile);
         }
     }
