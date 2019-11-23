@@ -15,6 +15,7 @@ if (!isset($_SESSION["uid"])) {
     <script src="serverActions.js"></script>
     <script src="editor.js"></script>
     <script src="table.js"></script>
+    <script src="manager.js"></script>
     <title>Internal</title>
 </head>
 

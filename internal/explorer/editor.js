@@ -15,7 +15,7 @@ class Editor {
     }
 
     async showFile(file) {
-        const folderPath = tableView.getCurrentFolderPath();
+        const folderPath = manager.tableView.getCurrentFolderPath();
         if ((this.currentlyOpenFile === file && this.currentlyOpenFileDir === folderPath) ||
             (this.lastClickedFile === file && this.lastClickedFileDir === folderPath)) {
             return;
@@ -67,5 +67,3 @@ class Editor {
         return "unsupported";
     }
 }
-
-let editor = new Editor("editor", "currentlyviewing");

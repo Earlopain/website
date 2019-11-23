@@ -1,8 +1,8 @@
 async function downloadSelection() {
-    const folderPath = tableView.getCurrentFolderPath();
+    const folderPath = manager.tableView.getCurrentFolderPath();
     let ids = [];
     let nonDownloadable = [];
-    for (const file of tableView.tableElements) {
+    for (const file of manager.tableView.tableElements) {
         if (file.childNodes[0].checked && file.childNodes[7].textContent === "true") {
             ids.push(file.id.substring(4));
         } else if (file.childNodes[0].checked) {
@@ -51,7 +51,7 @@ function loginAndGotoIndex() {
 
 function loginAndReloadFolder() {
     login(() => {
-        tableView.displayCurrentFolder(false);
+        manager.tableView.displayCurrentFolder(false);
     });
 }
 

@@ -5,26 +5,24 @@ class TableView {
         this.currentUserElementId = currentUserElementId;
         this.serverResponse;
         this.tableElements = [];
-        window.addEventListener("DOMContentLoaded", () => {
-            document.getElementById(this.currentFolderElementId).addEventListener("keydown", event => {
-                if (event.keyCode === 13) {
-                    tableView.displayCurrentFolder();
-                }
-            });
-            window.addEventListener("popstate", this.loadFromUrl);
-            const slider = document.getElementById("filenameslider");
-            const fileNameHeader = document.querySelector(`#${this.tableElementId} th.filename`);
-            slider.value = fileNameHeader.getBoundingClientRect().width;
-            slider.addEventListener("input", event => {
-                const newWidth = event.currentTarget.value + "px";
-                fileNameHeader.style.width = newWidth;
-                for (const entry of this.tableElements) {
-                    entry.children[1].style.width = newWidth;
-                }
-            });
-            this.loadFromUrl();
-            registerTableSort();
+
+        document.getElementById(this.currentFolderElementId).addEventListener("keydown", event => {
+            if (event.keyCode === 13) {
+                this.displayCurrentFolder();
+            }
         });
+        window.addEventListener("popstate", this.loadFromUrl);
+        const slider = document.getElementById("filenameslider");
+        const fileNameHeader = document.querySelector(`#${this.tableElementId} th.filename`);
+        slider.value = fileNameHeader.getBoundingClientRect().width;
+        slider.addEventListener("input", event => {
+            const newWidth = event.currentTarget.value + "px";
+            fileNameHeader.style.width = newWidth;
+            for (const entry of this.tableElements) {
+                entry.children[1].style.width = newWidth;
+            }
+        });
+        this.loadFromUrl();
     }
 
     loadFromUrl() {
@@ -37,7 +35,7 @@ class TableView {
     async displayCurrentFolder(pushToHistory = true) {
         const folderPath = this.getCurrentFolderPath();
         this.serverResponse = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
-        currentOrder = Array(sortType.length).fill(1);
+        manager.sorting.currentOrder = Array(manager.sorting.sortType.length).fill(1);
         if (this.serverResponse.folder.parentFolder === null && this.serverResponse.folder.currentFolder !== "/") {
             return;
         }
@@ -55,9 +53,10 @@ class TableView {
         for (const entry of this.serverResponse.folder.entries) {
             this.tableElements.push(this.generateFileElement(entry));
         }
-        this.tableElements = sortColumn(1);
+        this.tableElements = manager.sorting.sortColumn(1);
         this.setTableEntries(this.tableElements);
-        setFirstEntryActive();
+        manager.sorting.setFirstEntryActive();
+        manager.sorting.currentOrder[1] *= -1;
     }
 
     setTableEntries(entries) {
@@ -101,7 +100,7 @@ class TableView {
     addFileEditEventListener(element, file) {
         if (!file.isDir && file.isReadable) {
             element.addEventListener("click", () => {
-                editor.showFile(file);
+                manager.editor.showFile(file);
             });
         }
     }
@@ -145,5 +144,3 @@ class TableView {
         }
     }
 }
-
-let tableView = new TableView("table", "currentfolder", "loggedinas");
