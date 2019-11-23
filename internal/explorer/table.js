@@ -44,34 +44,30 @@ function convertToBytes(input) {
 }
 
 function stringSort(a, b) {
-    let [aIsDir, bIsDir] = getTypes(a, b);
-    if (aIsDir === bIsDir) {
+    return folderSort(a, b, () => {
         a = a.children[this].innerText;
         b = b.children[this].innerText;
         return currentOrder[this] * a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
-    }
-    else {
-        return bIsDir - aIsDir;
-    }
+    });
 }
 
 function sizeSort(a, b) {
-    let [aIsDir, bIsDir] = getTypes(a, b);
-    if (aIsDir === bIsDir) {
+    return folderSort(a, b, () => {
         a = convertToBytes(a.children[this].innerText);
         b = convertToBytes(b.children[this].innerText);
         return currentOrder[this] * (a - b);
+    });
+}
+
+function folderSort(a, b, callback) {
+    const aIsDir = a.children[3].innerText === "";
+    const bIsDir = b.children[3].innerText === "";
+    if (aIsDir === bIsDir) {
+        return callback();
     }
     else {
         return bIsDir - aIsDir;
     }
-
-}
-
-function getTypes(a, b) {
-    aIsDir = a.children[3].innerText === "";
-    bIsDir = b.children[3].innerText === "";
-    return [aIsDir, bIsDir];
 }
 
 document.addEventListener('keydown', (event) => {
