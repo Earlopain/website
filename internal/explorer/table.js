@@ -3,18 +3,20 @@ let sortType = ["none", "string", "string", "size", "string", "string", "string"
 
 function registerTableSort() {
     for (const header of tableView.getHeaders()) {
-        header.addEventListener("click", () => sortColum(header.cellIndex));
+        header.addEventListener("click", () => {
+            const sorted = sortColumn(header.cellIndex);
+            tableView.setTableEntries(sorted);
+        });
     }
-    currentOrder = Array(sortType.length).fill(-1);
+    currentOrder = Array(sortType.length).fill(1);
 }
 
-function sortColum(index) {
+function sortColumn(index) {
     if (sortType[index] === "none") {
         return;
     }
 
     let entriesCopy = [...tableView.tableElements].slice();
-    tableView.removeAllEntires();
     const dotdot = tableView.getCurrentFolderPath() !== "/" ? entriesCopy.shift() : undefined;
     switch (sortType[index]) {
         case "string":
@@ -28,15 +30,10 @@ function sortColum(index) {
     let previousValue = currentOrder[index];
     currentOrder = Array(sortType.length).fill(1);
     currentOrder[index] = previousValue * -1;
-    let newTableBody = document.createElement("tbody");
     if (dotdot !== undefined) {
-        newTableBody.appendChild(dotdot);
+        entriesCopy.unshift(dotdot);
     }
-
-    for (const entry of entriesCopy) {
-        newTableBody.appendChild(entry);
-    }
-    document.querySelector("#" + tableView.tableElementId).appendChild(newTableBody);
+    return entriesCopy;
 }
 
 function convertToBytes(input) {

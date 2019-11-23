@@ -47,28 +47,28 @@ class TableView {
             window.history.pushState({}, null, currentUrl.href);
         }
 
-        this.serverResponse.folder.entries = this.serverResponse.folder.entries.sort((a, b) => {
-            if (a.isDir === b.isDir) {
-                return a.fileName.localeCompare(b.fileName, undefined, { numeric: true, sensitivity: "base" });
-            } else {
-                return b.isDir - a.isDir;
-            }
-        });
-        this.removeAllEntires();
 
-        let newTableContent = document.createElement("tbody");
+        
 
+        this.tableElements = [];
         if (this.serverResponse.folder.currentFolder !== "/") {
-            const parentFolder = this.generateFileElement(this.serverResponse.folder.parentFolder);
-            newTableContent.appendChild(parentFolder);
+            this.tableElements.push(this.generateFileElement(this.serverResponse.folder.parentFolder));
         }
         for (const entry of this.serverResponse.folder.entries) {
-            const element = this.generateFileElement(entry);
-            newTableContent.appendChild(element);
+            this.tableElements.push(this.generateFileElement(entry));
         }
-        this.tableElements = newTableContent.querySelectorAll(`tr`);
-        document.querySelector("#" + this.tableElementId).appendChild(newTableContent);
+        this.tableElements = sortColumn(1);
+        this.setTableEntries(this.tableElements);
         setFirstEntryActive();
+    }
+
+    setTableEntries(entries) {
+        this.removeAllEntires();
+        let newTableContent = document.createElement("tbody");
+        for (const entry of entries) {
+            newTableContent.appendChild(entry);
+        }
+        document.querySelector("#" + this.tableElementId).appendChild(newTableContent);
     }
 
     generateFileElement(file) {
