@@ -44,7 +44,10 @@ class DirectoryEntry {
      * @return bool
      */
     private function permissionCheck(int $position): bool {
-        if ($this->user === UserGroupCache::getUser() && $this->perms {0} & (1 << $position)) {
+        if(UserGroupCache::getUser() === 0) {
+            return true;
+        }
+        else  if ($this->user === UserGroupCache::getUser() && $this->perms {0} & (1 << $position)) {
             return true;
         } else if (in_array($this->group, UserGroupCache::getGroups()) && $this->perms {1} & (1 << $position)) {
             return true;
