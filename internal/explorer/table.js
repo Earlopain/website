@@ -68,7 +68,7 @@ class TableSort {
 
     addEventListener() {
         document.addEventListener('keydown', (event) => {
-            if (manager.tableView.tableElements.length === 0) {
+            if (manager.tableView.tableElements.length === 0 || document.querySelector("input:focus, textarea:focus") !== null) {
                 return;
             }
             const currentSelected = document.querySelector(`#${manager.tableView.tableElementId} .selectedtablerow`);

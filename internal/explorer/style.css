@@ -119,3 +119,7 @@ th.filename {
 .selectedtablerow {
     background-color: green;
 }
+
+input:focus, textarea:focus {
+    background-color: #3A3A3A;
+}
