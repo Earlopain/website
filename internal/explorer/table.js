@@ -86,7 +86,7 @@ document.addEventListener('keydown', (event) => {
             tableView.addStringToCurrentFolderPath(currentFile.fileName);
             tableView.displayCurrentFolder();
         } else {
-            editor.showFile(currentFile, tableView.getCurrentFolderPath());
+            editor.showFile(currentFile);
         }
     }
 });

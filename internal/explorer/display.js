@@ -105,7 +105,7 @@ class TableView {
     addFileEditEventListener(element, file) {
         if (!file.isDir && file.isReadable) {
             element.addEventListener("click", () => {
-                editor.showFile(file, this.getCurrentFolderPath());
+                editor.showFile(file);
             });
         }
     }

@@ -14,7 +14,8 @@ class Editor {
         };
     }
 
-    async showFile(file, folderPath) {
+    async showFile(file) {
+        const folderPath = tableView.getCurrentFolderPath();
         if ((this.currentlyOpenFile === file && this.currentlyOpenFileDir === folderPath) ||
             (this.lastClickedFile === file && this.lastClickedFileDir === folderPath)) {
             return;
