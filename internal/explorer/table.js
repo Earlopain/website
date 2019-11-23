@@ -65,12 +65,15 @@ document.addEventListener('keydown', (event) => {
     const currentSelected = document.querySelector(".selectedtablerow");
     const key = event.key;
     if (key === "ArrowUp") {
+        event.preventDefault();
         setActive(currentSelected.previousElementSibling, currentSelected);
     }
     else if (key === "ArrowDown") {
+        event.preventDefault();
         setActive(currentSelected.nextSibling, currentSelected);
     }
     else if (key === "Enter") {
+        event.preventDefault();
         let currentFile;
         for (const file of tableView.serverResponse.folder.entries) {
             if (file.index === parseInt(currentSelected.id.substring(4))) {
