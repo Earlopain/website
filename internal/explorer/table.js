@@ -85,10 +85,10 @@ document.addEventListener('keydown', (event) => {
             tableView.addStringToCurrentFolderPath("..");
             tableView.displayCurrentFolder();
         }
-        else if (currentFile.isDir) {
+        else if (currentFile.isDir && currentFile.isExecutable && currentFile.isReadable) {
             tableView.addStringToCurrentFolderPath(currentFile.fileName);
             tableView.displayCurrentFolder();
-        } else {
+        } else if(!currentFile.isDir && currentFile.isReadable){
             editor.showFile(currentFile);
         }
     }

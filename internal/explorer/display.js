@@ -8,7 +8,7 @@ class TableView {
         window.addEventListener("DOMContentLoaded", () => {
             document.getElementById(this.currentFolderElementId).addEventListener("keydown", event => {
                 if (event.keyCode === 13) {
-                    displayCurrentFolder();
+                    tableView.displayCurrentFolder();
                 }
             });
             window.addEventListener("popstate", this.loadFromUrl);
@@ -37,9 +37,7 @@ class TableView {
     async displayCurrentFolder(pushToHistory = true) {
         const folderPath = this.getCurrentFolderPath();
         this.serverResponse = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
-        if (this.serverResponse.folder.entries.length === 0) {
-            this.setCurrentFolderPath("/");
-            this.displayCurrentFolder();
+        if (this.serverResponse.folder.parentFolder === null && this.serverResponse.folder.currentFolder !== "/") {
             return;
         }
         document.getElementById(this.currentUserElementId).innerHTML = this.serverResponse.username;
@@ -95,7 +93,7 @@ class TableView {
     }
 
     addFolderEventListener(element, file) {
-        if (file.isDir && file.isExecutable) {
+        if (file.isDir && file.isExecutable && file.isReadable) {
             element.addEventListener("click", () => {
                 this.addStringToCurrentFolderPath(file.fileName);
                 this.displayCurrentFolder();
