@@ -55,21 +55,17 @@ function loginAndReloadFolder() {
     });
 }
 
-async function serverRequest(type, postData) {
+function serverRequest(type, postData) {
     postData.action = type;
-    const result = await httpPOST("previlegeWrapper.php", postData);
-    return result;
-}
-
-function httpPOST(url, formDataJSON = {}) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
         let formData = new FormData();
-        formData.append("data", btoa(JSON.stringify(formDataJSON)));
-        xmlHttp.open("POST", url, true);
+        formData.append("data", btoa(JSON.stringify(postData)));
+        xmlHttp.open("POST", "previlegeWrapper.php", true);
         xmlHttp.onload = event => {
             resolve(event.target.responseText);
         };
         xmlHttp.send(formData);
     });
+
 }

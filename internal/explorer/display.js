@@ -97,7 +97,6 @@ class TableView {
     addFolderEventListener(element, file) {
         if (file.isDir && file.isExecutable) {
             element.addEventListener("click", () => {
-
                 this.addStringToCurrentFolderPath(file.fileName);
                 this.displayCurrentFolder();
             });
