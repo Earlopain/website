@@ -1,6 +1,6 @@
 <?php
 
-$json = base64_decode($_REQUEST["data"], true);
+$json = isset($_REQUEST["data"]) ? base64_decode($_REQUEST["data"], true) : false;
 
 if ($json === false) {
     require_once "htmlHelper.php";
