@@ -22,7 +22,15 @@ class TableSort {
         const dotdot = manager.tableView.getCurrentFolderPath() !== "/" ? entriesCopy.shift() : undefined;
         switch (this.sortType[index]) {
             case "string":
-                entriesCopy = entriesCopy.sort(this.folderSort(index, this.stringSort));
+                const hexValidator = /^[0-9A-Fa-f]*$/;
+                let doNumeric = false;
+                for (const element of entriesCopy.slice(0, 10)) {
+                    if(!hexValidator.test(element.children[1].innerText.split(".")[0])) {
+                        doNumeric = true;
+                        break;
+                    }
+                }
+                entriesCopy = entriesCopy.sort(this.folderSort(index, this.stringSort, doNumeric));
                 break;
             case "size":
                 entriesCopy = entriesCopy.sort(this.folderSort(index, this.sizeSort));
@@ -41,10 +49,10 @@ class TableSort {
         return split[0] * Math.pow(1024, index);
     }
 
-    stringSort(a, b, sortIndex) {
+    stringSort(a, b, sortIndex, doNumeric) {
         a = a.children[sortIndex].innerText;
         b = b.children[sortIndex].innerText;
-        return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+        return a.localeCompare(b, undefined, { numeric: doNumeric, sensitivity: "base",usage: "sort"});
     }
 
     sizeSort(a, b, sortIndex) {
@@ -53,12 +61,12 @@ class TableSort {
         return a - b;
     }
 
-    folderSort(sortIndex, sortFunction) {
+    folderSort(sortIndex, sortFunction, extraParam) {
         return (a, b) => {
             const aIsDir = a.children[3].innerText === "";
             const bIsDir = b.children[3].innerText === "";
             if (aIsDir === bIsDir) {
-                return this.currentOrder[sortIndex] * sortFunction(a, b, sortIndex);
+                return this.currentOrder[sortIndex] * sortFunction(a, b, sortIndex, extraParam);
             }
             else {
                 return bIsDir - aIsDir;
