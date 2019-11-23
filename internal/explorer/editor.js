@@ -22,7 +22,6 @@ class Editor {
         }
         this.lastClickedFile = file;
         this.lastClickedFileDir = folderPath;
-        document.getElementById(this.currentlyViewingId).innerHTML = ", viewing: " + file.fileName;
         let editor = document.getElementById(this.elementId);
         const json = { action: "getsinglefile", folder: folderPath, id: file.index };
         const mimeType = await serverRequest("getsinglefile", { folder: folderPath, id: file.index, mimeonly: "true" });
@@ -30,6 +29,7 @@ class Editor {
         if (elementType === "unsupported") {
             return;
         }
+        document.getElementById(this.currentlyViewingId).innerHTML = ", viewing: " + file.fileName;
         editor.innerHTML = "";
         let mediaElement = document.createElement(elementType);
         if (elementType === "textarea") {
