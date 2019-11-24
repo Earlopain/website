@@ -10,8 +10,8 @@ if (isset($_SESSION["uid"])) {
 
 <head>
     <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
-    <script src="serverActions.js"></script>
-    <link rel="stylesheet" type="text/css" href="loginstyle.css">
+    <script src="js/serverActions.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/loginstyle.css">
     <title>Login Page</title>
 </head>
 <body>

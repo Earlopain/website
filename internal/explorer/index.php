@@ -10,12 +10,12 @@ if (!isset($_SESSION["uid"])) {
 
 <head>
     <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
-    <link rel="stylesheet" href="style.css">
-    <script src="display.js"></script>
-    <script src="serverActions.js"></script>
-    <script src="editor.js"></script>
-    <script src="table.js"></script>
-    <script src="manager.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/display.js"></script>
+    <script src="js/serverActions.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/table.js"></script>
+    <script src="js/manager.js"></script>
     <title>Internal</title>
 </head>
 
