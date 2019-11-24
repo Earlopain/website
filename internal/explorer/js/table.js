@@ -56,8 +56,8 @@ class TableSort {
     }
 
     sizeSort(a, b, sortIndex) {
-        a = a.convertToBytes(a.children[sortIndex].innerText);
-        b = b.convertToBytes(b.children[sortIndex].innerText);
+        a = TableSort.prototype.convertToBytes(a.children[sortIndex].innerText);
+        b = TableSort.prototype.convertToBytes(b.children[sortIndex].innerText);
         return a - b;
     }
 
