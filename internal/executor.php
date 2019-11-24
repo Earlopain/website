@@ -51,6 +51,9 @@ function getCommand() {
         case 'shortmovie':
             $command = youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
             break;
+        case 'youtube':
+            $command = youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s");
+            break;
         default:
             $command = "echo test";
             break;

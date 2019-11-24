@@ -39,6 +39,9 @@
     <div class="buttoncontainer">
         <button class="button" onclick="executeOnServer('shortmovie')">Short Movies</button>
     </div>
+    <div class="buttoncontainer">
+        <button class="button" onclick="executeOnServer('youtube')">Youtube Download</button>
+    </div>
     <p></p>
     <div class="buttoncontainer">
         <textarea id="commandout" class="output button">test</textarea>
