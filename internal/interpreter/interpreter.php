@@ -1,5 +1,5 @@
 <?php
-
+ini_set("log_errors", 0);
 set_time_limit(0.1);
 
 if (isset($_POST["code"])) {
