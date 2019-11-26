@@ -37,6 +37,8 @@ class TableView {
         this.serverResponse = JSON.parse(await serverRequest("getdir", { folder: folderPath }));
         manager.sorting.currentOrder = Array(manager.sorting.sortType.length).fill(1);
         if (this.serverResponse.folder.parentFolder === null && this.serverResponse.folder.currentFolder !== "/") {
+            this.addStringToCurrentFolderPath("..");
+            this.displayCurrentFolder();
             return;
         }
         document.getElementById(this.currentUserElementId).innerHTML = this.serverResponse.username;
