@@ -79,7 +79,6 @@ class DirectoryInfo {
                 $entry = new DirectoryEntry($parentFolder, $parentFolder->getRealPath(), -1);
                 $this->parentFolder = $entry;
                 $this->addEntryToUserGroupMap($entry);
-                
             }
 
             $counter = 0;
@@ -116,14 +115,16 @@ class UserGroupCache {
 
     public static function resolveUser(int $uid): string {
         if (!isset(self::$uidMap[$uid])) {
-            self::$uidMap[$uid] = posix_getpwuid($uid)["name"];
+            $data = posix_getpwuid($uid);
+            self::$uidMap[$uid] = $data === false ? "ERROR" : $data["name"];
         }
         return self::$uidMap[$uid];
     }
 
     public static function resolveGroup(int $gid): string {
         if (!isset(self::$gidMap[$gid])) {
-            self::$gidMap[$gid] = posix_getgrgid($gid)["name"];
+            $data = posix_getgrgid($gid);
+            self::$gidMap[$gid] = $data === false ? "ERROR" : $data["name"];
         }
         return self::$gidMap[$gid];
     }
