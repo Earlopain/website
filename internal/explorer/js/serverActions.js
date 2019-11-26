@@ -38,9 +38,11 @@ async function login(successCallback = () => { }) {
     const status = await serverRequest("validatePassword", { user: user, password: password });
     if (status !== "false") {
         successCallback();
+        document.getElementById("username").value = "";
     } else {
         alert("Wrong credentials");
     }
+    document.getElementById("password").value = "";
 }
 
 function loginAndGotoIndex() {
