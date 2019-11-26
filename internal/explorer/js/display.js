@@ -81,8 +81,8 @@ class TableView {
         row.appendChild(fileNameColumn);
         row.appendChild(this.createTableColumn("ext", file.ext));
         row.appendChild(this.createTableColumn("size", file.isDir ? "" : file.size));
-        row.appendChild(this.createTableColumn("user", file.userString));
-        row.appendChild(this.createTableColumn("group", file.groupString));
+        row.appendChild(this.createTableColumn("user", this.serverResponse.folder.uidMap[file.user]));
+        row.appendChild(this.createTableColumn("group", this.serverResponse.folder.gidMap[file.group]));
         row.appendChild(this.createTableColumn("perms", file.perms));
         row.appendChild(this.createTableColumn("readable", file.isReadable));
         row.appendChild(this.createTableColumn("writeable", file.isWriteable));
