@@ -24,8 +24,8 @@ class DirectoryEntry {
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = $fileInfo->getOwner();
         $this->group = $fileInfo->getGroup();
-        $this->isReadable = $fileInfo->isReadable();
-        $this->isWriteable = $fileInfo->isWritable();
+        $this->isReadable = UserGroupCache::isRoot() ? true : $fileInfo->isReadable();
+        $this->isWriteable = UserGroupCache::isRoot() ? true : $fileInfo->isWritable();
         $this->isExecutable = $fileInfo->isExecutable();
     }
 
@@ -85,7 +85,6 @@ class DirectoryInfo {
 
 class UserGroupCache {
     protected static $uid;
-    protected static $gids;
     protected static $uidMap = [];
     protected static $gidMap = [];
 
@@ -101,5 +100,12 @@ class UserGroupCache {
             self::$gidMap[$gid] = posix_getgrgid($gid)["name"];
         }
         return self::$gidMap[$gid];
+    }
+
+    public static function isRoot() {
+        if(!isset(self::$uid)) {
+            self::$uid = posix_getuid();
+        }
+        return self::$uid === 0;
     }
 }
