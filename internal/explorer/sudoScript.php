@@ -18,7 +18,7 @@ switch ($json->action) {
         require_once "getFolderInfo.php";
         $dir = new DirectoryInfo($json->folder, [$json->id]);
         $file = $dir->entries[0];
-        echo mime_content_type($file->absolutePath);
+        echo mime_content_type($file->getAbsolutePath());
         break;
     case "validatePassword":
         login($json->user, $json->password);
@@ -39,7 +39,7 @@ function getSingleFile($folder, $id) {
     $dir = new DirectoryInfo($folder, [$id]);
     $file = $dir->entries[0];
     $stdin = fopen('php://stdin', 'r');
-    $fd = fopen($file->absolutePath, "r");
+    $fd = fopen($file->getAbsolutePath(), "r");
     while (true) {
         $start = intval(fgets($stdin));
         $length = intval(fgets($stdin));
@@ -94,11 +94,11 @@ function zipSelection($path, $ids) {
             continue;
         }
         if (!$file->isDir) {
-            $zip->addFile($file->absolutePath, $file->fileName);
+            $zip->addFile($file->getAbsolutePath(), $file->fileName);
         } else {
-            $folderPath = dirname($file->absolutePath);
-            $offset = strlen(substr($file->absolutePath, 0, strlen($folderPath)));
-            $subdir = new RecursiveDirectoryIterator($file->absolutePath, RecursiveDirectoryIterator::SKIP_DOTS);
+            $folderPath = dirname($file->getAbsolutePath());
+            $offset = strlen(substr($file->getAbsolutePath(), 0, strlen($folderPath)));
+            $subdir = new RecursiveDirectoryIterator($file->getAbsolutePath(), RecursiveDirectoryIterator::SKIP_DOTS);
             $subdirfiles = new RecursiveIteratorIterator($subdir, RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
             foreach ($subdirfiles as $subfile) {
                 if (!$subfile->isReadable() || $subfile->isDir()) {

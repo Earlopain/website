@@ -3,7 +3,6 @@ setlocale(LC_ALL, "en_US.UTF-8");
 class DirectoryEntry {
     public $fileName;
     public $ext;
-    public $absolutePath;
     public $index;
     public $isDir;
     public $size;
@@ -14,9 +13,11 @@ class DirectoryEntry {
     public $user;
     public $group;
 
+    protected $absolutePath;
+
     public function __construct(SplFileInfo $fileInfo, string $realPath, int $index) {
+        //public members, will be transmitted to webpage
         $this->fileName = $fileInfo->getBasename();
-        $this->absolutePath = $realPath;
         $this->index = $index;
         $this->isDir = $fileInfo->isDir();
         $this->ext = $this->isDir ? "" : $fileInfo->getExtension();
@@ -27,15 +28,22 @@ class DirectoryEntry {
         $this->isReadable = UserGroupCache::isRoot() ? true : $fileInfo->isReadable();
         $this->isWriteable = UserGroupCache::isRoot() ? true : $fileInfo->isWritable();
         $this->isExecutable = $fileInfo->isExecutable();
+
+        //protected members, internal to php only
+        $this->absolutePath = $realPath;
     }
 
     private function formatBytes(int $bytes): string {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $units = array("B", "KB", "MB", "GB", "TB");
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
-        return round($bytes, 2) . ' ' . $units[$pow];
+        return round($bytes, 2) . " " . $units[$pow];
+    }
+
+    public function getAbosultePath() {
+        return $this->absolutePath;
     }
 }
 
