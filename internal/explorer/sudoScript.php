@@ -85,13 +85,12 @@ function loginFail($file) {
 
 function zipSelection($path, $ids) {
     require_once "getFolderInfo.php";
-    $dir = new DirectoryInfo($path, explode(",", $ids));
     $zipPath = tempnam(sys_get_temp_dir(), "zipdownload");
     $dir = new DirectoryInfo($path, explode(",", $ids));
     $zip = new ZipArchive();
     $zip->open($zipPath, ZipArchive::OVERWRITE | ZipArchive::CREATE);
     foreach ($dir->entries as $file) {
-        if (!$file->infoObject->isReadable()) {
+        if (!$file->isReadable) {
             continue;
         }
         if (!$file->isDir) {

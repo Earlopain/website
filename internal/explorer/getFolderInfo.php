@@ -13,7 +13,6 @@ class DirectoryEntry {
     public $isExecutable;
     public $user;
     public $group;
-    public $infoObject;
 
     public function __construct(SplFileInfo $fileInfo, string $realPath, int $index) {
         $this->fileName = $fileInfo->getBasename();
@@ -25,35 +24,12 @@ class DirectoryEntry {
         $this->perms = substr(sprintf('%o', $fileInfo->getPerms()), -3);
         $this->user = $fileInfo->getOwner();
         $this->group = $fileInfo->getGroup();
-        $readableBitSet = $this->permissionCheck(2);
-        $writeableBitSet = $this->permissionCheck(1);
-        $executableBitSet = $this->permissionCheck(0);
-        $this->isReadable = $this->isDir ? $executableBitSet : $readableBitSet;
-        $this->isWriteable = $this->isDir ? $executableBitSet && $writeableBitSet : $writeableBitSet;
-        $this->isExecutable = $executableBitSet;
-        $this->infoObject = $fileInfo;
-    }
-    /**
-     * Checks wether or not a given bit is set on $this->perms
-     *
-     * @param  integer $position
-     * @return bool
-     */
-    private function permissionCheck(int $position): bool {
-        if(UserGroupCache::getExecutingUser() === 0) {
-            return true;
-        }
-        else  if ($this->user === UserGroupCache::getExecutingUser() && $this->perms {0} & (1 << $position)) {
-            return true;
-        } else if (in_array($this->group, UserGroupCache::getExecutingGroups()) && $this->perms {1} & (1 << $position)) {
-            return true;
-        } else if ($this->perms {2} & (1 << $position)) {
-            return true;
-        }
-        return false;
+        $this->isReadable = $fileInfo->isReadable();
+        $this->isWriteable = $fileInfo->isWritable();
+        $this->isExecutable = $fileInfo->isExecutable();
     }
 
-    public function formatBytes(int $bytes): string {
+    private function formatBytes(int $bytes): string {
         $units = array('B', 'KB', 'MB', 'GB', 'TB');
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
@@ -125,19 +101,5 @@ class UserGroupCache {
             self::$gidMap[$gid] = posix_getgrgid($gid)["name"];
         }
         return self::$gidMap[$gid];
-    }
-
-    public static function getExecutingUser(): int {
-        if (!isset(self::$uid)) {
-            self::$uid = posix_getuid();
-        }
-        return self::$uid;
-    }
-
-    public static function getExecutingGroups() : array {
-        if (!isset(self::$gids)) {
-            self::$gids = posix_getgroups();
-        }
-        return self::$gids;
     }
 }
