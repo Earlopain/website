@@ -102,7 +102,7 @@ class DirectoryInfo {
             $this->uidMap[$dirEntry->user] = UserGroupCache::resolveUser($dirEntry->user);
         }
         if(!isset($this->gidMap[$dirEntry->group])) {
-            $this->gidMap[$dirEntry->group] = UserGroupCache::resolveUser($dirEntry->group);
+            $this->gidMap[$dirEntry->group] = UserGroupCache::resolveGroup($dirEntry->group);
         }
     }
 }
@@ -115,16 +115,14 @@ class UserGroupCache {
 
     public static function resolveUser(int $uid): string {
         if (!isset(self::$uidMap[$uid])) {
-            $data = posix_getpwuid($uid);
-            self::$uidMap[$uid] = $data === false ? "ERROR" : $data["name"];
+            self::$uidMap[$uid] = posix_getpwuid($uid)["name"];
         }
         return self::$uidMap[$uid];
     }
 
     public static function resolveGroup(int $gid): string {
         if (!isset(self::$gidMap[$gid])) {
-            $data = posix_getgrgid($gid);
-            self::$gidMap[$gid] = $data === false ? "ERROR" : $data["name"];
+            self::$gidMap[$gid] = posix_getgrgid($gid)["name"];
         }
         return self::$gidMap[$gid];
     }
