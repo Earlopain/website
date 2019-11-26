@@ -42,7 +42,7 @@ class DirectoryEntry {
         return round($bytes, 2) . " " . $units[$pow];
     }
 
-    public function getAbosultePath() {
+    public function getAbsolutePath() {
         return $this->absolutePath;
     }
 }
