@@ -7,7 +7,7 @@ generateHeadBoilerplate();?>
     <title>Some Stuff</title>
     <script src="/projects/util.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <link rel="stylesheet" href="/css/projects/visualization/discord.css">
+    <link rel="stylesheet" href="discord.css">
 
 </head>
 
@@ -19,7 +19,7 @@ generateHeadBoilerplate();?>
         <button onclick="submitNew()">Submit</button>
         Missing: <select id="dropdownmissing"></select>
         <p></p>
-        Checks discord invite link every 20s or so and puts time and count in a .cvs file available raw <a href="/projects/visualization/discordoutput/41771983423143937.csv">like
+        Checks discord invite link every 20s or so and puts time and count in a .cvs file available raw <a href="discordoutput/41771983423143937.csv">like
             this</a>
         <p></p>
         <div>
@@ -32,7 +32,7 @@ generateHeadBoilerplate();?>
         </div>
 
     </div>
-    <script src="/projects/visualization/visualize.js"></script>
+    <script src="visualize.js"></script>
     <svg id="svg"></svg>
 
 </body>

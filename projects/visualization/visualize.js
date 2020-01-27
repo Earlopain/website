@@ -154,7 +154,7 @@ let dropdownMissing = document.getElementById("dropdownmissing");
 populateDropdown()
 
 async function populateDropdown() {
-    const json = JSON.parse(await getURL("/projects/visualization/tracking.json")).servers;
+    const json = JSON.parse(await getURL("tracking.json")).servers;
     json.reverse().forEach(element => {
         var option = document.createElement('option');
         option.text = element.name
@@ -175,7 +175,7 @@ function changeGraph() {    //gets called if dropdown menu selected value change
 
 async function loadData(id) {
     try {
-        return await getURL("/projects/visualization/discordoutput/" + id + ".csv");
+        return await getURL("discordoutput/" + id + ".csv");
     } catch (error) {   //a server was added but the script didn't create the datafile yet
         return undefined;
     }
@@ -222,5 +222,5 @@ function getNearestDataPoint(array, dateWished) {
 
 async function submitNew() {
     const invite = document.getElementById("textfield").value;
-    logResponse(await postURL("/projects/visualization/discord.php", { "invite": invite }));
+    logResponse(await postURL("discord.php", { "invite": invite }));
 }

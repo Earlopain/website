@@ -2,11 +2,12 @@
 <html>
 
 <head>
-    <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
+    <?php require_once "htmlHelper.php";
+generateHeadBoilerplate();?>
     <title>Steam Stuff</title>
     <script src="/projects/steamapi.js"></script>
     <script src="/projects/util.js"></script>
-    <script src="/projects/steamgames/humblecompare.js"></script>
+    <script src="humblecompare.js"></script>
 </head>
 
 <body>

@@ -3,7 +3,7 @@ async function startCompare() {
     const steamuser = await SteamUser.create(steamid);
     const json = await steamuser.getGames();
     const games = json.games.map(x => { return x.appid });
-    const humbleData = JSON.parse(await getURL("/projects/steamgames/humble.json"));
+    const humbleData = JSON.parse(await getURL("humble.json"));
     let missingCount = 0;
     let totalCount = 0
 
@@ -20,11 +20,11 @@ async function startCompare() {
                 missingCount++;
             }
         });
-        
+
         let div = document.createElement("div");
         div.appendChild(document.createTextNode(time));
         div.appendChild(document.createElement("p"));
-        if (missing.length === 0){
+        if (missing.length === 0) {
             div.appendChild(document.createTextNode("Completed"))
             container.appendChild(div);
             return;

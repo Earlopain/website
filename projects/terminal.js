@@ -221,7 +221,7 @@ class Terminal {
         let link = document.createElement("link");
         link.type = "text/css";
         link.rel = "stylesheet";
-        link.href = "/css/terminal.css";
+        link.href = "/terminal.css";
 
         head.appendChild(link);
     }
