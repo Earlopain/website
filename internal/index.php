@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
+    <?php require_once "htmlHelper.php";
+generateHeadBoilerplate();?>
     <link rel="stylesheet" href="style.css">
     <script src="main.js"></script>
     <title>Internal</title>
@@ -19,7 +20,7 @@
         <button class="button" onclick="executeOnServer('plexrefreshcomics')">Plex Refresh Comics</button>
     </div>
     <div class="buttoncontainer">
-        <button class="button" onclick="getFileFromServer('/media/plex/cronjobs/e621comics/pools.json')">Plex Edit Comics</button>
+        <button class="button" onclick="getFileFromServer('/media/plex/software/e621comics/pools.json')">Plex Edit Comics</button>
     </div>
     <div class="buttoncontainer">
         <button class="button" onclick="executeOnServer('plextagimages')">Plex Tag Images</button>
