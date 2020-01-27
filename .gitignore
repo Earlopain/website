@@ -2,8 +2,8 @@ pihole/**
 /projects/visualization/discordoutput/**
 /projects/visualization/tracking.json
 /projects/e621history/data.*
-/projects/e621history/userfavs
-/projects/e621history/postjson
+/projects/e621history/e621posts
+/projects/e621history/e621userfavs
 secrets.txt
 node_modules
 .htaccess
