@@ -28,8 +28,8 @@ function postURL(url, data) {
     })
 }
 
-function logResponse(request){
-    if(request.status !== 200)
+function logResponse(request) {
+    if (request.status !== 200)
         infoMessage(request.responseText, request.status);
     else
         infoMessage("Success");

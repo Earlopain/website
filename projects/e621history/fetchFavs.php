@@ -1,5 +1,5 @@
 <?php
-set_time_limit(10);   //1h
+set_time_limit(10); //1h
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $json = file_get_contents('php://input');
     http_response_code(400);
@@ -22,18 +22,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 }
 
-function isValidUsername($username)
-{
+function isValidUsername($username) {
     if ($username === "") {
         return false;
     }
     $c = curl_init();
-    curl_setopt($c, CURLOPT_URL, "https://e621.net/user/show.json?name=".$username);
+    curl_setopt($c, CURLOPT_URL, "https://e621.net/user/show.json?name=" . $username);
     curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($c, CURLOPT_USERAGENT, "favhistory/earlopain");
-    $json =  curl_exec($c);
+    $json = curl_exec($c);
     $responsecode = curl_getinfo($c, CURLINFO_HTTP_CODE);
-    if ($responsecode === 302) {   //redirect, only if user not exists
+    if ($responsecode === 302) { //redirect, only if user not exists
         return false;
     }
     return true;

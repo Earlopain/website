@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
+    <?php require_once "htmlHelper.php";
+generateHeadBoilerplate();?>
 	<title>Monosodium Glutamate</title>
 </head>
 

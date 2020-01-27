@@ -20,18 +20,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (alreadyTracking($inviteJSON["guild"]["id"])) {
         echo "Already tracking that";
         return;
-    };
+    }
     addServer($inviteJSON["guild"]["id"], $inviteJSON["code"], $inviteJSON["guild"]["name"]);
     http_response_code(200);
     echo "Success";
 }
 //only gets called if server does not have a valid invite
-function addServer($id, $invite, $name)
-{
+function addServer($id, $invite, $name) {
     $currentJSON = json_decode(file_get_contents("./tracking.json"), true);
     //if already exists but no valid invite, replace the one instead of appending a new
     foreach ($currentJSON["servers"] as $key => $server) {
-        if ($server["id"] === $id && !$server["invite"]) {   //found a server missing an invite with the right id, so put it there
+        if ($server["id"] === $id && !$server["invite"]) { //found a server missing an invite with the right id, so put it there
             $currentJSON["servers"][$key]["invite"] = $invite;
             $currentJSON["servers"][$key]["name"] = $name;
             file_put_contents("./tracking.json", json_encode($currentJSON));
@@ -45,15 +44,16 @@ function addServer($id, $invite, $name)
     file_put_contents("./tracking.json", json_encode($currentJSON));
 }
 
-function isValidInvite($id)
-{   //no code specified but doesn't return the same error as invalid so return prematurely
-    if($id === "")
+function isValidInvite($id) { //no code specified but doesn't return the same error as invalid so return prematurely
+    if ($id === "") {
         return false;
+    }
+
     $c = curl_init();
-    curl_setopt($c, CURLOPT_URL, "https://discordapp.com/api/v6/invite/".$id."?with_counts=true");
+    curl_setopt($c, CURLOPT_URL, "https://discordapp.com/api/v6/invite/" . $id . "?with_counts=true");
     curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-    $json =  curl_exec($c);
-    $jsonparsed;
+    $json = curl_exec($c);
+    $jsonparsed = null;
     try {
         $jsonparsed = json_decode($json, true);
     } catch (Exception $e) {
@@ -65,12 +65,11 @@ function isValidInvite($id)
     return $jsonparsed;
 }
 
-function alreadyTracking($id)
-{
+function alreadyTracking($id) {
     $currentJSON = json_decode(file_get_contents("./tracking.json"), true);
 
     foreach ($currentJSON["servers"] as $value) {
-        if ($value["id"] === $id  && isset($value["invite"])) {
+        if ($value["id"] === $id && isset($value["invite"])) {
             return true;
         }
     }

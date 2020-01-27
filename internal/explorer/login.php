@@ -9,7 +9,8 @@ if (isset($_SESSION["uid"])) {
 <html lang="en">
 
 <head>
-    <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
+    <?php require_once "htmlHelper.php";
+generateHeadBoilerplate();?>
     <script src="js/serverActions.js"></script>
     <link rel="stylesheet" type="text/css" href="css/loginstyle.css">
     <title>Login Page</title>

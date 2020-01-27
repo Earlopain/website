@@ -82,10 +82,10 @@ class DirectoryInfo {
     }
 
     private function addEntryToUserGroupMap(DirectoryEntry $dirEntry) {
-        if(!isset($this->uidMap[$dirEntry->user])) {
+        if (!isset($this->uidMap[$dirEntry->user])) {
             $this->uidMap[$dirEntry->user] = UserGroupCache::resolveUser($dirEntry->user);
         }
-        if(!isset($this->gidMap[$dirEntry->group])) {
+        if (!isset($this->gidMap[$dirEntry->group])) {
             $this->gidMap[$dirEntry->group] = UserGroupCache::resolveGroup($dirEntry->group);
         }
     }
@@ -111,7 +111,7 @@ class UserGroupCache {
     }
 
     public static function isRoot() {
-        if(!isset(self::$uid)) {
+        if (!isset(self::$uid)) {
             self::$uid = posix_getuid();
         }
         return self::$uid === 0;

@@ -25,7 +25,7 @@ class TableSort {
                 const hexValidator = /^[0-9A-Fa-f]*$/;
                 let doNumeric = false;
                 for (const element of entriesCopy.slice(0, 10)) {
-                    if(!hexValidator.test(element.children[1].innerText.split(".")[0])) {
+                    if (!hexValidator.test(element.children[1].innerText.split(".")[0])) {
                         doNumeric = true;
                         break;
                     }
@@ -52,7 +52,7 @@ class TableSort {
     stringSort(a, b, sortIndex, doNumeric) {
         a = a.children[sortIndex].innerText;
         b = b.children[sortIndex].innerText;
-        return a.localeCompare(b, undefined, { numeric: doNumeric, sensitivity: "base",usage: "sort"});
+        return a.localeCompare(b, undefined, { numeric: doNumeric, sensitivity: "base", usage: "sort" });
     }
 
     sizeSort(a, b, sortIndex) {

@@ -2,7 +2,8 @@
 <html lang="en">
 
 <head>
-    <?php require_once "htmlHelper.php"; generateHeadBoilerplate(); ?>
+    <?php require_once "htmlHelper.php";
+generateHeadBoilerplate();?>
     <link rel="stylesheet" href="style.css">
     <title>Interpreter</title>
 </head>

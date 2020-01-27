@@ -4,7 +4,7 @@ if (!isset($argv)) {
     redirectToFolderOfFile();
 }
 $json = json_decode(base64_decode($argv[1]));
-if($json->action !== "validatePassword") {
+if ($json->action !== "validatePassword") {
     dropPrivileges($json->uid);
 }
 switch ($json->action) {
