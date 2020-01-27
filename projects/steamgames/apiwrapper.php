@@ -1,7 +1,7 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    include $_SERVER['DOCUMENT_ROOT'].'/serverside/secretParser.php';
-    include $_SERVER['DOCUMENT_ROOT'].'/serverside/proxy.php';
+    include $_SERVER['DOCUMENT_ROOT'] . '/secretParser.php';
+    include $_SERVER['DOCUMENT_ROOT'] . '/proxy.php';
 
     $json = file_get_contents('php://input');
     $obj = json_decode($json, true);
@@ -13,6 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "No url specified";
         return;
     }
-    $response = proxyGetUrl($obj["url"]."&key=".getSecret("steam"));
+    $response = proxyGetUrl($obj["url"] . "&key=" . getSecret("steam"));
     echo $response;
 }

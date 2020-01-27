@@ -1,4 +1,4 @@
-const proxyURL = "/serverside/projects/steamgames/apiwrapper.php"
+const proxyURL = "/projects/steamgames/apiwrapper.php"
 const steamURL = "https://api.steampowered.com/";
 
 class SteamUser {

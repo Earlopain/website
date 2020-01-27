@@ -1,11 +1,10 @@
 pihole/**
-serverside/projects/visualization/discordoutput/**
-serverside/projects/visualization/tracking.json
-serverside/projects/e621history/data.*
-serverside/projects/e621history/userfavs
-serverside/projects/e621history/postjson
-.vscode/**
-serverside/secrets.txt
+/projects/visualization/discordoutput/**
+/projects/visualization/tracking.json
+/projects/e621history/data.*
+/projects/e621history/userfavs
+/projects/e621history/postjson
+secrets.txt
 node_modules
 .htaccess
 package-lock.json
