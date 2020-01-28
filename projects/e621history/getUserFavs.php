@@ -12,12 +12,12 @@ function tagsMatchesFilter($tagString, $filterString) {
     foreach ($seperatedFilters as $filter) {
         $inverse = $filter{0} === "-";
         $filterNoMinus = $inverse ? substr($filter, 1) : $filter;
-        if ($result === false) {
-            break;
-        }
         $regex = RegexCache::escapeStringToRegex($filterNoMinus);
         $result = preg_match($regex, $tagString) === 1 ? true : false;
         $result = $result !== $inverse;
+        if ($result === false) {
+            break;
+        }
     }
     return $result;
 }
