@@ -38,19 +38,10 @@ class UserfavHistory {
             $csvHeader .= ";" . $key;
         }
 
-        $filestat = getAllStat();
-        $sortKeys = array_filter(array_keys($postMatches), function ($a) use (&$filestat) {
-            return isset($filestat[$a]);
-        });
-        uasort($sortKeys, function ($a, $b) use (&$filestat) {
-            return $filestat[$a] - $filestat[$b];
-        });
         $csv = "";
-        foreach ($sortKeys as $md5) {
-            if (!isset($filestat[$md5])) {
-                continue;
-            }
-            $csv .= "\n" . date("Y-m-d", $filestat[$md5]);
+        for ($i = 0; $i < count($userfavs); $i++) {
+            $md5 = $userfavs[$i];
+            $csv .= "\n" . $i;
             foreach (array_keys($this->tagGroups) as $key) {
                 $tagCounter[$key] += $postMatches[$md5][$key];
                 $csv .= ";" . $tagCounter[$key];
@@ -127,20 +118,6 @@ class E621Post {
     public static function createFromMd5($md5) {
         return new self(json_decode(file_get_contents(self::$postJsonFolder . "/" . $md5 . ".json")));
     }
-}
-
-function getAllStat() {
-    $glob = "/media/plex/plexmedia/e621/**/**";
-    $result = [];
-    foreach (glob($glob) as $file) {
-        $md5 = pathinfo($file, PATHINFO_FILENAME);
-        $fp = fopen($file, "r");
-        $stat = fstat($fp);
-        if (isset($stat["mtime"])) {
-            $result[$md5] = $stat["mtime"];
-        }
-    }
-    return $result;
 }
 
 class RegexCache {
