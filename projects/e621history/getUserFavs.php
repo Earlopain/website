@@ -154,8 +154,8 @@ class RegexCache {
             return self::$regexCache[$string];
         }
         $regex = preg_quote($string, "/");
-		$regex = str_replace("\\*", "[\s\S]*?", $regex);
-        self::$regexCache[$string] = "/" .$regex . "/";
+        $regex = str_replace("\\*", "[\\s\\S]*?", $regex);
+        self::$regexCache[$string] = "/" . $regex . "/";
         return self::$regexCache[$string];
     }
 }
