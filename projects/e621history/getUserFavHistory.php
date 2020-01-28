@@ -11,7 +11,7 @@ class UserfavHistory {
 
     public function __construct($username, $tagGroups) {
         createDirIfNotExists(self::$userfavsFolder);
-        $this->username = $username;
+        $this->username = strtolower($username);
         $this->tagGroups = $tagGroups;
     }
 
