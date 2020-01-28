@@ -1,9 +1,93 @@
 <?php
 
-$userfavsFolder = __DIR__ . "/e621userfavs";
-$postJsonFolder = __DIR__ . "/e621posts";
-createDirIfNotExists($userfavsFolder);
-createDirIfNotExists($postJsonFolder);
+class UserfavHistory {
+    private static $userfavsFolder = __DIR__ . "/e621userfavs";
+    private static $postJsonFolder = __DIR__ . "/e621posts";
+
+    private $username;
+    private $tagGroups;
+    private $favs;
+
+    public function __construct($username, $tagGroups) {
+        createDirIfNotExists(self::$userfavsFolder);
+        createDirIfNotExists(self::$postJsonFolder);
+        $this->username = $username;
+        $this->tagGroups = $tagGroups;
+    }
+
+    public function generateGraph() {
+        $postMatches = [];
+        $userfavs = array_reverse($this->getAllFavs());
+        foreach ($userfavs as $userfavMd5) {
+            $postMatches[$userfavMd5] = [];
+            $userfavJson = json_decode(file_get_contents(self::$postJsonFolder . "/" . $userfavMd5 . ".json"));
+            foreach ($this->tagGroups as $tagGroupKey => $dummy) {
+                foreach ($this->tagGroups[$tagGroupKey] as $filter) {
+                    $matches = tagsMatchesFilter($userfavJson->tags, $filter);
+                    $postMatches[$userfavMd5][$tagGroupKey] = $matches;
+                    if ($matches === true) {
+                        break;
+                    }
+                }
+            }
+        }
+        $csvHeader = "date";
+        $tagCounter = [];
+        foreach (array_keys($this->tagGroups) as $key) {
+            $tagCounter[$key] = 0;
+            $csvHeader .= ";" . $key;
+        }
+
+        $filestat = getAllStat();
+        $sortKeys = array_filter(array_keys($postMatches), function ($a) use (&$filestat) {
+            return isset($filestat[$a]);
+        });
+        uasort($sortKeys, function ($a, $b) use (&$filestat) {
+            return $filestat[$a] - $filestat[$b];
+        });
+        $csv = "";
+        foreach ($sortKeys as $md5) {
+            if (!isset($filestat[$md5])) {
+                continue;
+            }
+            $csv .= "\n" . date("Y-m-d", $filestat[$md5]);
+            foreach (array_keys($this->tagGroups) as $key) {
+                $tagCounter[$key] += $postMatches[$md5][$key];
+                $csv .= ";" . $tagCounter[$key];
+            }
+        }
+        return $csvHeader . $csv;
+    }
+
+    private function getAllFavs() {
+        if (isset($this->favs)) {
+            return $this->favs;
+        }
+        $userfavPath = self::$userfavsFolder . "/" . $this->username . ".json";
+        if (file_exists($userfavPath)) {
+            return json_decode(file_get_contents($userfavPath));
+        }
+        $page = 1;
+        $resultsPerPage = 320;
+        $url = "https://e621.net/post/index.json?tags=fav:" . $this->username . "&limit=" . $resultsPerPage . "&page=";
+        $jsonArray = null;
+        $favMd5 = [];
+        do {
+            if ($page > 750) {
+                break;
+            }
+            $jsonArray = getJSON($url . $page);
+            foreach ($jsonArray as $json) {
+                $favMd5[] = $json->md5;
+                savePost($json);
+            }
+            $page++;
+        } while (count($jsonArray) === $resultsPerPage);
+        file_put_contents($userfavPath, json_encode($favMd5));
+        $this->favs = $favMd5;
+        return $favMd5;
+    }
+}
 
 function tagsMatchesFilter($tagString, $filterString) {
     $seperatedFilters = explode(" ", $filterString);
@@ -20,32 +104,6 @@ function tagsMatchesFilter($tagString, $filterString) {
         }
     }
     return $result;
-}
-
-function getAllUserFavs($username) {
-    global $userfavsFolder;
-    $userfavPath = $userfavsFolder . "/" . $username . ".json";
-    if (file_exists($userfavPath)) {
-        return json_decode(file_get_contents($userfavPath));
-    }
-    $page = 1;
-    $resultsPerPage = 320;
-    $url = "https://e621.net/post/index.json?tags=fav:" . $username . "&limit=" . $resultsPerPage . "&page=";
-    $jsonArray = null;
-    $favMd5 = [];
-    do {
-        if ($page > 750) {
-            break;
-        }
-        $jsonArray = getJSON($url . $page);
-        foreach ($jsonArray as $json) {
-            $favMd5[] = $json->md5;
-            savePost($json);
-        }
-        $page++;
-    } while (count($jsonArray) === $resultsPerPage);
-    file_put_contents($userfavPath, json_encode($favMd5));
-    return $favMd5;
 }
 
 function savePost($json) {
@@ -72,54 +130,6 @@ function createDirIfNotExists($path) {
     }
 }
 
-$username = "earlopain";
-$tagGroups = [
-    "gay" => ["male/male -bisexual -male/female", "male solo -bisexual"],
-    "straight" => ["male/female -bisexual", "female solo"]
-];
-
-$postMatches = [];
-$userfavs = array_reverse(getAllUserFavs($username));
-foreach ($userfavs as $userfavMd5) {
-    $postMatches[$userfavMd5] = [];
-    $userfavJson = json_decode(file_get_contents($postJsonFolder . "/" . $userfavMd5 . ".json"));
-    foreach ($tagGroups as $tagGroupKey => $dummy) {
-        foreach ($tagGroups[$tagGroupKey] as $filter) {
-            $matches = tagsMatchesFilter($userfavJson->tags, $filter);
-            $postMatches[$userfavMd5][$tagGroupKey] = $matches;
-            if ($matches === true) {
-                break;
-            }
-        }
-    }
-}
-
-$csv = "date;straight;gay";
-$currentStraigt = 0;
-$currentGay = 0;
-
-$filestat = getAllStat();
-
-$sortKeys = array_keys($postMatches);
-$sortKeys = array_filter($sortKeys, function ($a) {
-    global $filestat;
-    return isset($filestat[$a]);
-});
-uasort($sortKeys, function ($a, $b) {
-    global $filestat;
-    return $filestat[$a] - $filestat[$b];
-});
-
-foreach ($sortKeys as $md5) {
-    if (!isset($filestat[$md5])) {
-        continue;
-    }
-    $currentStraigt += $postMatches[$md5]["straight"];
-    $currentGay += $postMatches[$md5]["gay"];
-    $csv .= "\n" . date("Y-m-d", $filestat[$md5]) . ";" . $currentStraigt . ";" . $currentGay;
-}
-echo $csv;
-
 function getAllStat() {
     $glob = "/media/plex/plexmedia/e621/**/**";
     $result = [];
@@ -127,7 +137,7 @@ function getAllStat() {
         $md5 = pathinfo($file, PATHINFO_FILENAME);
         $fp = fopen($file, "r");
         $stat = fstat($fp);
-        if (isset($stat["mtime"]) && $stat["mtime"] > 1420070400) {
+        if (isset($stat["mtime"])) {
             $result[$md5] = $stat["mtime"];
         }
     }
@@ -146,3 +156,20 @@ class RegexCache {
         return self::$regexCache[$string];
     }
 }
+
+class PostParams {
+    public $username;
+    public $tagGroups;
+    public function __construct($jsonString) {
+        $json = json_decode($jsonString, true);
+        $this->username = $json["username"];
+        $this->tagGroups = $json["tagGroups"];
+    }
+
+    public static function create() {
+        return new self(file_get_contents("php://input"));
+    }
+}
+$postParams = PostParams::create();
+$favs = new UserfavHistory($postParams->username, $postParams->tagGroups);
+echo $favs->generateGraph();
