@@ -21,7 +21,7 @@ class UserfavHistory {
         foreach ($userfavs as $userfavMd5) {
             $postMatches[$userfavMd5] = [];
             $userfavJson = E621Post::createFromMd5($userfavMd5);
-            foreach ($this->tagGroups as $tagGroupKey => $dummy) {
+            foreach (array_keys($this->tagGroups) as $tagGroupKey) {
                 foreach ($this->tagGroups[$tagGroupKey] as $filter) {
                     $matches = $userfavJson->tagsMatchesFilter($filter);
                     $postMatches[$userfavMd5][$tagGroupKey] = $matches;
@@ -31,23 +31,14 @@ class UserfavHistory {
                 }
             }
         }
-        $csvHeader = "date";
-        $tagCounter = [];
+        $result = new ResultJson();
         foreach (array_keys($this->tagGroups) as $key) {
-            $tagCounter[$key] = 0;
-            $csvHeader .= ";" . $key;
+            $result->addGroup($key);
         }
-
-        $csv = "";
         for ($i = 0; $i < count($userfavs); $i++) {
-            $md5 = $userfavs[$i];
-            $csv .= "\n" . $i;
-            foreach (array_keys($this->tagGroups) as $key) {
-                $tagCounter[$key] += $postMatches[$md5][$key];
-                $csv .= ";" . $tagCounter[$key];
-            }
+            $result->addDataPoint($i, $postMatches[$userfavs[$i]]);
         }
-        return $csvHeader . $csv;
+        return json_encode($result);
     }
 
     private function getAllFavs() {
@@ -78,6 +69,25 @@ class UserfavHistory {
         file_put_contents($userfavPath, json_encode($favMd5));
         $this->favs = $favMd5;
         return $favMd5;
+    }
+}
+
+class ResultJson {
+    public $tagGroups = [];
+    public $xAxis = [];
+    private $tagGroupCurrentValue = [];
+
+    public function addGroup($groupName) {
+        $this->tagGroups[$groupName] = [];
+        $this->tagGroupCurrentValue[$groupName] = 0;
+    }
+
+    public function addDataPoint($x, $data) {
+        $this->xAxis[] = $x;
+        foreach (array_keys($this->tagGroups) as $groupName) {
+            $this->tagGroupCurrentValue[$groupName] += $data[$groupName];
+            $this->tagGroups[$groupName][] = $this->tagGroupCurrentValue[$groupName];
+        }
     }
 }
 

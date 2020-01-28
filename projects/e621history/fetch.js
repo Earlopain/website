@@ -11,5 +11,13 @@ async function fetchCsv() {
         username: username,
         tagGroups: tagGroups
     });
+    const json = JSON.parse(response.response);
+    const maxDataPoints = json.xAxis.length;
+    console.log(maxDataPoints)
+    for (const groupName of Object.keys(json.tagGroups)) {
+        console.log(groupName);
+        console.log(json.tagGroups[groupName][maxDataPoints - 1]);
+    }
+
     document.getElementById("csv").innerHTML = response.response;
 }
