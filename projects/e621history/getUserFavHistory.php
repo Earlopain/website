@@ -1,5 +1,7 @@
 <?php
 
+require_once "util.php";
+
 class UserfavHistory {
     private static $userfavsFolder = __DIR__ . "/e621userfavs";
     private static $postJsonFolder = __DIR__ . "/e621posts";
@@ -76,7 +78,7 @@ class UserfavHistory {
             if ($page > 750) {
                 break;
             }
-            $jsonArray = getJSON($url . $page);
+            $jsonArray = getJson($url . $page);
             foreach ($jsonArray as $json) {
                 $favMd5[] = $json->md5;
                 savePost($json);
@@ -113,21 +115,6 @@ function savePost($json) {
         return;
     }
     file_put_contents($filepath, json_encode($json));
-}
-
-function getJSON($url) {
-    $context = stream_context_create(["http" => ["user_agent" => "earlopain"]]);
-    $result = file_get_contents($url, false, $context);
-    return json_decode($result);
-}
-
-function createDirIfNotExists($path) {
-    if (!file_exists($path)) {
-        $result = mkdir($path);
-        if ($result === false) {
-            throw new Error("Failed to create " . $path);
-        }
-    }
 }
 
 function getAllStat() {

@@ -1,4 +1,6 @@
 <?php
+require_once "util.php";
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $json = file_get_contents('php://input');
     //assume the worst, set 200 later, if checks pass
@@ -49,10 +51,7 @@ function isValidInvite($id) { //no code specified but doesn't return the same er
         return false;
     }
 
-    $c = curl_init();
-    curl_setopt($c, CURLOPT_URL, "https://discordapp.com/api/v6/invite/" . $id . "?with_counts=true");
-    curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-    $json = curl_exec($c);
+    $json = getJson("https://discordapp.com/api/v6/invite/" . $id . "?with_counts=true");
     $jsonparsed = null;
     try {
         $jsonparsed = json_decode($json, true);
