@@ -7,7 +7,6 @@ createDirIfNotExists($postJsonFolder);
 
 function tagsMatchesFilter($tagString, $filterString) {
     $seperatedFilters = explode(" ", $filterString);
-    $allTags = explode(" ", $tagString);
     $result = true;
 
     foreach ($seperatedFilters as $filter) {
@@ -16,20 +15,8 @@ function tagsMatchesFilter($tagString, $filterString) {
         if ($result === false) {
             break;
         }
-        if (strpos($filterNoMinus, "*") !== false) {
-            $regex = RegexCache::escapeStringToRegex($filterNoMinus);
-            $result = preg_match($regex, $tagString) === 1 ? true : false;
-        } else {
-            //if there is no wildcard, the filter and tag must match
-            $matchFound = false;
-            foreach ($allTags as $tag) {
-                if ($tag === $filterNoMinus) {
-                    $matchFound = true;
-                    break;
-                }
-            }
-            $result = $matchFound;
-        }
+        $regex = RegexCache::escapeStringToRegex($filterNoMinus);
+        $result = preg_match($regex, $tagString) === 1 ? true : false;
         $result = $result !== $inverse;
     }
     return $result;
