@@ -148,16 +148,14 @@ function getAllStat() {
 }
 
 class RegexCache {
-    static $stringToRegex = "/[-\/\\^$+?.()|[\]{}]/g";
-    static $regexStar = "/\*/g";
     static $regexCache = [];
     public static function escapeStringToRegex($string) {
         if (isset(self::$regexCache[$string])) {
             return self::$regexCache[$string];
         }
-        $regex = preg_replace(self::$stringToRegex, "\\$&", $string);
-        $regex = preg_replace(self::$regexStar, "[\\s\\S]\*\?", $regex);
-        self::$regexCache[$string] = $regex;
-        return $regex;
+        $regex = preg_quote($string, "/");
+		$regex = str_replace("\\*", "[\s\S]*?", $regex);
+        self::$regexCache[$string] = "/" .$regex . "/";
+        return self::$regexCache[$string];
     }
 }
