@@ -4,7 +4,6 @@ require_once "util.php";
 
 class UserfavHistory {
     private static $userfavsFolder = __DIR__ . "/e621userfavs";
-    private static $postJsonFolder = __DIR__ . "/e621posts";
 
     private $username;
     private $tagGroups;
@@ -12,7 +11,6 @@ class UserfavHistory {
 
     public function __construct($username, $tagGroups) {
         createDirIfNotExists(self::$userfavsFolder);
-        createDirIfNotExists(self::$postJsonFolder);
         $this->username = $username;
         $this->tagGroups = $tagGroups;
     }
@@ -22,10 +20,10 @@ class UserfavHistory {
         $userfavs = array_reverse($this->getAllFavs());
         foreach ($userfavs as $userfavMd5) {
             $postMatches[$userfavMd5] = [];
-            $userfavJson = json_decode(file_get_contents(self::$postJsonFolder . "/" . $userfavMd5 . ".json"));
+            $userfavJson = E621Post::createFromMd5($userfavMd5);
             foreach ($this->tagGroups as $tagGroupKey => $dummy) {
                 foreach ($this->tagGroups[$tagGroupKey] as $filter) {
-                    $matches = tagsMatchesFilter($userfavJson->tags, $filter);
+                    $matches = $userfavJson->tagsMatchesFilter($filter);
                     $postMatches[$userfavMd5][$tagGroupKey] = $matches;
                     if ($matches === true) {
                         break;
@@ -81,7 +79,8 @@ class UserfavHistory {
             $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
             foreach ($jsonArray as $json) {
                 $favMd5[] = $json->md5;
-                savePost($json);
+                $post = new E621Post($json);
+                $post->savePost();
             }
             $page++;
         } while (count($jsonArray) === $resultsPerPage);
@@ -91,30 +90,43 @@ class UserfavHistory {
     }
 }
 
-function tagsMatchesFilter($tagString, $filterString) {
-    $seperatedFilters = explode(" ", $filterString);
-    $result = true;
+class E621Post {
+    private static $postJsonFolder = __DIR__ . "/e621posts";
+    private $json;
 
-    foreach ($seperatedFilters as $filter) {
-        $inverse = $filter{0} === "-";
-        $filterNoMinus = $inverse ? substr($filter, 1) : $filter;
-        $regex = RegexCache::escapeStringToRegex($filterNoMinus);
-        $result = preg_match($regex, $tagString) === 1 ? true : false;
-        $result = $result !== $inverse;
-        if ($result === false) {
-            break;
+    public function __construct($jsonObject) {
+        $this->json = $jsonObject;
+    }
+
+    public function tagsMatchesFilter($filterString) {
+        $seperatedFilters = explode(" ", $filterString);
+        $result = true;
+
+        foreach ($seperatedFilters as $filter) {
+            $inverse = $filter{0} === "-";
+            $filterNoMinus = $inverse ? substr($filter, 1) : $filter;
+            $regex = RegexCache::escapeStringToRegex($filterNoMinus);
+            $result = preg_match($regex, $this->json->tags) === 1 ? true : false;
+            $result = $result !== $inverse;
+            if ($result === false) {
+                break;
+            }
         }
+        return $result;
     }
-    return $result;
-}
 
-function savePost($json) {
-    global $postJsonFolder;
-    $filepath = $postJsonFolder . "/" . $json->md5 . ".json";
-    if (file_exists($filepath)) {
-        return;
+    public function savePost() {
+        $filepath = self::$postJsonFolder . "/" . $this->json->md5 . ".json";
+        if (file_exists($filepath)) {
+            return;
+        }
+        createDirIfNotExists(self::$postJsonFolder);
+        file_put_contents($filepath, json_encode($this->json));
     }
-    file_put_contents($filepath, json_encode($json));
+
+    public static function createFromMd5($md5) {
+        return new self(json_decode(file_get_contents(self::$postJsonFolder . "/" . $md5 . ".json")));
+    }
 }
 
 function getAllStat() {
