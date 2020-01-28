@@ -1,6 +1,10 @@
 <?php
-function getJson($url) {
-    $context = stream_context_create(["http" => ["user_agent" => "earlopain"]]);
+function getJson($url, $header = []) {
+    $headerArray = [];
+    foreach ($header as $key => $value) {
+        $headerArray[] = $key . ": " . $value;
+    }
+    $context = stream_context_create(["http" => ["header" => $headerArray]]);
     $result = file_get_contents($url, false, $context);
     return json_decode($result);
 }

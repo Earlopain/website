@@ -78,7 +78,7 @@ class UserfavHistory {
             if ($page > 750) {
                 break;
             }
-            $jsonArray = getJson($url . $page);
+            $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
             foreach ($jsonArray as $json) {
                 $favMd5[] = $json->md5;
                 savePost($json);
