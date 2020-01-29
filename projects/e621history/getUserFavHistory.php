@@ -24,7 +24,19 @@ class UserfavHistory {
      */
     public function generateGraph(): string {
         $result = new ResultJson($this->postParams->tagGroups);
-        $userfavs = array_reverse($this->getAllFavs());
+        $userfavs = $this->getAllFavs();
+
+        if ($this->postParams->providedLocalFiles) {
+            $userfavs = array_filter($userfavs, function ($a) {
+                return isset($this->postParams->fileDates[$a]);
+            });
+            usort($userfavs, function ($a, $b) {
+                return $this->postParams->fileDates[$a] - $this->postParams->fileDates[$b];
+            });
+        } else {
+            $userfavs = array_reverse($userfavs);
+        }
+
         foreach ($userfavs as $index => $userfavMd5) {
             $userfavJson = E621Post::createFromMd5($userfavMd5);
             $dataPoint = [];
@@ -35,7 +47,8 @@ class UserfavHistory {
                     continue;
                 }
             }
-            $result->addDataPoint($index, $dataPoint);
+            $xAxis = $this->postParams->providedLocalFiles ? $this->postParams->fileDates[$userfavMd5] : $index;
+            $result->addDataPoint($xAxis, $dataPoint);
         }
         return json_encode($result);
     }
