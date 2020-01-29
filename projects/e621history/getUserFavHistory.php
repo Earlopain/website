@@ -64,7 +64,7 @@ class UserfavHistory {
             return $this->favs;
         }
         $userfavPath = self::$userfavsFolder . "/" . $this->postParams->username . ".json";
-        if (file_exists($userfavPath)) {
+        if (file_exists($userfavPath) && !$this->postParams->refreshUserFavs) {
             return json_decode(file_get_contents($userfavPath));
         }
         $page = 1;
@@ -234,6 +234,11 @@ class PostParams {
      * @var bool
      */
     public $providedLocalFiles;
+    /**
+     * If true, will force a new download of user favs
+     * @var bool
+     */
+    public $refreshUserFavs;
     public function __construct(string $jsonString) {
         $json = json_decode($jsonString, true);
         $this->username = strtolower($json["username"]);
@@ -242,6 +247,7 @@ class PostParams {
         }
         $this->fileDates = $json["fileDates"];
         $this->providedLocalFiles = count($this->fileDates) > 0;
+        $this->refreshUserFavs = $json["refreshUserFavs"];
     }
     /**
      * Creates a class instace with post data from php=>input

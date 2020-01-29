@@ -15,7 +15,8 @@ async function fetchCsv() {
     const response = await postURL(url, {
         username: username,
         tagGroups: tagGroups,
-        fileDates: fileDates
+        fileDates: fileDates,
+        refreshUserFavs: false
     });
     const json = JSON.parse(response.response);
     const maxDataPoints = json.xAxis.length;
