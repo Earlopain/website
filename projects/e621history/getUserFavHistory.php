@@ -146,10 +146,14 @@ class RegexCache {
 class PostParams {
     public $username;
     public $tagGroups;
+    public $fileDates;
+    public $providedLocalFiles;
     public function __construct($jsonString) {
         $json = json_decode($jsonString, true);
         $this->username = $json["username"];
         $this->tagGroups = $json["tagGroups"];
+        $this->fileDates = $json["fileDates"];
+        $this->providedLocalFiles = count($this->fileDates) > 0;
     }
 
     public static function create() {

@@ -4,12 +4,18 @@ async function fetchCsv() {
         "gay": ["male/male -bisexual -male/female", "male solo -bisexual"],
         "straight": ["male/female -bisexual", "female solo"]
     }
+    const files = document.getElementById("folderinput").files;
+    let fileDates = {};
+    for (const file of files) {
+        fileDates[file.name.split(".")[0]] = file.lastModified;
+    }
 
-    var url = "getUserFavHistory.php";
+    const url = "getUserFavHistory.php";
 
     const response = await postURL(url, {
         username: username,
-        tagGroups: tagGroups
+        tagGroups: tagGroups,
+        fileDates: fileDates
     });
     const json = JSON.parse(response.response);
     const maxDataPoints = json.xAxis.length;
