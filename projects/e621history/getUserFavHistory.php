@@ -74,34 +74,6 @@ class UserfavHistory {
     }
 }
 
-class ResultJson {
-    /**
-     * @var TagGroup[]
-     */
-    private $tagGroups;
-    public $xAxis = [];
-    public $graphData = [];
-    private $tagGroupCurrentValue = [];
-    /**
-     * @param TagGroup[] $tagGroups
-     */
-    public function __construct(array $tagGroups) {
-        $this->tagGroups = $tagGroups;
-        foreach ($this->tagGroups as $tagGroup) {
-            $this->graphData[$tagGroup->groupName] = [];
-            $this->tagGroupCurrentValue[$tagGroup->groupName] = 0;
-        }
-    }
-
-    public function addDataPoint($x, $dataPoint) {
-        $this->xAxis[] = $x;
-        foreach ($this->tagGroups as $tagGroup) {
-            $this->tagGroupCurrentValue[$tagGroup->groupName] += $dataPoint[$tagGroup->groupName];
-            $this->graphData[$tagGroup->groupName][] = $this->tagGroupCurrentValue[$tagGroup->groupName];
-        }
-    }
-}
-
 class E621Post {
     /**
      * @var string
@@ -161,6 +133,52 @@ class E621Post {
     }
 }
 
+class TagGroup {
+    /**
+     * @var string
+     */
+    public $groupName;
+    /**
+     * @var array[]
+     */
+    public $allFilters = [];
+
+    public function __construct(string $groupName, array $allFilters) {
+        $this->groupName = $groupName;
+        foreach ($allFilters as $value) {
+            $this->allFilters[] = explode(" ", $value);
+        }
+    }
+}
+
+class ResultJson {
+    /**
+     * @var TagGroup[]
+     */
+    private $tagGroups;
+    public $xAxis = [];
+    public $graphData = [];
+    private $tagGroupCurrentValue = [];
+    /**
+     * @param TagGroup[] $tagGroups
+     */
+    public function __construct(array $tagGroups) {
+        $this->tagGroups = $tagGroups;
+        foreach ($this->tagGroups as $tagGroup) {
+            $this->graphData[$tagGroup->groupName] = [];
+            $this->tagGroupCurrentValue[$tagGroup->groupName] = 0;
+        }
+    }
+
+    public function addDataPoint($x, $dataPoint) {
+        $this->xAxis[] = $x;
+        foreach ($this->tagGroups as $tagGroup) {
+            $this->tagGroupCurrentValue[$tagGroup->groupName] += $dataPoint[$tagGroup->groupName];
+            $this->graphData[$tagGroup->groupName][] = $this->tagGroupCurrentValue[$tagGroup->groupName];
+        }
+    }
+}
+
 class RegexCache {
     static $regexCache = [];
     /**
@@ -217,23 +235,6 @@ class PostParams {
     }
 }
 
-class TagGroup {
-    /**
-     * @var string
-     */
-    public $groupName;
-    /**
-     * @var array[]
-     */
-    public $allFilters = [];
-
-    public function __construct(string $groupName, array $allFilters) {
-        $this->groupName = $groupName;
-        foreach ($allFilters as $value) {
-            $this->allFilters[] = explode(" ", $value);
-        }
-    }
-}
 $postParams = PostParams::create();
 $favs = new UserfavHistory($postParams);
 echo $favs->generateGraph();
