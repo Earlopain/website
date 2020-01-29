@@ -5,14 +5,12 @@ require_once "util.php";
 class UserfavHistory {
     private static $userfavsFolder = __DIR__ . "/e621userfavs";
 
-    private $username;
-    private $tagGroups;
+    private $postParams;
     private $favs;
 
-    public function __construct($username, $tagGroups) {
+    public function __construct($postParams) {
         createDirIfNotExists(self::$userfavsFolder);
-        $this->username = strtolower($username);
-        $this->tagGroups = $tagGroups;
+        $this->postParams = $postParams;
     }
 
     public function generateGraph() {
@@ -21,8 +19,8 @@ class UserfavHistory {
         foreach ($userfavs as $userfavMd5) {
             $postMatches[$userfavMd5] = [];
             $userfavJson = E621Post::createFromMd5($userfavMd5);
-            foreach (array_keys($this->tagGroups) as $tagGroupKey) {
-                foreach ($this->tagGroups[$tagGroupKey] as $filter) {
+            foreach (array_keys($this->postParams->tagGroups) as $tagGroupKey) {
+                foreach ($this->postParams->tagGroups[$tagGroupKey] as $filter) {
                     $matches = $userfavJson->tagsMatchesFilter($filter);
                     $postMatches[$userfavMd5][$tagGroupKey] = $matches;
                     if ($matches === true) {
@@ -32,7 +30,7 @@ class UserfavHistory {
             }
         }
         $result = new ResultJson();
-        foreach (array_keys($this->tagGroups) as $key) {
+        foreach (array_keys($this->postParams->tagGroups) as $key) {
             $result->addGroup($key);
         }
         for ($i = 0; $i < count($userfavs); $i++) {
@@ -45,13 +43,13 @@ class UserfavHistory {
         if (isset($this->favs)) {
             return $this->favs;
         }
-        $userfavPath = self::$userfavsFolder . "/" . $this->username . ".json";
+        $userfavPath = self::$userfavsFolder . "/" . $this->postParams->username . ".json";
         if (file_exists($userfavPath)) {
             return json_decode(file_get_contents($userfavPath));
         }
         $page = 1;
         $resultsPerPage = 320;
-        $url = "https://e621.net/post/index.json?tags=fav:" . $this->username . "&limit=" . $resultsPerPage . "&page=";
+        $url = "https://e621.net/post/index.json?tags=fav:" . $this->postParams->username . "&limit=" . $resultsPerPage . "&page=";
         $jsonArray = null;
         $favMd5 = [];
         do {
@@ -150,7 +148,7 @@ class PostParams {
     public $providedLocalFiles;
     public function __construct($jsonString) {
         $json = json_decode($jsonString, true);
-        $this->username = $json["username"];
+        $this->username = strtolower($json["username"]);
         $this->tagGroups = $json["tagGroups"];
         $this->fileDates = $json["fileDates"];
         $this->providedLocalFiles = count($this->fileDates) > 0;
@@ -161,5 +159,5 @@ class PostParams {
     }
 }
 $postParams = PostParams::create();
-$favs = new UserfavHistory($postParams->username, $postParams->tagGroups);
+$favs = new UserfavHistory($postParams);
 echo $favs->generateGraph();
