@@ -27,13 +27,16 @@ class UserfavHistory {
         $userfavs = $this->getAllFavs();
 
         if ($this->postParams->providedLocalFiles) {
+            //remove files which are not found in post data
             $userfavs = array_filter($userfavs, function ($a) {
                 return isset($this->postParams->fileDates[$a]);
             });
+            //sort favs by those transmitted mtimes
             usort($userfavs, function ($a, $b) {
                 return $this->postParams->fileDates[$a] - $this->postParams->fileDates[$b];
             });
         } else {
+            //because we walk our way backwards through the favs reverse the array
             $userfavs = array_reverse($userfavs);
         }
 
@@ -70,6 +73,7 @@ class UserfavHistory {
         $jsonArray = null;
         $favMd5 = [];
         do {
+            //api imposes a limit of 750 pages, which amounts to 240k posts
             if ($page > 750) {
                 break;
             }
@@ -106,6 +110,7 @@ class E621Post {
         $result = false;
         foreach ($tagGroup->allFilters as $seperatedFilters) {
             foreach ($seperatedFilters as $filter) {
+                //if filter starts with '-' the opposite should match
                 $inverse = $filter{0} === "-";
                 $filterNoMinus = $inverse ? substr($filter, 1) : $filter;
                 $regex = RegexCache::escapeStringToRegex($filterNoMinus);
