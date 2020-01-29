@@ -23,22 +23,19 @@ class UserfavHistory {
      * @return string
      */
     public function generateGraph(): string {
-        $postMatches = [];
+        $result = new ResultJson($this->postParams->tagGroups);
         $userfavs = array_reverse($this->getAllFavs());
-        foreach ($userfavs as $userfavMd5) {
-            $postMatches[$userfavMd5] = [];
+        foreach ($userfavs as $index => $userfavMd5) {
             $userfavJson = E621Post::createFromMd5($userfavMd5);
+            $dataPoint = [];
             foreach ($this->postParams->tagGroups as $tagGroup) {
                 $matches = $userfavJson->tagsMatchesFilter($tagGroup);
-                $postMatches[$userfavMd5][$tagGroup->groupName] = $matches;
+                $dataPoint[$tagGroup->groupName] = $matches;
                 if ($matches === true) {
                     continue;
                 }
             }
-        }
-        $result = new ResultJson($this->postParams->tagGroups);
-        for ($i = 0; $i < count($userfavs); $i++) {
-            $result->addDataPoint($i, $postMatches[$userfavs[$i]]);
+            $result->addDataPoint($index, $dataPoint);
         }
         return json_encode($result);
     }
