@@ -50,7 +50,7 @@ class UserfavHistory {
                     continue;
                 }
             }
-            $xAxis = $this->postParams->providedLocalFiles ? $this->postParams->fileDates[$userfavMd5] : $index;
+            $xAxis = $this->postParams->providedLocalFiles ? date("Y-m-d", $this->postParams->fileDates[$userfavMd5] / 1000) : $index;
             $result->addDataPoint($xAxis, $dataPoint);
         }
         return json_encode($result);
@@ -242,6 +242,7 @@ class PostParams {
     public function __construct(string $jsonString) {
         $json = json_decode($jsonString, true);
         $this->username = strtolower($json["username"]);
+        $this->username = str_replace(" ", "_", $this->username);
         foreach ($json["tagGroups"] as $key => $value) {
             $this->tagGroups[] = new TagGroup($key, $value);
         }

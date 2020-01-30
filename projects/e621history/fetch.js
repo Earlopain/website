@@ -19,12 +19,57 @@ async function fetchCsv() {
         refreshUserFavs: false
     });
     const json = JSON.parse(response.response);
-    const maxDataPoints = json.xAxis.length;
-    console.log(maxDataPoints);
+    let lines = [];
+    let stack = [];
     for (const groupName of Object.keys(json.graphData)) {
-        console.log(groupName);
-        console.log(json.graphData[groupName][maxDataPoints - 1]);
+        stack.push({ x: json.xAxis, y: json.graphData[groupName], groupnorm: "percent", stackgroup: "one", name: groupName });
+        lines.push({ x: json.xAxis, y: json.graphData[groupName], name: groupName, mode: "lines", visible: false });
+
     }
 
-    document.getElementById("csv").innerHTML = response.response;
+    const layout = {
+        title: "Degenerate Stats",
+        legend: {
+            traceorder: "normal"
+        },
+        xaxis: {
+            rangeslider: {}
+        },
+        yaxis: {
+            fixedrange: false,
+            side: "left",
+            title: "favcount",
+            zeroline: false
+        },
+        updatemenus: [{
+            y: 1.3,
+            yanchor: "top",
+            buttons: [{
+                method: "restyle",
+                args: ['visible', stack.map(a => true).concat(lines.map(a => false))],
+                label: 'Stack'
+            }, {
+                method: "restyle",
+                args: ['visible', stack.map(a => false).concat(lines.map(a => true))],
+                label: "Lines"
+            }]
+        }],
+        images: [
+            {
+                source: "/image.png",
+                x: 0.25,
+                y: 1,
+                sizex: 1,
+                sizey: 1,
+                opacity: 0.03,
+                layer: "below"
+            }
+        ]
+    }
+    const options = {
+        scrollZoom: true,
+        resposive: true
+    }
+    Plotly.newPlot('graph', stack.concat(lines), layout, options);
+
 }

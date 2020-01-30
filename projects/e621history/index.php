@@ -7,6 +7,7 @@ generateHeadBoilerplate();?>
     <title>UwU</title>
     <script src="/projects/util.js"></script>
     <script src="fetch.js"></script>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 </head>
 
 <body>
@@ -14,7 +15,7 @@ generateHeadBoilerplate();?>
     Optional local files<input type="file" id="folderinput" webkitdirectory directory multiple/>
     <button onclick="fetchCsv()">Fetch Favs</button>
     <br>
-    <div id="csv"></div>
+    <div id="graph" style="width: 50%"></div>
 </body>
 
 </html>
