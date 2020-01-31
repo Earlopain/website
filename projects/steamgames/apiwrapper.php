@@ -1,5 +1,6 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    require_once "secretParser.php";
     include $_SERVER['DOCUMENT_ROOT'] . '/secretParser.php';
     include $_SERVER['DOCUMENT_ROOT'] . '/proxy.php';
 
