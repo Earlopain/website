@@ -116,9 +116,9 @@ class UserfavHistory {
                 $statementUserFav->bindValue("md5", $json->md5);
                 $statementUserFav->bindValue("position", $counter);
                 $statementUserFav->execute();
+                $counter++;
             }
             $page++;
-            $counter++;
         } while (count($jsonArray) === $resultsPerPage);
         $statement = $this->connection->prepare("INSERT INTO users (user_name, last_updated) VALUES (:username, now())
         ON DUPLICATE KEY UPDATE user_name = user_name");
