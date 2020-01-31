@@ -1,9 +1,9 @@
 <?php
 
 require_once "util.php";
+require_once "sql.php";
 
 class UserfavHistory {
-    private static $userfavsFolder = __DIR__ . "/e621userfavs";
     /**
      * @var PostParams
      */
@@ -14,9 +14,11 @@ class UserfavHistory {
      */
     private $favs;
 
+    private $connection;
+
     public function __construct(PostParams $postParams) {
-        createDirIfNotExists(self::$userfavsFolder);
         $this->postParams = $postParams;
+        $this->connection = SqlConnection::get("e621");
     }
     /**
      * Converts the object into json which can be interpreted by js graphing lib
@@ -24,7 +26,7 @@ class UserfavHistory {
      */
     public function generateGraph(): string {
         $result = new ResultJson($this->postParams->tagGroups);
-        $userfavs = $this->getAllFavs();
+        $userfavs = $this->getAllFavsMd5();
 
         if ($this->postParams->providedLocalFiles) {
             //remove files which are not found in post data
@@ -39,9 +41,9 @@ class UserfavHistory {
             //because we walk our way backwards through the favs reverse the array
             $userfavs = array_reverse($userfavs);
         }
-
+        $allFavJson = $this->getAllFavsJson();
         foreach ($userfavs as $index => $userfavMd5) {
-            $userfavJson = E621Post::createFromMd5($userfavMd5);
+            $userfavJson = new E621Post($allFavJson[$userfavMd5]);
             $dataPoint = [];
             foreach ($this->postParams->tagGroups as $tagGroup) {
                 $matches = $userfavJson->tagsMatchesFilter($tagGroup);
@@ -56,22 +58,49 @@ class UserfavHistory {
         return json_encode($result);
     }
     /**
+     * Returns an unordered assoc array of all favs for a user as json objects (md5 => json)
+     * @return array
+     */
+    private function getAllFavsJson(): array{
+        $statement = $this->connection->prepare("select json from posts, favs where posts.md5 = favs.md5 and favs.user_name = :username;");
+        $statement->bindValue("username", $this->postParams->username);
+        $statement->execute();
+        $result = [];
+
+        while (($row = $statement->fetch(PDO::FETCH_COLUMN)) !== false) {
+            $json = json_decode(utf8_encode($row));
+            $result[$json->md5] = $json;
+        }
+        return $result;
+    }
+
+    /**
      * Populates and returns the users fav md5
      * @return string[]
      */
-    private function getAllFavs(): array{
+    private function getAllFavsMd5(): array{
         if (isset($this->favs)) {
             return $this->favs;
         }
-        $userfavPath = self::$userfavsFolder . "/" . $this->postParams->username . ".json";
-        if (file_exists($userfavPath) && !$this->postParams->refreshUserFavs) {
-            return json_decode(file_get_contents($userfavPath));
+        $this->favs = [];
+        if ($this->userIsInDb() && !$this->postParams->refreshUserFavs) {
+            $addFavsStatement = $this->connection->prepare("SELECT md5 from favs where user_name = :username ORDER BY position");
+            $addFavsStatement->bindValue("username", $this->postParams->username);
+            $addFavsStatement->execute();
+            while (($row = $addFavsStatement->fetch(PDO::FETCH_COLUMN)) !== false) {
+                $this->favs[] = $row;
+            }
+            return $this->favs;
         }
+        $statementUserFav = $this->connection->prepare("INSERT INTO favs (user_name, md5, position) VALUES (:username, :md5, :position)
+        ON DUPLICATE KEY UPDATE user_name = user_name");
+
         $page = 1;
         $resultsPerPage = 320;
         $url = "https://e621.net/post/index.json?tags=fav:" . $this->postParams->username . "&limit=" . $resultsPerPage . "&page=";
         $jsonArray = null;
-        $favMd5 = [];
+        $this->connection->beginTransaction();
+        $counter = 1;
         do {
             //api imposes a limit of 750 pages, which amounts to 240k posts
             if ($page > 750) {
@@ -79,25 +108,48 @@ class UserfavHistory {
             }
             $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
             foreach ($jsonArray as $json) {
-                $favMd5[] = $json->md5;
+                $this->favs[] = $json->md5;
                 $post = new E621Post($json);
-                $post->savePost();
+                $post->savePost($this->connection);
+                // save post as user fav with position
+                $statementUserFav->bindValue("username", $this->postParams->username);
+                $statementUserFav->bindValue("md5", $json->md5);
+                $statementUserFav->bindValue("position", $counter);
+                $statementUserFav->execute();
             }
             $page++;
+            $counter++;
         } while (count($jsonArray) === $resultsPerPage);
-        file_put_contents($userfavPath, json_encode($favMd5));
-        $this->favs = $favMd5;
-        return $favMd5;
+        $statement = $this->connection->prepare("INSERT INTO users (user_name, last_updated) VALUES (:username, now())
+        ON DUPLICATE KEY UPDATE user_name = user_name");
+
+        $statement->bindValue("username", $this->postParams->username);
+        $statement->execute();
+
+        $this->connection->commit();
+        return $this->favs;
+    }
+    /**
+     * Checks wether or not a user was already put into the db
+     * @return boolean
+     */
+    private function userIsInDb(): bool {
+        $statement = $this->connection->prepare("SELECT user_name FROM users WHERE user_name = :user");
+        $statement->bindValue("user", $this->postParams->username);
+        $statement->execute();
+        return $statement->fetch() !== false ? true : false;
     }
 }
 
 class E621Post {
-    /**
-     * @var string
-     */
-    private static $postJsonFolder = __DIR__ . "/e621posts";
     private $json;
 
+    private static $saveStatementSql = "INSERT INTO posts (md5, json, last_updated) VALUES (:md5, :json, NOW())
+                                        ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW();";
+    /**
+     * @var PDOStatement
+     */
+    private static $saveStatement;
     public function __construct($jsonObject) {
         $this->json = $jsonObject;
     }
@@ -128,26 +180,22 @@ class E621Post {
         return $result;
     }
     /**
-     * Saves the post to the file system. If is already exists, nothing happens
+     * Saves the post to the db. If is already exists, the current
+     * version will be overwritten and last_update gets set to now()
      * @return void
      */
-    public function savePost() {
-        $filepath = self::$postJsonFolder . "/" . $this->json->md5 . ".json";
-        if (file_exists($filepath)) {
-            return;
-        }
-        createDirIfNotExists(self::$postJsonFolder);
-        file_put_contents($filepath, json_encode($this->json));
+    public function savePost(PDO $connection) {
+        $statement = self::getSaveStatement($connection);
+        $statement->bindValue("md5", $this->json->md5);
+        $statement->bindValue("json", json_encode($this->json));
+        $statement->execute();
     }
-    /**
-     * Creates a self instance from the given md5
-     * Tries to only read from file system. If it doesn't exist it will error
-     *
-     * @param  string $md5
-     * @return self
-     */
-    public static function createFromMd5(string $md5): self {
-        return new self(json_decode(file_get_contents(self::$postJsonFolder . "/" . $md5 . ".json")));
+
+    public static function getSaveStatement(PDO $connection): PDOStatement {
+        if (!isset(self::$saveStatement)) {
+            self::$saveStatement = $connection->prepare(self::$saveStatementSql);
+        }
+        return self::$saveStatement;
     }
 }
 
