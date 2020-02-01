@@ -83,7 +83,7 @@ class UserfavHistory {
             return $this->favs;
         }
         $this->favs = [];
-        if ($this->userIsInDb() && !$this->postParams->refreshUserFavs) {
+        if (self::userIsInDb($this->postParams->username) && !$this->postParams->refreshUserFavs) {
             $addFavsStatement = $this->connection->prepare("SELECT md5 from favs where user_name = :username ORDER BY position");
             $addFavsStatement->bindValue("username", $this->postParams->username);
             $addFavsStatement->execute();
@@ -92,15 +92,22 @@ class UserfavHistory {
             }
             return $this->favs;
         }
-        $statementUserFav = $this->connection->prepare("INSERT INTO favs (user_name, md5, position) VALUES (:username, :md5, :position)
+        $this->favs = self::populateDb($this->postParams->username);
+        return $this->favs;
+    }
+
+    private static function populateDb($username) {
+        $connection = SqlConnection::get("e621");
+        $statementUserFav = $connection->prepare("INSERT INTO favs (user_name, md5, position) VALUES (:username, :md5, :position)
         ON DUPLICATE KEY UPDATE user_name = user_name");
 
         $page = 1;
         $resultsPerPage = 320;
-        $url = "https://e621.net/post/index.json?tags=fav:{$this->postParams->username}&limit={$resultsPerPage}&page=";
+        $url = "https://e621.net/post/index.json?tags=fav:{$username}&limit={$resultsPerPage}&page=";
         $jsonArray = null;
-        $this->connection->beginTransaction();
+        $connection->beginTransaction();
         $counter = 1;
+        $result = [];
         do {
             //api imposes a limit of 750 pages, which amounts to 240k posts
             if ($page > 750) {
@@ -108,11 +115,11 @@ class UserfavHistory {
             }
             $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
             foreach ($jsonArray as $json) {
-                $this->favs[] = $json->md5;
+                $result[] = $json->md5;
                 $post = new E621Post($json);
-                $post->savePost($this->connection);
+                $post->savePost($connection);
                 // save post as user fav with position
-                $statementUserFav->bindValue("username", $this->postParams->username);
+                $statementUserFav->bindValue("username", $username);
                 $statementUserFav->bindValue("md5", $json->md5);
                 $statementUserFav->bindValue("position", $counter);
                 $statementUserFav->execute();
@@ -120,22 +127,22 @@ class UserfavHistory {
             }
             $page++;
         } while (count($jsonArray) === $resultsPerPage);
-        $statement = $this->connection->prepare("INSERT INTO users (user_name, last_updated) VALUES (:username, now())
+        $statement = $connection->prepare("INSERT INTO users (user_name, last_updated) VALUES (:username, now())
         ON DUPLICATE KEY UPDATE user_name = user_name");
 
-        $statement->bindValue("username", $this->postParams->username);
+        $statement->bindValue("username", $username);
         $statement->execute();
 
-        $this->connection->commit();
-        return $this->favs;
+        $connection->commit();
+        return $result;
     }
     /**
      * Checks wether or not a user was already put into the db
      * @return boolean
      */
-    private function userIsInDb(): bool {
-        $statement = $this->connection->prepare("SELECT user_name FROM users WHERE user_name = :user");
-        $statement->bindValue("user", $this->postParams->username);
+    private static function userIsInDb($username): bool {
+        $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM users WHERE user_name = :user");
+        $statement->bindValue("user", $username);
         $statement->execute();
         return $statement->fetch() !== false ? true : false;
     }
