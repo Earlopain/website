@@ -97,7 +97,7 @@ class UserfavHistory {
 
         $page = 1;
         $resultsPerPage = 320;
-        $url = "https://e621.net/post/index.json?tags=fav:" . $this->postParams->username . "&limit=" . $resultsPerPage . "&page=";
+        $url = "https://e621.net/post/index.json?tags=fav:{$this->postParams->username}&limit={$resultsPerPage}&page=";
         $jsonArray = null;
         $this->connection->beginTransaction();
         $counter = 1;
@@ -258,7 +258,7 @@ class RegexCache {
         }
         $regex = preg_quote($input, "/");
         $regex = str_replace("\\*", ".*?", $regex);
-        self::$regexCache[$input] = "/\\b" . $regex . "\\b/";
+        self::$regexCache[$input] = "/\\b{$regex}\\b/";
         return self::$regexCache[$input];
     }
 }
