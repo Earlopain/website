@@ -7,7 +7,7 @@ class SqlConnection {
     public static function get($dbname): PDO {
         if (!isset(self::$connections[$dbname])) {
             $servername = "localhost";
-            $username = "earlopain";
+            $username = getSecret("dbuser");
             $password = getSecret("dbpass");
             $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
