@@ -45,7 +45,7 @@ generateHeadBoilerplate();?>
     </div>
     <p></p>
     <div class="buttoncontainer">
-        <textarea id="commandout" class="output button">test</textarea>
+        <textarea id="commandout" class="output button"></textarea>
         <button id="submitfile" class="button" onclick="putFileOnServer()" style="display: none">Submit File</button>
     </div>
 
