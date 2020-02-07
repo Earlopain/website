@@ -49,7 +49,7 @@ function showSubmitButton() {
 
 
 function requestOnProgress(event) {
-    document.getElementById("commandout").value = event.target.responseText;
+    document.getElementById("commandout").value = event.target.responseText.substr(-50000);
     document.getElementById("commandout").scrollTop = 999999;
 }
 
