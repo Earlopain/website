@@ -47,13 +47,16 @@ function showSubmitButton() {
     document.getElementById("submitfile").style.display = "";
 }
 
+
+function requestOnProgress(event) {
+    document.getElementById("commandout").value = event.target.responseText;
+    document.getElementById("commandout").scrollTop = 999999;
+}
+
 function httpGET(url) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", url, true); // false for synchronous request
-    xmlHttp.onprogress = function (event) {
-        document.getElementById("commandout").value = event.target.responseText;
-        document.getElementById("commandout").scrollTop = 999999;
-    };
+    xmlHttp.onprogress = requestOnProgress;
     xmlHttp.onload = function () {
         commandInProgress = false;
     };
@@ -67,10 +70,7 @@ function httpPOST(formDataJSON) {
         formData.append(key, formDataJSON[key])
     });
     xmlHttp.open("POST", "executor.php", true); // false for synchronous request
-    xmlHttp.onprogress = function (event) {
-        document.getElementById("commandout").value = event.target.responseText;
-        document.getElementById("commandout").scrollTop = 999999;
-    };
+    xmlHttp.onprogress = requestOnProgress;
     xmlHttp.onload = function () {
         hideSubmitButton();
         commandInProgress = false;
