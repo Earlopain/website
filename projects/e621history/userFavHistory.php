@@ -101,6 +101,7 @@ class UserfavHistory {
     }
 
     public static function populateDb(string $username) {
+        $username = strtolower($username);
         if (self::removeFromDb($username) === false) {
             return;
         }
@@ -148,6 +149,7 @@ class UserfavHistory {
     }
 
     private static function removeFromDb(string $username): bool {
+        $username = strtolower($username);
         $connection = SqlConnection::get("e621");
         $statementRemoveUser = $connection->prepare("DELETE FROM users WHERE user_name = :user");
         $statementRemoveUser->bindValue("user", $username);
@@ -165,6 +167,7 @@ class UserfavHistory {
      * @return boolean
      */
     public static function userIsInDb(string $username): bool {
+        $username = strtolower($username);
         $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM users WHERE user_name = :user");
         $statement->bindValue("user", $username);
         $statement->execute();
@@ -172,6 +175,7 @@ class UserfavHistory {
     }
 
     public static function countPostsInDb(string $username) {
+        $username = strtolower($username);
         $statement = SqlConnection::get("e621")->prepare("SELECT COUNT(*) FROM favs WHERE user_name = :user");
         $statement->bindValue("user", $username);
         $statement->execute();
