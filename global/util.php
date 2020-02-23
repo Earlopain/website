@@ -34,8 +34,12 @@ function closeConnection(string $body = "", int $responseCode = 200) {
 
     set_time_limit(0);
     ignore_user_abort(true);
+    $previousBuffer = ob_get_contents();
     ob_end_clean();
     ob_start();
+    if ($previousBuffer !== false) {
+        echo $previousBuffer;
+    }
     echo $body;
     $size = ob_get_length();
     header("Connection: close\r\n");
