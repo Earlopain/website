@@ -3,12 +3,12 @@ function getURL(url) {
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
         request.open("GET", url, true);
-        request.onload = () => {
+        request.addEventListener("load", () => {
             if (request.status >= 200 && request.status < 400) {
                 resolve(request.responseText);
             } else { reject(); }
-        };
-        request.onerror = () => { reject() };
+        });
+        request.addEventListener("error", () => { reject() });
         request.send();
     })
 }
@@ -18,21 +18,23 @@ function postURL(url, data) {
     return new Promise((resolve, reject) => {
         let request = new XMLHttpRequest();
         request.open("POST", url, true);
-        request.onload = () => {
+        request.addEventListener("load", () => {
             if (request.status >= 200 && request.status <= 400) {
                 resolve(request);
             } else { reject(); }
-        };
-        request.onerror = () => { reject() };
+        });
+        request.addEventListener("error", () => { reject() });
         request.send(JSON.stringify(data));
     })
 }
 
 function logResponse(request) {
-    if (request.status !== 200)
+    if (request.status !== 200) {
         infoMessage(request.responseText, request.status);
-    else
+    }
+    else {
         infoMessage("Success");
+    }
 }
 
 let allBoxes = [];
@@ -64,6 +66,7 @@ function infoMessage(message, level) {
             break;
         default:
             infoBox.style.backgroundColor = "rgb(48, 110, 48)";
+            break;
     }
     infoBox.style.fontSize = (textSize - 3) + "px";
     allBoxes.push(infoBox);

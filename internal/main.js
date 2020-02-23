@@ -56,10 +56,10 @@ function requestOnProgress(event) {
 function httpGET(url) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", url, true); // false for synchronous request
-    xmlHttp.onprogress = requestOnProgress;
-    xmlHttp.onload = function () {
+    xmlHttp.addEventListener("progress", requestOnProgress);
+    xmlHttp.addEventListener("load", () => {
         commandInProgress = false;
-    };
+    });
     xmlHttp.send(null);
 }
 
@@ -70,10 +70,10 @@ function httpPOST(formDataJSON) {
         formData.append(key, formDataJSON[key])
     });
     xmlHttp.open("POST", "executor.php", true); // false for synchronous request
-    xmlHttp.onprogress = requestOnProgress;
-    xmlHttp.onload = function () {
+    xmlHttp.addEventListener("progress", requestOnProgress);
+    xmlHttp.addEventListener("load", () => {
         hideSubmitButton();
         commandInProgress = false;
-    };
+    });
     xmlHttp.send(formData);
 }

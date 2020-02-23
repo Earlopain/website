@@ -1,15 +1,15 @@
 let previousContent;
 let timeout;
 
-document.getElementById("input").onkeydown = (e) => {
-    var target = e.target;
-    var insertString = "    ";
+document.getElementById("input").addEventListener("keydown", e => {
+    const target = e.target;
+    const insertString = "    ";
     if (e.keyCode === 9) {
         e.preventDefault();
-        var currentSelection = target.selectionStart;
+        const currentSelection = target.selectionStart;
         if (target.selectionStart || target.selectionStart == '0') {
-            var startPos = target.selectionStart;
-            var endPos = target.selectionEnd;
+            const startPos = target.selectionStart;
+            const endPos = target.selectionEnd;
             target.value = target.value.substring(0, startPos)
                 + insertString
                 + target.value.substring(endPos, target.value.length);
@@ -18,7 +18,7 @@ document.getElementById("input").onkeydown = (e) => {
         }
         target.setSelectionRange(currentSelection + 4, currentSelection + 4);
     }
-}
+});
 
 setInterval(() => {
     let currentContent = document.getElementById("input").value;
@@ -42,20 +42,20 @@ setInterval(() => {
         document.getElementById("form").code.value = backupString;
     }
     else if (currentContent.startsWith("php")) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onload = (e) => {
-            if (xhttp.response.length > 10000) {
+        const xmlHttp = new XMLHttpRequest();
+        xmlHttp.addEventListener("load", () => {
+            if (xmlHttp.response.length > 50000) {
                 output.innerHTML = "Zu viel output (unconditional loop?)"
             }
             else {
-                output.innerHTML = xhttp.responseText;
+                output.innerHTML = xmlHttp.responseText;
             }
-        }
+        });
         currentContent = currentContent.replace(/echo /g, "echo '<br>'; echo ")
         let data = new FormData();
         data.append("code", currentContent.substring(currentContent.indexOf("\n") + 1));
-        xhttp.open("POST", "interpreter.php", true);
-        xhttp.send(data);
+        xmlHttp.open("POST", "interpreter.php", true);
+        xmlHttp.send(data);
     }
     else {
 

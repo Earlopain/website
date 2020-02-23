@@ -156,7 +156,7 @@ populateDropdown()
 async function populateDropdown() {
     const json = JSON.parse(await getURL("tracking.json")).servers;
     json.reverse().forEach(element => {
-        var option = document.createElement('option');
+        const option = document.createElement('option');
         option.text = element.name
         option.value = element.id;
         dropdownAll.add(option, 0);

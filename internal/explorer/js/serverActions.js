@@ -64,9 +64,9 @@ function serverRequest(type, postData) {
         let formData = new FormData();
         formData.append("data", btoa(JSON.stringify(postData)));
         xmlHttp.open("POST", "previlegeWrapper.php", true);
-        xmlHttp.onload = event => {
+        xmlHttp.addEventListener("load", event => {
             resolve(event.target.responseText);
-        };
+        });
         xmlHttp.send(formData);
     });
 

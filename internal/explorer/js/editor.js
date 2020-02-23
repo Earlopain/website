@@ -39,12 +39,12 @@ class Editor {
             const url = "previlegeWrapper.php?data=" + encodeURI(btoa(JSON.stringify(json)));
             mediaElement.controls = true;
             mediaElement.src = url;
-            mediaElement.onload = function () {
+            mediaElement.addEventListener("load", () => {
                 if (mediaElement.height > mediaElement.width) {
                     mediaElement.style.height = "calc(100% - var(--editor-margin) * 2)";
                     mediaElement.style.width = "auto";
                 }
-            };
+            });
         }
         editor.appendChild(mediaElement);
         this.currentlyOpenFile = file;
