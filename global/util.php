@@ -27,6 +27,11 @@ function createDirIfNotExists($path) {
  * @return void
  */
 function closeConnection(string $body = "", int $responseCode = 200) {
+    if (headers_sent($file, $line)) {
+        echo "Headers already send in {$file}:{$line}";
+        die();
+    }
+
     set_time_limit(0);
     ignore_user_abort(true);
     ob_end_clean();
