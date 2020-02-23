@@ -5,7 +5,7 @@ require_once "sql.php";
 require_once "logger.php";
 
 class UserfavHistory {
-    private static $logger;
+    private static $logfile = "userfavhistory.log";
     /**
      * @var PostParams
      */
@@ -19,9 +19,6 @@ class UserfavHistory {
     private $connection;
 
     public function __construct(PostParams $postParams) {
-        if (!isset(self::$logger)) {
-            self::$logger = Logger::get("userfavhistory.log");
-        }
         $this->postParams = $postParams;
         $this->connection = SqlConnection::get("e621");
     }
@@ -89,7 +86,8 @@ class UserfavHistory {
         }
         $this->favs = [];
         if (!self::userIsInDb($this->postParams->username)) {
-            self::$logger->log(LogLevel::ERROR, "User " . $this->postParams->username . " is not in db even though he should", $this->postParams);
+            $logger = Logger::get(self::$logfile);
+            $logger->log(LogLevel::ERROR, "User " . $this->postParams->username . " is not in db even though he should", $this->postParams);
             return $this->favs;
         }
 
@@ -141,10 +139,11 @@ class UserfavHistory {
 
         $statement->bindValue("username", $username);
         $statement->execute();
+        $logger = Logger::get(self::$logfile);
         if ($connection->commit() === true) {
-            self::$logger->log(LogLevel::INFO, "Inserted {$counter} posts for user {$username}");
+            $logger->log(LogLevel::INFO, "Inserted {$counter} posts for user {$username}");
         } else {
-            self::$logger->log(LogLevel::ERROR, "Failed to insert {$username} into db");
+            $logger->log(LogLevel::ERROR, "Failed to insert {$username} into db");
         }
     }
 
@@ -156,7 +155,8 @@ class UserfavHistory {
         $statementRemoveUserFavs->bindValue("user", $username);
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
         if ($result === false) {
-            self::$logger->log(LogLevel::WARNING, "Failed to remove {$username} from db");
+            $logger = Logger::get(self::$logfile);
+            $logger->log(LogLevel::WARNING, "Failed to remove {$username} from db");
         }
         return $result;
     }
