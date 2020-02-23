@@ -13,6 +13,11 @@ class Logger {
     private $treshhold;
 
     public function __construct(string $filePath, string $treshhold = LogLevel::DEBUG) {
+        if (strpos($filePath, "/") === 0) {
+            throw new Error("No absolute filepaths allowed: " . $filePath);
+        }
+        $filePath = __DIR__ . "/../logger/" . $filePath;
+
         if (file_exists($filePath) && !is_writable($filePath)) {
             throw new Error("Logfile is not writable\n" . $filePath);
         }
