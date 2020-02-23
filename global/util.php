@@ -17,3 +17,27 @@ function createDirIfNotExists($path) {
         }
     }
 }
+
+/**
+ * Close the connection but keep executing everything below it
+ * Only works if nothing has been outputed yet
+ * https://gist.github.com/bubba-h57/32593b2b970366d24be
+ * @param  string  $body
+ * @param  integer $responseCode
+ * @return void
+ */
+function closeConnection(string $body = "", int $responseCode = 200) {
+    set_time_limit(0);
+    ignore_user_abort(true);
+    ob_end_clean();
+    ob_start();
+    echo $body;
+    $size = ob_get_length();
+    header("Connection: close\r\n");
+    header("Content-Encoding: none\r\n");
+    header("Content-Length: $size");
+    http_response_code($responseCode);
+    ob_end_flush();
+    @ob_flush();
+    flush();
+}
