@@ -5,7 +5,7 @@ require_once "sql.php";
 require_once "logger.php";
 
 class UserfavHistory {
-    private static $logger = new Logger("userfavhistory.log");
+    private static $logger;
     /**
      * @var PostParams
      */
@@ -19,6 +19,9 @@ class UserfavHistory {
     private $connection;
 
     public function __construct(PostParams $postParams) {
+        if (!isset(self::$logger)) {
+            self::$logger = Logger::get("userfavhistory.log");
+        }
         $this->postParams = $postParams;
         $this->connection = SqlConnection::get("e621");
     }
@@ -138,9 +141,11 @@ class UserfavHistory {
 
         $statement->bindValue("username", $username);
         $statement->execute();
-
-        $connection->commit();
-        return $result;
+        if ($connection->commit() === true) {
+            self::$logger->log(LogLevel::INFO, "Inserted {$counter} posts for user {$username}");
+        } else {
+            self::$logger->log(LogLevel::ERROR, "Failed to insert {$username} into db");
+        }
     }
 
     private static function removeFromDb(string $username): bool {
@@ -150,7 +155,7 @@ class UserfavHistory {
         $statementRemoveUserFavs = $connection->prepare("DELETE FROM favs WHERE user_name = :user");
         $statementRemoveUserFavs->bindValue("user", $username);
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
-        if($result === false) {
+        if ($result === false) {
             self::$logger->log(LogLevel::WARNING, "Failed to remove {$username} from db");
         }
         return $result;

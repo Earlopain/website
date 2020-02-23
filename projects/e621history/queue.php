@@ -2,8 +2,10 @@
 
 require_once "sql.php";
 require_once "userFavHistory.php";
+require_once "logger.php";
 
 class E621UserQueue {
+    private static $logfile = "queue.log";
     /**
      * Returns the queue index of the user
      * Will be -1 if not in queue
@@ -18,6 +20,8 @@ class E621UserQueue {
         $position = $statementPosition->fetch(PDO::FETCH_COLUMN);
         //Not in queue
         if ($position === false) {
+            $logger = Logger::get(self::$logfile);
+            $logger->log(LogLevel::INFO, "User {$username} not in queue");
             return -1;
         }
         $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
@@ -54,7 +58,12 @@ class E621UserQueue {
         }
         $statement = SqlConnection::get("e621")->prepare("INSERT INTO user_queue (user_name) VALUES (:user)");
         $statement->bindValue("user", $username);
-        $statement->execute();
+        $logger = Logger::get(self::$logfile);
+        if ($statement->execute() === false) {
+            $logger->log(LogLevel::ERROR, "Failed to add {$username} to queue");
+        } else {
+            $logger->log(LogLevel::INFO, "Added {$username} to queue");
+        }
         return;
     }
 
@@ -83,6 +92,9 @@ class E621UserQueue {
     public static function removeFromQueue(string $username) {
         $statement = SqlConnection::get("e621")->prepare("DELETE FROM user_queue WHERE user_name = :user");
         $statement->bindValue("user", $username);
-        $statement->execute();
+        if ($statement->execute() === false) {
+            $logger = Logger::get(self::$logfile);
+            $logger->log(LogLevel::ERROR, "Failed to remove {$username} from queue");
+        }
     }
 }

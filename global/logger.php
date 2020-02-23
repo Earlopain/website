@@ -9,14 +9,23 @@ class Logger {
         LogLevel::DEBUG => 4
     ];
 
+    private static $loggers = [];
+
     private $fileHandle;
     private $treshhold;
 
-    public function __construct(string $filePath, string $treshhold = LogLevel::DEBUG) {
+    public static function get($filePath, string $treshhold = LogLevel::DEBUG): self {
+        if (!isset(self::$loggers[$filePath])) {
+            self::$loggers[$filePath] = new self($filePath, $treshhold);
+        }
+        return self::$loggers[$filePath];
+    }
+
+    private function __construct(string $filePath, string $treshhold) {
         if (strpos($filePath, "/") === 0) {
             throw new Error("No absolute filepaths allowed: " . $filePath);
         }
-        $filePath = __DIR__ . "/../logger/" . $filePath;
+        $filePath = __DIR__ . "/../log/" . $filePath;
 
         if (file_exists($filePath) && !is_writable($filePath)) {
             throw new Error("Logfile is not writable\n" . $filePath);
