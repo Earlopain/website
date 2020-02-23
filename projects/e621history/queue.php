@@ -58,4 +58,34 @@ class E621UserQueue {
         $statement->execute();
         return;
     }
+
+    /**
+     *  Returns an array of usernames ordered by their appearance in the queue
+     *
+     * @return string[]
+     */
+    public static function getFullQueue(): array{
+        $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM user_queue ORDER BY counter");
+        $statement->execute();
+        $result = [];
+
+        while (($username = $statement->fetch(PDO::FETCH_COLUMN)) !== false) {
+            $result[] = $username;
+        }
+        return $result;
+    }
+
+    /**
+     * Removes the specified user from the queue
+     *
+     * @param  string $username
+     * @return void
+     */
+    public static function removeFromQueue(string $username) {
+        $statement = SqlConnection::get("e621")->prepare("DELETE FROM user_queue WHERE user_name = :user");
+        $statement->bindValue("user", $username);
+        $statement->execute();
+    }
 }
+
+var_dump(E621UserQueue::getFullQueue());
