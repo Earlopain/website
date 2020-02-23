@@ -2,8 +2,10 @@
 
 require_once "util.php";
 require_once "sql.php";
+require_once "logger.php";
 
 class UserfavHistory {
+    private static $logger = new Logger("userfavhistory.log");
     /**
      * @var PostParams
      */
@@ -83,20 +85,24 @@ class UserfavHistory {
             return $this->favs;
         }
         $this->favs = [];
-        if (self::userIsInDb($this->postParams->username) && !$this->postParams->refreshUserFavs) {
-            $addFavsStatement = $this->connection->prepare("SELECT md5 from favs where user_name = :username ORDER BY position");
-            $addFavsStatement->bindValue("username", $this->postParams->username);
-            $addFavsStatement->execute();
-            while (($row = $addFavsStatement->fetch(PDO::FETCH_COLUMN)) !== false) {
-                $this->favs[] = $row;
-            }
+        if (!self::userIsInDb($this->postParams->username)) {
+            self::$logger->log(LogLevel::ERROR, "User " . $this->postParams->username . " is not in db even though he should", $this->postParams);
             return $this->favs;
         }
-        $this->favs = self::populateDb($this->postParams->username);
+
+        $addFavsStatement = $this->connection->prepare("SELECT md5 from favs where user_name = :username ORDER BY position");
+        $addFavsStatement->bindValue("username", $this->postParams->username);
+        $addFavsStatement->execute();
+        while (($row = $addFavsStatement->fetch(PDO::FETCH_COLUMN)) !== false) {
+            $this->favs[] = $row;
+        }
         return $this->favs;
     }
 
-    private static function populateDb(string $username) {
+    public static function populateDb(string $username) {
+        if (self::removeFromDb($username) === false) {
+            return;
+        }
         $connection = SqlConnection::get("e621");
         $statementUserFav = $connection->prepare("INSERT INTO favs (user_name, md5, position) VALUES (:username, :md5, :position)
         ON DUPLICATE KEY UPDATE user_name = user_name");
@@ -134,6 +140,19 @@ class UserfavHistory {
         $statement->execute();
 
         $connection->commit();
+        return $result;
+    }
+
+    private static function removeFromDb(string $username): bool {
+        $connection = SqlConnection::get("e621");
+        $statementRemoveUser = $connection->prepare("DELETE FROM users WHERE user_name = :user");
+        $statementRemoveUser->bindValue("user", $username);
+        $statementRemoveUserFavs = $connection->prepare("DELETE FROM favs WHERE user_name = :user");
+        $statementRemoveUserFavs->bindValue("user", $username);
+        $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
+        if($result === false) {
+            self::$logger->log(LogLevel::WARNING, "Failed to remove {$username} from db");
+        }
         return $result;
     }
     /**
