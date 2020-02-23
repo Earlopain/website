@@ -113,7 +113,6 @@ class UserfavHistory {
         $resultsPerPage = 320;
         $url = "https://e621.net/post/index.json?tags=fav:{$username}&limit={$resultsPerPage}&page=";
         $jsonArray = null;
-        $connection->beginTransaction();
         $counter = 0;
         $result = [];
         do {
@@ -122,6 +121,7 @@ class UserfavHistory {
                 break;
             }
             $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
+            $connection->beginTransaction();
             foreach ($jsonArray as $json) {
                 $result[] = $json->md5;
                 $post = new E621Post($json);
@@ -133,15 +133,15 @@ class UserfavHistory {
                 $statementUserFav->execute();
                 $counter++;
             }
+            $connection->commit();
             $page++;
         } while (count($jsonArray) === $resultsPerPage);
         $statement = $connection->prepare("INSERT INTO users (user_name, last_updated) VALUES (:username, now())
         ON DUPLICATE KEY UPDATE user_name = user_name");
 
         $statement->bindValue("username", $username);
-        $statement->execute();
         $logger = Logger::get(self::$logfile);
-        if ($connection->commit() === true) {
+        if ($statement->execute() === true) {
             $logger->log(LogLevel::INFO, "Inserted {$counter} posts for user {$username}");
         } else {
             $logger->log(LogLevel::ERROR, "Failed to insert {$username} into db");
