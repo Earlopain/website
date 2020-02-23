@@ -10,7 +10,11 @@ if (UserfavHistory::userIsInDb($_GET["username"])) {
     $result->code = 0;
 } else {
     $queuePosition = E621UserQueue::queuePosition($_GET["username"]);
-    if ($queuePosition !== -1) {
+    if ($queuePosition === 1) {
+        $postCount = UserfavHistory::countPostsInDb($_GET["username"]);
+        $result->text = "Found {$postCount} of your posts";
+        $result->code = 1;
+    } else if ($queuePosition !== -1) {
         $result->text = "You are position " . ($queuePosition + 1) . " in the queue";
         $result->code = 1;
 

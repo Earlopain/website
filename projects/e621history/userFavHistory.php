@@ -170,6 +170,13 @@ class UserfavHistory {
         $statement->execute();
         return $statement->fetch() !== false ? true : false;
     }
+
+    public static function countPostsInDb(string $username) {
+        $statement = SqlConnection::get("e621")->prepare("SELECT COUNT(*) FROM favs WHERE user_name = :user");
+        $statement->bindValue("user", $username);
+        $statement->execute();
+        return $statement->fetch(PDO::FETCH_COLUMN);
+    }
 }
 
 class E621Post {
