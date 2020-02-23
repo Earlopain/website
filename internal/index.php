@@ -32,6 +32,9 @@ generateHeadBoilerplate();?>
         <button class="button" onclick="executeOnServer('deezerdl')">Deezer Download</button>
     </div>
     <div class="buttoncontainer">
+        <button class="button" onclick="getFileFromServer('/media/plex/software/deezerdl/SMLoadrConfig.json')">Deezer Set ARL</button>
+    </div>
+    <div class="buttoncontainer">
         <button class="button" onclick="executeOnServer('e621dl')">E621 Download</button>
     </div>
     <div class="buttoncontainer">
