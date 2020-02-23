@@ -1,7 +1,7 @@
 <?php
 
-require_once "userFavHistory.php";
-UserfavHistory::addToQueue($_REQUEST["username"]);
+require_once "queue.php";
+E621UserQueue::addToQueue($_REQUEST["username"]);
 
 closeConnection();
 exec("php -f queueWorker.php");
