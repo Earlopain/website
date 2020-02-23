@@ -55,7 +55,7 @@ class UserfavHistory {
                 }
             }
             $xAxis = $this->postParams->providedLocalFiles ? date("Y-m-d", $this->postParams->fileDates[$userfavMd5] / 1000) : $index;
-            $result->addDataPoint($xAxis, $dataPoint);
+            $result->addDataPoint($xAxis + 1, $dataPoint);
         }
         return json_encode($result);
     }
@@ -113,7 +113,7 @@ class UserfavHistory {
         $url = "https://e621.net/post/index.json?tags=fav:{$username}&limit={$resultsPerPage}&page=";
         $jsonArray = null;
         $connection->beginTransaction();
-        $counter = 1;
+        $counter = 0;
         $result = [];
         do {
             //api imposes a limit of 750 pages, which amounts to 240k posts
