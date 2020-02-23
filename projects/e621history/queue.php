@@ -23,7 +23,6 @@ class E621UserQueue {
         $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
         $statementMinCount->execute();
         $minCount = $statementMinCount->fetch(PDO::FETCH_COLUMN);
-        var_dump($minCount, $position);
         return $position - $minCount;
     }
 
@@ -87,5 +86,3 @@ class E621UserQueue {
         $statement->execute();
     }
 }
-
-var_dump(E621UserQueue::getFullQueue());
