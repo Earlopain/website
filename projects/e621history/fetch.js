@@ -10,7 +10,7 @@ async function fetchCsv() {
         fileDates[file.name.split(".")[0]] = file.lastModified;
     }
 
-    const url = "getUserFavHistory.php";
+    const url = "getUserFavs.php";
 
     const response = await postURL(url, {
         username: username,

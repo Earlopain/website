@@ -7,6 +7,7 @@ generateHeadBoilerplate();?>
     <title>UwU</title>
     <script src="/projects/util.js"></script>
     <script src="fetch.js"></script>
+    <script src="statusChecker.js"></script>
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 </head>
 

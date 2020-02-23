@@ -96,7 +96,7 @@ class UserfavHistory {
         return $this->favs;
     }
 
-    private static function populateDb($username) {
+    private static function populateDb(string $username) {
         $connection = SqlConnection::get("e621");
         $statementUserFav = $connection->prepare("INSERT INTO favs (user_name, md5, position) VALUES (:username, :md5, :position)
         ON DUPLICATE KEY UPDATE user_name = user_name");
@@ -140,11 +140,66 @@ class UserfavHistory {
      * Checks wether or not a user was already put into the db
      * @return boolean
      */
-    private static function userIsInDb($username): bool {
+    public static function userIsInDb(string $username): bool {
         $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM users WHERE user_name = :user");
         $statement->bindValue("user", $username);
         $statement->execute();
         return $statement->fetch() !== false ? true : false;
+    }
+
+    /**
+     * Returns the queue index of the user
+     * Will be -1 if not in queue
+     *
+     * @param  string  $username
+     * @return integer queue index
+     */
+    public static function queuePosition(string $username): int {
+        $statementPosition = SqlConnection::get("e621")->prepare("SELECT counter FROM user_queue where user_name = :user");
+        $statementPosition->bindValue("user", $username);
+        $statementPosition->execute();
+        $position = $statementPosition->fetch(PDO::FETCH_COLUMN);
+        //Not in queue
+        if ($position === false) {
+            return -1;
+        }
+        $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
+        $statementMinCount->execute();
+        $minCount = $statementMinCount->fetch(PDO::FETCH_COLUMN);
+        var_dump($minCount, $position);
+        return $position - $minCount;
+    }
+
+    /**
+     * Wether or not the user is already being processed
+     *
+     * @param  string    $username
+     * @return boolean
+     */
+    private static function shouldAddToQueue(string $username) {
+        if (self::userIsInDb($username)) {
+            return false;
+        }
+        $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM user_queue WHERE user_name = :user");
+        $statement->bindValue("user", $username);
+        $statement->execute();
+        return $statement->fetch() !== false ? false : true;
+    }
+
+    /**
+     * Adds a user to the queue, if he's not already processed or in the queue
+     *
+     * @param  string $username
+     * @return void
+     */
+    public static function addToQueue(string $username) {
+        if (!self::shouldAddToQueue($username)) {
+            return;
+        }
+        $statement = SqlConnection::get("e621")->prepare("INSERT INTO user_queue (user_name) VALUES (:user)");
+        $statement->bindValue("user", $username);
+        $statement->execute();
+        return;
     }
 }
 
@@ -314,7 +369,3 @@ class PostParams {
         return new self(file_get_contents("php://input"));
     }
 }
-
-$postParams = PostParams::create();
-$favs = new UserfavHistory($postParams);
-echo $favs->generateGraph();
