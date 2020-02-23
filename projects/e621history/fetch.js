@@ -1,5 +1,4 @@
-async function fetchCsv() {
-    const username = document.getElementById("username").value;
+async function fetchCsv(username) {
     const tagGroups = {
         "gay": ["male/male -bisexual -male/female", "male solo -bisexual"],
         "straight": ["male/female -bisexual", "female solo"]

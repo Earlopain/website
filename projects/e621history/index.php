@@ -14,7 +14,7 @@ generateHeadBoilerplate();?>
 <body>
     Your username: <input type="text" id="username">
     Optional local files<input type="file" id="folderinput" webkitdirectory directory multiple/>
-    <button onclick="fetchCsv()">Fetch Favs</button>
+    <button onclick="startLoop()">Fetch Favs</button>
     <br>
     <div id="graph" style="width: 50%"></div>
 </body>
