@@ -44,12 +44,7 @@ setInterval(() => {
     else if (currentContent.startsWith("php")) {
         const xmlHttp = new XMLHttpRequest();
         xmlHttp.addEventListener("load", () => {
-            if (xmlHttp.response.length > 50000) {
-                output.innerHTML = "Zu viel output (unconditional loop?)"
-            }
-            else {
-                output.innerHTML = xmlHttp.responseText;
-            }
+            output.innerHTML = xmlHttp.responseText;
         });
         currentContent = currentContent.replace(/echo /g, "echo '<br>'; echo ")
         let data = new FormData();
