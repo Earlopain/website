@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 function getSecret($wished) {
     $wished = strtolower($wished);
-    $string = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/secrets.txt');
+    $string = file_get_contents(__DIR__ . "/../secrets.txt");
     $array = explode("\n", $string);
     foreach ($array as $line) {
         $result = explode("=", $line);
