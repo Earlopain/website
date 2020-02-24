@@ -87,7 +87,7 @@ class UserfavHistory {
         $this->favs = [];
         if (!self::userIsInDb($this->postParams->username)) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::ERROR, "User " . $this->postParams->username . " is not in db even though he should", $this->postParams);
+            $logger->log(LogLevel::ERROR, "User " . $this->postParams->username . " is not in db even though he should");
             return $this->favs;
         }
 
