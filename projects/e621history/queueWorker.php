@@ -7,11 +7,11 @@ if (!flock($fp, LOCK_EX | LOCK_NB)) {
 require_once "userFavHistory.php";
 require_once "queue.php";
 
-$allUsers = E621UserQueue::getFullQueue();
-
-foreach ($allUsers as $username) {
-    UserfavHistory::populateDb($username);
-    E621UserQueue::removeFromQueue($username);
+while (count($allUsers = E621UserQueue::getFullQueue()) > 0) {
+    foreach ($allUsers as $username) {
+        UserfavHistory::populateDb($username);
+        E621UserQueue::removeFromQueue($username);
+    }
 }
 
 flock($fp, LOCK_UN);
