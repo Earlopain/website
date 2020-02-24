@@ -332,7 +332,7 @@ class PostParams {
     public function __construct(string $jsonString) {
         $json = json_decode($jsonString, true);
         $this->username = strtolower($json["username"]);
-        $this->username = str_replace(" ", "_", $this->username);
+        $this->username = str_replace(" ", "_", trim($this->username));
         foreach ($json["tagGroups"] as $key => $value) {
             $this->tagGroups[] = new TagGroup($key, $value);
         }
