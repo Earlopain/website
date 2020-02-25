@@ -1,4 +1,3 @@
-const proxyURL = "/projects/steamgames/apiwrapper.php"
 const steamURL = "https://api.steampowered.com/";
 
 class SteamUser {
@@ -27,7 +26,7 @@ class SteamUser {
 }
 
 async function getWrapper(url) {
-    const request = await postURL(proxyURL, { url: steamURL + url });
+    const request = await postURL("/proxy.php", { url: steamURL + url, type: "steam" });
     if (request.status !== 200) {
         console.log(url)
         throw new Error(url + "\n" + response.responseText);

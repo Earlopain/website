@@ -1,13 +1,18 @@
 <?php
-function proxyGetUrl($url) {
-    $c = curl_init();
-    curl_setopt($c, CURLOPT_URL, $url);
-    curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($c, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0");
-    curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
-    $response = curl_exec($c);
-    $http_status = curl_getinfo($c, CURLINFO_HTTP_CODE);
-    http_response_code($http_status);
-    curl_close($c);
-    return $response;
+require_once "secret.php";
+$json = json_decode(file_get_contents('php://input'));
+$url = $json->url;
+
+if (isset($json->type)) {
+    $appendChar = parse_url($url, PHP_URL_QUERY) === null ? "?" : "&";
+    $url .= $appendChar;
+    switch ($json->type) {
+        case "steam":
+            $url .= "key=" . Secret::get("steam");
+            break;
+        default:
+            throw new Error("Unknown extra " . $json->type);
+            break;
+    }
 }
+echo file_get_contents($url);
