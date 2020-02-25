@@ -1,5 +1,7 @@
 <?php
 
+require_once "config.php";
+
 class Logger {
     private $logLevels = [
         LogLevel::CRITICAL => 0,
@@ -25,7 +27,12 @@ class Logger {
         if (strpos($filePath, "/") === 0) {
             throw new Error("No absolute filepaths allowed: " . $filePath);
         }
-        $filePath = __DIR__ . "/../log/" . $filePath;
+        $logFolder = Config::get("logfolder");
+        //If no trailing slash, add one
+        if (substr($logFolder, -1) !== "/") {
+            $logFolder .= "/";
+        }
+        $filePath = $logFolder . $filePath;
 
         if (file_exists($filePath) && !is_writable($filePath)) {
             throw new Error("Logfile is not writable\n" . $filePath);

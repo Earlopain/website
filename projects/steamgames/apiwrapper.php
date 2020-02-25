@@ -1,7 +1,6 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    require_once "secretParser.php";
-    include $_SERVER['DOCUMENT_ROOT'] . '/secretParser.php';
+    require_once "secret.php";
     include $_SERVER['DOCUMENT_ROOT'] . '/proxy.php';
 
     $json = file_get_contents('php://input');
@@ -14,6 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "No url specified";
         return;
     }
-    $response = proxyGetUrl($obj["url"] . "&key=" . getSecret("steam"));
+    $response = proxyGetUrl($obj["url"] . "&key=" . Secret::get("steam"));
     echo $response;
 }
