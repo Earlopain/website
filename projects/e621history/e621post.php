@@ -3,7 +3,8 @@
 require_once "userFavHistory.php";
 
 class E621Post {
-    private $tags;
+    public $tags;
+    public $md5;
 
     private static $saveStatementSql = "INSERT INTO posts (md5, json, last_updated) VALUES (:md5, :json, NOW())
                                         ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW();";
@@ -13,6 +14,7 @@ class E621Post {
     private static $saveStatement;
     public function __construct($json) {
         $this->tags = $json->tags;
+        $this->md5 = $json->md5;
     }
     /**
      * Checks wether or not a given filter matches the post or not

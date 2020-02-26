@@ -44,37 +44,60 @@ class UserfavHistory {
             //because we walk our way backwards through the favs reverse the array
             $userfavs = array_reverse($userfavs);
         }
-        $allFavJson = $this->getAllFavsJson();
-        foreach ($userfavs as $index => $userfavMd5) {
-            $userfavJson = new E621Post($allFavJson[$userfavMd5]);
-            $dataPoint = [];
-            foreach ($this->postParams->tagGroups as $tagGroup) {
-                $matches = $userfavJson->tagsMatchesFilter($tagGroup);
-                $dataPoint[$tagGroup->groupName] = $matches;
-                if ($matches === true) {
-                    continue;
+        //TODO: logic cleanup
+        $userFavCount = $this->getFavCount();
+        $maxFavsAtOnce = 1000;
+        $indexStart = 0;
+        $offset = $userFavCount - $maxFavsAtOnce;
+        do {
+            $jsonArray = $this->getFavsJson($maxFavsAtOnce, $offset, $indexStart);
+            foreach ($jsonArray as $position => $json) {
+                $post = new E621Post($json);
+                $dataPoint = [];
+                foreach ($this->postParams->tagGroups as $tagGroup) {
+                    $matches = $post->tagsMatchesFilter($tagGroup);
+                    $dataPoint[$tagGroup->groupName] = $matches;
+                    if ($matches === true) {
+                        continue;
+                    }
                 }
+                $xAxis = $this->postParams->providedLocalFiles ? date("Y-m-d", $this->postParams->fileDates[$post->md5] / 1000) : $position + 1;
+                $result->addDataPoint($xAxis, $dataPoint);
             }
-            $xAxis = $this->postParams->providedLocalFiles ? date("Y-m-d", $this->postParams->fileDates[$userfavMd5] / 1000) : $index;
-            $result->addDataPoint($xAxis + 1, $dataPoint);
-        }
+            $offset -= $maxFavsAtOnce;
+            $indexStart += $maxFavsAtOnce;
+        } while (count($jsonArray) === $maxFavsAtOnce);
         return json_encode($result);
     }
     /**
-     * Returns an unordered assoc array of all favs for a user as json objects (md5 => json)
+     * Returns $count user favs starting from $offset. Array will start counting from $indexStart
+     *
+     * @param  integer $count
+     * @param  integer $offset
+     * @param  integer $indexStart
      * @return array
      */
-    private function getAllFavsJson(): array{
-        $statement = $this->connection->prepare("select json from posts, favs where posts.md5 = favs.md5 and favs.user_name = :username;");
+    private function getFavsJson(int $count, int $offset, int $indexStart): array{
+        $end = $offset + $count - 1;
+        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN favs ON posts.md5 = favs.md5 WHERE favs.user_name = :username AND favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
         $statement->bindValue("username", $this->postParams->username);
         $statement->execute();
         $result = [];
 
-        while (($row = $statement->fetch(PDO::FETCH_COLUMN)) !== false) {
-            $json = json_decode(utf8_encode($row));
-            $result[$json->md5] = $json;
+        $counter = 0;
+        while (($row = $statement->fetch(PDO::FETCH_ASSOC)) !== false) {
+            $json = json_decode(utf8_encode($row["json"]));
+            $result[$indexStart + $counter] = $json;
+            $counter++;
         }
         return $result;
+    }
+
+    private function getFavCount() {
+        $statement = $this->connection->prepare("SELECT COUNT(*) FROM favs WHERE favs.user_name = :username;");
+        $statement->bindValue("username", $this->postParams->username);
+        $statement->execute();
+        return $statement->fetch(PDO::FETCH_COLUMN);
     }
 
     /**
