@@ -101,7 +101,7 @@ class UserfavHistory {
         return $this->favs;
     }
 
-    public static function populateDb(string $username) {
+    public static function populateDb(string $username, $loop = 0) {
         $username = strtolower($username);
         if (self::removeFromDb($username) === false) {
             return;
@@ -130,7 +130,18 @@ class UserfavHistory {
                 $statementUserFav->bindValue("username", $username);
                 $statementUserFav->bindValue("md5", $json->md5);
                 $statementUserFav->bindValue("position", $counter);
-                $statementUserFav->execute();
+                //Failed to insert because of key constraint
+                //The user has added something while we were scraping, try again
+                if ($statementUserFav->execute() === false) {
+                    $logger = Logger::get(self::$logfile);
+                    $logger->log(LogLevel::ERROR, "Post insert failed for " . $this->postParams->username . " at loop: {$loop}");
+                    $connection->rollBack();
+                    if ($loop < 3) {
+                        self::populateDb($username, $loop + 1);
+                    } else {
+                        return;
+                    }
+                }
                 $counter++;
             }
             $connection->commit();
