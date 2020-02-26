@@ -22,7 +22,7 @@ if (isset($_POST["code"])) {
             proc_terminate($process, 9);
         }
     });
-    usleep(100000); //0.1 seconds
+    sleep(1);
     if (is_resource($process)) {
         fclose($pipes[0]);
         stream_set_blocking($pipes[1], false);
