@@ -124,8 +124,7 @@ class UserfavHistory {
             $connection->beginTransaction();
             foreach ($jsonArray as $json) {
                 $result[] = $json->md5;
-                $post = new E621Post($json);
-                $post->savePost($connection);
+                E621Post::savePost($connection, $json);
                 // save post as user fav with position
                 $statementUserFav->bindValue("username", $username);
                 $statementUserFav->bindValue("md5", $json->md5);
@@ -184,7 +183,7 @@ class UserfavHistory {
 }
 
 class E621Post {
-    private $json;
+    private $tags;
 
     private static $saveStatementSql = "INSERT INTO posts (md5, json, last_updated) VALUES (:md5, :json, NOW())
                                         ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW();";
@@ -192,8 +191,8 @@ class E621Post {
      * @var PDOStatement
      */
     private static $saveStatement;
-    public function __construct($jsonObject) {
-        $this->json = $jsonObject;
+    public function __construct($json) {
+        $this->tags = $json->tags;
     }
     /**
      * Checks wether or not a given filter matches the post or not
@@ -208,7 +207,7 @@ class E621Post {
                 $inverse = $filter{0} === "-";
                 $filterNoMinus = $inverse ? substr($filter, 1) : $filter;
                 $regex = RegexCache::escapeStringToRegex($filterNoMinus);
-                $result = preg_match($regex, $this->json->tags) === 1 ? true : false;
+                $result = preg_match($regex, $this->tags) === 1 ? true : false;
                 $result = $result !== $inverse;
                 if ($result === false) {
                     break;
@@ -226,10 +225,10 @@ class E621Post {
      * version will be overwritten and last_update gets set to now()
      * @return void
      */
-    public function savePost(PDO $connection) {
+    public static function savePost(PDO $connection, $json) {
         $statement = self::getSaveStatement($connection);
-        $statement->bindValue("md5", $this->json->md5);
-        $statement->bindValue("json", json_encode($this->json));
+        $statement->bindValue("md5", $json->md5);
+        $statement->bindValue("json", json_encode($json));
         $statement->execute();
     }
 
