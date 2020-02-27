@@ -1,6 +1,10 @@
 <?php
 require_once "secret.php";
 $json = json_decode(file_get_contents('php://input'));
+if (!isset($json->url)) {
+    http_response_code(400);
+    die();
+}
 $url = $json->url;
 
 $domainWhitelist = ["api.steampowered.com"];
