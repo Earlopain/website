@@ -28,22 +28,7 @@ class UserfavHistory {
      * @return string
      */
     public function generateGraph(): string {
-        $result = new ResultJson($this->postParams->tagGroups);
-        $userfavs = $this->getAllFavsMd5();
-
-        if ($this->postParams->providedLocalFiles) {
-            //remove files which are not found in post data
-            $userfavs = array_filter($userfavs, function ($a) {
-                return isset($this->postParams->fileDates[$a]);
-            });
-            //sort favs by those transmitted mtimes
-            usort($userfavs, function ($a, $b) {
-                return $this->postParams->fileDates[$a] - $this->postParams->fileDates[$b];
-            });
-        } else {
-            //because we walk our way backwards through the favs reverse the array
-            $userfavs = array_reverse($userfavs);
-        }
+        $result = new ResultJson($this->postParams->tagGroups, $this->postParams->providedLocalFiles);
         //TODO: logic cleanup
         $userFavCount = $this->getFavCount();
         $maxFavsAtOnce = 1000;
@@ -52,6 +37,9 @@ class UserfavHistory {
         do {
             $jsonArray = $this->getFavsJson($maxFavsAtOnce, $offset, $indexStart);
             foreach ($jsonArray as $position => $json) {
+                if ($this->postParams->providedLocalFiles && !isset($this->postParams->fileDates[$json->md5])) {
+                    continue;
+                }
                 $post = new E621Post($json);
                 $dataPoint = [];
                 foreach ($this->postParams->tagGroups as $tagGroup) {
@@ -61,12 +49,13 @@ class UserfavHistory {
                         continue;
                     }
                 }
-                $xAxis = $this->postParams->providedLocalFiles ? date("Y-m-d", $this->postParams->fileDates[$post->md5] / 1000) : $position + 1;
+                $xAxis = $this->postParams->providedLocalFiles ? $this->postParams->fileDates[$post->md5] : $position + 1;
                 $result->addDataPoint($xAxis, $dataPoint);
             }
             $offset -= $maxFavsAtOnce;
             $indexStart += $maxFavsAtOnce;
         } while (count($jsonArray) === $maxFavsAtOnce);
+        $result->finalize();
         return json_encode($result);
     }
     /**
@@ -98,30 +87,6 @@ class UserfavHistory {
         $statement->bindValue("username", $this->postParams->username);
         $statement->execute();
         return $statement->fetch(PDO::FETCH_COLUMN);
-    }
-
-    /**
-     * Populates and returns the users fav md5
-     * @return string[]
-     */
-    private function getAllFavsMd5(): array{
-        if (isset($this->favs)) {
-            return $this->favs;
-        }
-        $this->favs = [];
-        if (!self::userIsInDb($this->postParams->username)) {
-            $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::ERROR, "User " . $this->postParams->username . " is not in db even though he should");
-            return $this->favs;
-        }
-
-        $addFavsStatement = $this->connection->prepare("SELECT md5 from favs where user_name = :username ORDER BY position");
-        $addFavsStatement->bindValue("username", $this->postParams->username);
-        $addFavsStatement->execute();
-        while (($row = $addFavsStatement->fetch(PDO::FETCH_COLUMN)) !== false) {
-            $this->favs[] = $row;
-        }
-        return $this->favs;
     }
 
     public static function populateDb(string $username, $loop = 0) {
@@ -240,14 +205,17 @@ class ResultJson {
      * @var TagGroup[]
      */
     private $tagGroups;
+    private $sortByDate;
+    private $dataPoints = [];
     public $xAxis = [];
     public $graphData = [];
     private $tagGroupCurrentValue = [];
     /**
      * @param TagGroup[] $tagGroups
      */
-    public function __construct(array $tagGroups) {
+    public function __construct(array $tagGroups, bool $sortByDate) {
         $this->tagGroups = $tagGroups;
+        $this->sortByDate = $sortByDate;
         foreach ($this->tagGroups as $tagGroup) {
             $this->graphData[$tagGroup->groupName] = [];
             $this->tagGroupCurrentValue[$tagGroup->groupName] = 0;
@@ -255,10 +223,22 @@ class ResultJson {
     }
 
     public function addDataPoint($x, $dataPoint) {
-        $this->xAxis[] = $x;
-        foreach ($this->tagGroups as $tagGroup) {
-            $this->tagGroupCurrentValue[$tagGroup->groupName] += $dataPoint[$tagGroup->groupName];
-            $this->graphData[$tagGroup->groupName][] = $this->tagGroupCurrentValue[$tagGroup->groupName];
+        $this->dataPoints[$x] = $dataPoint;
+    }
+
+    public function finalize() {
+        if ($this->sortByDate) {
+            //sort favs by those transmitted mtimes
+            uksort($this->dataPoints, function ($a, $b) {
+                return $a - $b;
+            });
+        }
+        foreach ($this->dataPoints as $x => $dataPoint) {
+            $this->xAxis[] = $this->sortByDate ? date("Y-m-d", $x / 1000) : $x;
+            foreach ($this->tagGroups as $tagGroup) {
+                $this->tagGroupCurrentValue[$tagGroup->groupName] += $dataPoint[$tagGroup->groupName];
+                $this->graphData[$tagGroup->groupName][] = $this->tagGroupCurrentValue[$tagGroup->groupName];
+            }
         }
     }
 }
