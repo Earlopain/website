@@ -3,16 +3,26 @@ async function checkStatus(username) {
     return JSON.parse(await getURL(url));
 }
 
+let lastUsername;
+let loopIntervalId;
+
 async function startLoop() {
     const username = document.getElementById("username").value;
+    if (username === lastUsername) {
+        infoMessage("already processing", "info");
+        return;
+    }
+    //Don't allow simultanious requests
+    clearInterval(loopIntervalId);
+    lastUsername = username;
     await getURL("addToQueue.php?username=" + username);
-    let intervalId = setInterval(async () => {
+    loopIntervalId = setInterval(async () => {
         const json = await checkStatus(username);
         console.log(json.text)
         if (json.code === 2) {              //not in db
-            clearInterval(intervalId);
+            clearInterval(loopIntervalId);
         } else if (json.code === 0) {       //waiting on queue
-            clearInterval(intervalId);
+            clearInterval(loopIntervalId);
             fetchCsv(username);
         }
     }, 1000);
