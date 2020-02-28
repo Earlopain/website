@@ -10,7 +10,6 @@ class SqlConnection {
             $username = Secret::get("dbuser");
             $password = Secret::get("dbpass");
             $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$connections[$dbname] = $conn;
         }
         return self::$connections[$dbname];
