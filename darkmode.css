@@ -1,11 +1,7 @@
-html,
-body,
-input,
-textarea,
-select,
-button {
-    border-color: #5e5d5a;
-    color: #e5e1d8;
+:root {
+    --light-gray: #e5e1d8;
+    --dark-gray: #5e5d5a;
+    --darkest-gray: #232325;
 }
 
 html,
@@ -14,9 +10,23 @@ input,
 textarea,
 select,
 button {
-    background-color: #232325;
+    border-color: var(--dark-gray);
+    color: var(--light-gray);
+}
+
+html,
+body,
+input,
+textarea,
+select,
+button {
+    background-color: var(--darkest-gray);
 }
 
 a {
     color: #4791e6
+}
+
+g .updatemenu-item-rect {
+    fill: var(--dark-gray) !important;
 }

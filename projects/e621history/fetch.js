@@ -20,10 +20,10 @@ async function fetchCsv(username) {
     const json = JSON.parse(response.response);
     let lines = [];
     let stack = [];
+    const hovertemplate = "%{y:.2f}%";
     for (const groupName of Object.keys(json.graphData)) {
-        stack.push({ x: json.xAxis, y: json.graphData[groupName], groupnorm: "percent", stackgroup: "one", name: groupName });
+        stack.push({ x: json.xAxis, y: json.graphData[groupName], hovertemplate: hovertemplate, groupnorm: "percent", stackgroup: "one", name: groupName });
         lines.push({ x: json.xAxis, y: json.graphData[groupName], name: groupName, mode: "lines", visible: false });
-
     }
 
     const layout = {
@@ -40,6 +40,11 @@ async function fetchCsv(username) {
             title: "favcount",
             zeroline: false
         },
+        font: {
+            color: "#e5e1d8"
+        },
+        paper_bgcolor: "#ffffff00",
+        plot_bgcolor: "#ffffffdd",
         updatemenus: [{
             y: 1.3,
             yanchor: "top",
@@ -70,5 +75,4 @@ async function fetchCsv(username) {
         resposive: true
     }
     Plotly.newPlot('graph', stack.concat(lines), layout, options);
-
 }
