@@ -89,14 +89,13 @@ class UserfavHistory {
         return $statement->fetch(PDO::FETCH_COLUMN);
     }
 
-    public static function populateDb(string $username, $loop = 0) {
+    public static function populateDb(string $username) {
         $username = strtolower($username);
         if (self::removeFromDb($username) === false) {
             return;
         }
         $connection = SqlConnection::get("e621");
-        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_name, md5, position) VALUES (:username, :md5, :position)
-        ON DUPLICATE KEY UPDATE user_name = user_name");
+        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_name, md5, position) VALUES (:username, :md5, :position)");
 
         $page = 1;
         $resultsPerPage = 320;
@@ -122,13 +121,8 @@ class UserfavHistory {
                 //The user has added something while we were scraping, try again
                 if ($statementUserFav->execute() === false) {
                     $logger = Logger::get(self::$logfile);
-                    $logger->log(LogLevel::ERROR, "Post insert failed for " . $this->postParams->username . " at loop: {$loop}");
-                    $connection->rollBack();
-                    if ($loop < 3) {
-                        self::populateDb($username, $loop + 1);
-                    } else {
-                        return;
-                    }
+                    $logger->log(LogLevel::ERROR, "Post insert failed for " . $username . " => " . $json->md5);
+                    $counter--;
                 }
                 $counter++;
             }
