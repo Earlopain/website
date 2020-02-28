@@ -1,7 +1,10 @@
 :root {
-    --light-gray: #e5e1d8;
-    --dark-gray: #5e5d5a;
-    --darkest-gray: #232325;
+    --light-grey: #e5e1d8;
+    --dark-grey: #5e5d5a;
+    --darker-grey: #333333;
+    --darkest-grey: #232325;
+    --dark-terminal-green: #146411;
+    --light-terminal-green: #9bf293;
 }
 
 html,
@@ -10,8 +13,8 @@ input,
 textarea,
 select,
 button {
-    border-color: var(--dark-gray);
-    color: var(--light-gray);
+    border-color: var(--dark-grey);
+    color: var(--light-grey);
 }
 
 html,
@@ -20,7 +23,7 @@ input,
 textarea,
 select,
 button {
-    background-color: var(--darkest-gray);
+    background-color: var(--darkest-grey);
 }
 
 a {
@@ -28,5 +31,5 @@ a {
 }
 
 g .updatemenu-item-rect {
-    fill: var(--dark-gray) !important;
+    fill: var(--dark-grey) !important;
 }

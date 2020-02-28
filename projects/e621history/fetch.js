@@ -41,7 +41,7 @@ async function fetchCsv(username) {
             zeroline: false
         },
         font: {
-            color: "#e5e1d8"
+            color: getCssVar("--light-grey")
         },
         paper_bgcolor: "#ffffff00",
         plot_bgcolor: "#ffffffdd",

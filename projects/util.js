@@ -37,6 +37,10 @@ function logResponse(request) {
     }
 }
 
+function getCssVar(string) {
+    return getComputedStyle(document.body).getPropertyValue(string);
+}
+
 let allBoxes = [];
 function infoMessage(message, level) {
     let delay = 3000;

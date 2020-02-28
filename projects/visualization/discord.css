@@ -5,14 +5,14 @@
 }
 
 .count {
-    color: #047700
+    color: var(--dark-terminal-green);
 }
 
 .focus circle {
-    fill: #047700;
-    stroke: #047700;
+    fill: var(--dark-terminal-green);
+    stroke: var(--dark-terminal-green);
 }
-.focus text{
+.focus text {
     fill: white;
     font-size: 18px
 }

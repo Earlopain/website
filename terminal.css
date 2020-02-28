@@ -1,16 +1,16 @@
 .terminal-container {
     padding: 20px 20px;
-    background: #232325;;
+    background: var(--darkest-grey);
 }
 
 .selectable {
-    color: #9bf293;;
+    color: var(--light-terminal-green);
     font-size: 40px;
 }
 
 .selected {
-    background: darkgreen;
-    color: #e5e1d8;
+    background: var(--dark-terminal-green);
+    color: var(--light-grey);
 }
 
 .invisible {
@@ -27,7 +27,7 @@
     -khtml-user-select: none;
     -webkit-user-select: none;
     font-size: 40px;
-    color: #e5e1d8;;
-    background: #146411;
+    color: var(--light-grey);
+    background: var(--dark-terminal-green);
     padding: 10px;
 }
