@@ -68,7 +68,7 @@ class UserfavHistory {
      */
     private function getFavsJson(int $count, int $offset, int $indexStart): array{
         $end = $offset + $count - 1;
-        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN favs ON posts.md5 = favs.md5 WHERE favs.user_name = :username AND favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
+        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN user_favs ON posts.md5 = user_favs.md5 WHERE user_favs.user_name = :username AND user_favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
         $statement->bindValue("username", $this->postParams->username);
         $statement->execute();
         $result = [];
@@ -83,7 +83,7 @@ class UserfavHistory {
     }
 
     private function getFavCount() {
-        $statement = $this->connection->prepare("SELECT COUNT(*) FROM favs WHERE favs.user_name = :username;");
+        $statement = $this->connection->prepare("SELECT COUNT(*) FROM user_favs WHERE user_name = :username;");
         $statement->bindValue("username", $this->postParams->username);
         $statement->execute();
         return $statement->fetch(PDO::FETCH_COLUMN);
@@ -95,7 +95,7 @@ class UserfavHistory {
             return;
         }
         $connection = SqlConnection::get("e621");
-        $statementUserFav = $connection->prepare("INSERT INTO favs (user_name, md5, position) VALUES (:username, :md5, :position)
+        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_name, md5, position) VALUES (:username, :md5, :position)
         ON DUPLICATE KEY UPDATE user_name = user_name");
 
         $page = 1;
@@ -152,7 +152,7 @@ class UserfavHistory {
         $connection = SqlConnection::get("e621");
         $statementRemoveUser = $connection->prepare("DELETE FROM users WHERE user_name = :user");
         $statementRemoveUser->bindValue("user", $username);
-        $statementRemoveUserFavs = $connection->prepare("DELETE FROM favs WHERE user_name = :user");
+        $statementRemoveUserFavs = $connection->prepare("DELETE FROM user_favs WHERE user_name = :user");
         $statementRemoveUserFavs->bindValue("user", $username);
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
         if ($result === false) {
@@ -175,7 +175,7 @@ class UserfavHistory {
 
     public static function countPostsInDb(string $username) {
         $username = strtolower($username);
-        $statement = SqlConnection::get("e621")->prepare("SELECT COUNT(*) FROM favs WHERE user_name = :user");
+        $statement = SqlConnection::get("e621")->prepare("SELECT COUNT(*) FROM user_favs WHERE user_name = :user");
         $statement->bindValue("user", $username);
         $statement->execute();
         return $statement->fetch(PDO::FETCH_COLUMN);
