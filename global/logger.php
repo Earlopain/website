@@ -48,7 +48,7 @@ class Logger {
         $logThis = "[" . $this->getTimestamp() . "] [" . $level . "] " . $message;
         if ($object !== null) {
             $objectString = print_r($object, true);
-            $logThis .= str_replace("\n", "\n\t", $objectString);
+            $logThis .= " " . str_replace("\n", "\n\t", $objectString);
         }
         fwrite($this->fileHandle, $logThis . "\n");
     }
