@@ -72,7 +72,7 @@ async function fetchCsv(username) {
     }
     const options = {
         scrollZoom: true,
-        resposive: true
+        responsive: true
     }
     Plotly.newPlot('graph', stack.concat(lines), layout, options);
 }
