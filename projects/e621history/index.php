@@ -16,7 +16,7 @@ generateHeadBoilerplate();?>
     Optional local files<input type="file" id="folderinput" webkitdirectory directory multiple/>
     <button onclick="startLoop()">Fetch Favs</button>
     <br>
-    <div id="graph" style="width: 50%"></div>
+    <div id="graph"></div>
 </body>
 
 </html>
