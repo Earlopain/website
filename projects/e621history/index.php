@@ -13,8 +13,9 @@ generateHeadBoilerplate();?>
 
 <body>
     Your username: <input type="text" id="username">
-    Optional local files<input type="file" id="folderinput" webkitdirectory directory multiple/>
     <button onclick="startLoop()">Fetch Favs</button>
+    <br>
+    Optional local files: <input type="file" id="folderinput" onclick="document.getElementById('folderinput').value = ''" webkitdirectory directory multiple/>
     <br>
     <div id="graph"></div>
 </body>
