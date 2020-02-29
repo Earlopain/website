@@ -51,6 +51,7 @@ function infoMessage(message, level) {
     wrapper.style.position = "absolute";
     wrapper.style.top = padding * 2 + "px";
     wrapper.style.left = "50%";
+    wrapper.style.transform = "translate(-50%)";
     let infoBox = document.createElement("div");
     infoBox.appendChild(document.createTextNode(message));
     infoBox.style.padding = padding + "px";
@@ -77,8 +78,6 @@ function infoMessage(message, level) {
     wrapper.appendChild(infoBox);
     document.body.appendChild(wrapper);
     fade(wrapper);
-    //have to do it here, because the rect is 0 only if node is not put on dom
-    wrapper.childNodes[0].style.left = wrapper.childNodes[0].getBoundingClientRect().width / -2 + "px";
 
     function fade(element) {
         setTimeout(() => {
