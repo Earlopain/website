@@ -1,121 +1,78 @@
 class Terminal {
     constructor(containerID = "terminal-container", controlsID = "terminal-controls") {
-        this.root = new Folder("root");
-        this.rootDOM = document.getElementById(containerID);
-        this.controlsDOM = document.getElementById(controlsID);
+        this.root = new Folder("root", null);
+        this.rootDom = document.getElementById(containerID);
+        this.controlsDom = document.getElementById(controlsID);
         this.currentFolder = this.root;
-        this.location = [0];
-        this.counter = 0;
-        this.done = false;
+        this.location = 0;
+        this.idCounter = 0;
         this.addCss();
     }
 
-    //keyboard code
-
     moveUp() {
-        if (this.location[this.location.length - 1] === 0)
-            return false;
-        this.location[this.location.length - 1]--;
-        return true;
+        if (this.location !== 0) {
+            this.location--;
+        }
     }
 
     moveDown() {
-        if (this.location[this.location.length - 1] === this.currentFolder.fs.length - 1)
-            return false;
-        this.location[this.location.length - 1]++;
-        return true;
+        if (this.location !== this.currentFolder.fs.length - 1) {
+            this.location++;
+        }
     }
 
     select() {
         if (this.selectedIsFile()) {
-            if (this.done) {
-                const currentElement = this.getCurrentElement();
-                switch (currentElement.actionType) {
-                    case "onedown":
-                        this.cdDown();
-                        break;
-                    case "href":
-                        window.location.href = currentElement.action;
-                        break;
-                    default:
-                        console.log("unknown actionType " + this.getCurrentElement.actionType);
-                }
+            const currentElement = this.getCurrentElement();
+            switch (currentElement.actionType) {
+                case "onedown":
+                    this.cdDown();
+                    break;
+                case "href":
+                    window.location.href = currentElement.action;
+                    break;
+                default:
+                    console.log("unknown actionType " + currentElement.actionType);
             }
         }
         else {
-            this.location.push(0);
-            this.currentFolder = this.getFolderFromLocation2();
+            this.currentFolder = this.currentFolder.fs[this.location];
+            this.location = 0;
         }
     }
 
     cdDown() {
-        if (this.location.length === 1)
-            return false;
-        this.location.pop();
-        if (this.done) {
-            this.location.pop();
-            this.location.push(0);
+        if (this.currentFolder.parent !== null) {
+            this.currentFolder = this.currentFolder.parent;
         }
-        this.currentFolder = this.getFolderFromLocation2();
-        return true;
     }
 
-
-    //buildup code
-
     startFolder(text) {
-        this.currentFolder.addFolder(text);
-        this.location.push(0);
-        this.currentFolder = this.getFolderFromLocation();
-        this.currentFolder.addFile("..", "onedown");
-        this.counter++;
+        this.currentFolder = this.currentFolder.addFolder(text, this.idCounter++);
+        this.location = 0;
     }
 
     addFile(text, actionType, action) {
-        this.currentFolder.addFile(text, actionType, action);
-        this.location[this.location.length - 1]++;
+        this.currentFolder.addFile(text, actionType, action, this.idCounter++);
+        this.location++;
     }
 
     endFolder() {
-        this.location.pop();
-        this.currentFolder = this.getFolderFromLocation();
-        this.counter--;
-    }
-
-    getFolderFromLocation() {
-        let copy = this.location;
-        let result = this.root;
-        while (copy.length > 1) {
-            result = result.fs[result.fs.length - 1];
-            copy = copy.slice(1);
-        }
-        return result;
-    }
-
-    getFolderFromLocation2() {
-        let copy = this.location;
-        let result = this.root;
-        while (copy.length > 1) {
-            result = result.fs[copy[0]];
-            copy = copy.slice(1);
-        }
-        return result;
+        this.location = 0;
+        this.currentFolder = this.currentFolder.parent;
     }
 
     finish() {
-        if (this.counter !== 0)
-            throw new Error("Invalid call count for start/endFolder");
-        this.addToDOM();
+        if (this.currentFolder.parent !== null) {
+            alert("Invalid call count for start/endFolder");
+        }
+        this.addToDom(this.root);
         this.addControls();
-        let element = document.getElementById("id_0");
-        element.classList.add("selected");
-        this.location = [0];
-        this.handleDOM();
-        this.done = true;
-        //Add event listener for keydown event
+        this.handleDom();
+
         document.addEventListener('keydown', (event) => {
             const key = event.key;
-            let element = document.getElementById("id_" + this.location.join("_"));
+            let element = document.getElementById("terminal_item_" + this.getCurrentElement().id);
             element.classList.remove("selected");
             if (key === "ArrowUp")
                 this.moveUp();
@@ -123,97 +80,82 @@ class Terminal {
                 this.moveDown();
             else if (key === "Enter") {
                 this.select();
-                this.handleDOM();
+                this.handleDom();
             }
-            element = document.getElementById("id_" + this.location.join("_"));
-            element.classList.add("selected");
+            this.markSelected();
         });
+        this.markSelected();
     }
 
     addControls() {
         const names = ["ArrowUp", "ArrowDown", "Enter"];
-        for (let i = 0; i < names.length; i++) {
+        for (const name of names) {
             let div = document.createElement("div");
             div.classList.add("control");
-            div.appendChild(document.createTextNode(names[i]));
-            div.id = names[i];
+            div.appendChild(document.createTextNode(name));
             div.addEventListener("click", () => {
-                let evt = new KeyboardEvent('keydown', { key: div.id });
+                let evt = new KeyboardEvent('keydown', { key: name });
                 document.dispatchEvent(evt);
             });
-            this.controlsDOM.appendChild(div);
+            this.controlsDom.appendChild(div);
         }
     }
 
-    handleDOM() {
+    handleDom() {
         this.hideAll();
         this.showVisible();
     }
 
     showVisible() {
-        const currentID = "id_" + this.location.slice(0, -1).join("_");
-        const currentFolder = this.getFolderFromLocation2();
-
-        for (let i = 0; i < currentFolder.fs.length; i++) {
-            document.getElementById((currentID + "_" + i).replace("__", "_")).classList.remove("invisible");
+        for (const file of this.currentFolder.fs) {
+            document.getElementById("terminal_item_" + file.id).classList.remove("invisible");
         }
+    }
+
+    markSelected() {
+        for (const element of document.getElementsByClassName("selected")) {
+            element.classList.remove("selected");
+        }
+        this.getCurrentDomElement().classList.add("selected");
     }
 
     hideAll() {
-        const hide = document.getElementsByClassName("selectable")
-        for (let i = 0; i < hide.length; i++) {
-            hide[i].classList.add("invisible");
+        for (const element of document.getElementsByClassName("selectable")) {
+            element.classList.add("invisible");
         }
     }
 
-    addToDOM() {
-        while (true) {
-            this.counter++;
-            if (this.counter > 50)
-                break;
-            let currentElement = this.getCurrentElement();
-            let locationPrev = Array.from(this.location);
-            this.select();
-            //location changed, it must be a folder
-            if (currentElement instanceof Folder) {
-                this.rootDOM.appendChild(this.createElement("folder", currentElement.text, locationPrev));
+    addToDom(folderToAdd) {
+        for (const file of folderToAdd.fs) {
+            if (file instanceof Folder) {
+                this.rootDom.appendChild(this.createElement("folder", file.text, file.id));
+                this.addToDom(file);
             }
             else {
-                this.rootDOM.appendChild(this.createElement("file", currentElement.text, locationPrev));
-
-                //location still the same after going one down, end of folder reached
-                if (!this.moveDown()) {
-                    while (true) {
-                        if (!this.cdDown())
-                            return;
-                        if (this.moveDown())
-                            break;
-
-                    }
-                }
+                this.rootDom.appendChild(this.createElement("file", file.text, file.id));
             }
         }
     }
 
-    createElement(type, text, location) {
+    createElement(type, text, id) {
         let div = document.createElement("div");
         div.classList.add("selectable");
         div.classList.add(type);
         div.appendChild(document.createTextNode(text));
-        div.id = "id_" + location.join("_");
+        div.id = "terminal_item_" + id;
         return div;
     }
 
     getCurrentElement() {
-        return this.currentFolder.fs[this.location[this.location.length - 1]];
+        return this.currentFolder.fs[this.location];
     }
 
-    getCurrentDOM() {
-        return document.getElementById("id_" + this.location.join("_"));
+    getCurrentDomElement() {
+        return document.getElementById("terminal_item_" + this.getCurrentElement().id);
     }
 
     selectedIsFile() {
-        return this.currentFolder.fs[this.location[this.location.length - 1]] instanceof File;
+        return this.currentFolder.fs[this.location] instanceof File;
     }
 
     addCss() {
@@ -227,26 +169,31 @@ class Terminal {
     }
 }
 
-
 class Folder {
-    constructor(text) {
+    constructor(text, parent, id) {
         this.text = text;
+        this.parent = parent;
         this.fs = [];
+        this.id = id;
     }
 
-    addFolder(text) {
-        this.fs.push(new Folder(text));
+    addFolder(text, id) {
+        const folder = new Folder(text, this, id);
+        folder.addFile("..", "onedown");
+        this.fs.push(folder);
+        return folder;
 
     }
-    addFile(text, actionType, action) {
-        this.fs.push(new File(text, actionType, action));
+    addFile(text, actionType, action, id) {
+        this.fs.push(new File(text, actionType, action, id));
     }
 }
 
 class File {
-    constructor(text, actionType, action) {
+    constructor(text, actionType, action, id) {
         this.text = text;
         this.actionType = actionType;
         this.action = action;
+        this.id = id;
     }
 }
