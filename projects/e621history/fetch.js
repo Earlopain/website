@@ -1,8 +1,5 @@
 async function fetchCsv(username) {
-    const tagGroups = {
-        "gay": ["male/male -bisexual -male/female", "male solo -bisexual"],
-        "straight": ["male/female -bisexual", "female solo"]
-    }
+    const tagGroups = getTagGroupsFromHtml();
     const files = document.getElementById("folderinput").files;
     let fileDates = {};
     for (const file of files) {
@@ -75,4 +72,21 @@ async function fetchCsv(username) {
         responsive: true
     }
     Plotly.newPlot('graph', stack.concat(lines), layout, options);
+}
+
+function getTagGroupsFromHtml() {
+    const allFilters = document.querySelectorAll(".singlefilter");
+    let result = {};
+    for (const filter of allFilters) {
+        const arrayIndex = filter.parentNode.id.split("_")[1];
+        const tagName = filter.parentNode.parentNode.id;
+        if (result[tagName] === undefined) {
+            result[tagName] = [];
+        }
+        if (result[tagName][arrayIndex] === undefined) {
+            result[tagName].push("");
+        }
+        result[tagName][arrayIndex] += (result[tagName][arrayIndex].length === 0 ? "" : " ") + filter.textContent;
+    }
+    return result;
 }
