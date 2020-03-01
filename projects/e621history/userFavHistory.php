@@ -124,7 +124,8 @@ class UserfavHistory {
             $connection->beginTransaction();
             foreach ($jsonArray as $json) {
                 $result[] = $json->id;
-                E621Post::savePost($connection, $json);
+                $post = new E621Post($json);
+                $post->save($connection);
                 // save post as user fav with position
                 $statementUserFav->bindValue("userid", $userid);
                 $statementUserFav->bindValue("id", $json->id);

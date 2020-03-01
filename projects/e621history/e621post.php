@@ -6,11 +6,13 @@ class E621Post {
     public $tags;
     public $md5;
     public $id;
+    private $json;
 
     public function __construct($json) {
         $this->tags = $json->tags;
         $this->md5 = isset($json->md5) ? $json->md5 : null;
         $this->id = $json->id;
+        $this->json = $json;
     }
     /**
      * Checks wether or not a given filter matches the post or not
@@ -43,27 +45,27 @@ class E621Post {
      * version will be overwritten IF the status is not deleted and last_update gets set to now()
      * @return void
      */
-    public static function savePost(PDO $connection, $json) {
-        if (self::postIsInDb($connection, $json->id) && $json->status === "deleted") {
+    public function save(PDO $connection) {
+        if ($this->isInDb($connection) && $this->json->status === "deleted") {
             $statement = $connection->prepare("INSERT INTO posts (id, md5, json, last_updated) VALUES (:id, :md5, :json, NOW())
                                             ON DUPLICATE KEY UPDATE last_updated = NOW();");
         } else {
             $statement = $connection->prepare("INSERT INTO posts (id, md5, json, last_updated) VALUES (:id, :md5, :json, NOW())
                                             ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW();");
         }
-        $statement->bindValue("id", $json->id);
-        if (isset($json->md5)) {
-            $statement->bindValue("md5", $json->md5);
+        $statement->bindValue("id", $this->id);
+        if (isset($this->md5)) {
+            $statement->bindValue("md5", $this->md5);
         } else {
             $statement->bindValue("md5", null);
         }
-        $statement->bindValue("json", json_encode($json));
+        $statement->bindValue("json", json_encode($this->json));
         $statement->execute();
     }
 
-    public static function postIsInDb(PDO $connection, int $id) {
+    public function isInDb(PDO $connection) {
         $statement = $connection->prepare("SELECT 1 FROM posts WHERE id = :id");
-        $statement->bindValue("id", $id);
+        $statement->bindValue("id", $this->id);
         $statement->execute();
         return $statement->fetch() !== false;
     }
