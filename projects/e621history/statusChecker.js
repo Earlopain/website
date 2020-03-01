@@ -4,7 +4,7 @@ async function checkStatus(username) {
 }
 
 let lastUsername;
-let loopIntervalId;
+let lastInvervalId;
 
 async function startLoop() {
     const username = document.getElementById("username").value;
@@ -12,18 +12,30 @@ async function startLoop() {
         infoMessage("already processing", "info");
         return;
     }
-    //Don't allow simultanious requests
-    clearInterval(loopIntervalId);
+    clearInterval(lastInvervalId);
     lastUsername = username;
     await getURL("addToQueue.php?username=" + username);
-    loopIntervalId = setInterval(async () => {
+    const callback = async () => {
         const json = await checkStatus(username);
-        console.log(json.text)
-        if (json.code === 2) {              //not in db
-            clearInterval(loopIntervalId);
-        } else if (json.code === 0) {       //waiting on queue
-            clearInterval(loopIntervalId);
+        console.log(json.text);
+        if (json.code === 0) {       //waiting on queue
             fetchCsv(username);
         }
-    }, 1000);
+        return json.code;
+    };
+    let shouldRetry = true;
+    lastInvervalId = setInterval(async () => {
+        if (!shouldRetry) {
+            return;
+        }
+        shouldRetry = false;
+        const resultCode = await callback();
+        if (resultCode <= 0) {
+            clearInterval(lastInvervalId);
+        }
+        shouldRetry = true;
+
+    }, 2500);
+
+
 }

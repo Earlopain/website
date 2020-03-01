@@ -9,7 +9,7 @@ E621User::addToDb($_GET["username"]);
 $userid = E621User::usernameToId($_GET["username"]);
 if ($userid === -1) {
     $result->text = "Unknown username";
-    $result->code = 0;
+    $result->code = -1;
 } else if (E621User::userIsProcessed($userid)) {
     $result->text = "Added to db, fetching result...";
     $result->code = 0;
@@ -25,7 +25,7 @@ if ($userid === -1) {
 
     } else {
         $result->text = "You are not in the queue";
-        $result->code = 2;
+        $result->code = -1;
     }
 }
 
