@@ -1,6 +1,7 @@
 <?php
 
 require_once "userFavHistory.php";
+require_once "logger.php";
 
 class E621Post {
     public $tags;
@@ -61,6 +62,43 @@ class E621Post {
         }
         $statement->bindValue("json", json_encode($this->json));
         $statement->execute();
+    }
+
+    /**
+     * Saves the posts file as a blob in the db
+     *
+     * @param  PDO     $connection
+     * @return boolean True on success, false on failure
+     */
+    public function saveFile(PDO $connection): bool {
+        if ($this->hasFile($connection)) {
+            return false;
+        }
+        $fp = fopen($this->json->file_url, "r");
+        if ($fp === false) {
+            return false;
+        }
+        $statement = $connection->prepare("UPDATE posts SET file = :fp WHERE id = :id");
+        $statement->bindValue("id", $this->id);
+        $statement->bindValue("fp", $fp, PDO::PARAM_LOB);
+        $result = $statement->execute();
+        if ($result === false) {
+            $logger = Logger::get("mirror.log");
+            $logger->log(LogLevel::ERROR, "Failed to insert {$this->md5}");
+        }
+        return $result;
+    }
+    /**
+     * Checks wether or not the file is already in the db
+     *
+     * @param  PDO       $connection
+     * @return boolean
+     */
+    public function hasFile(PDO $connection): bool {
+        $statement = $connection->prepare("SELECT 1 FROM posts WHERE id = :id AND file IS NOT NULL");
+        $statement->bindValue("id", $this->id);
+        $statement->execute();
+        return $statement->fetch() !== false;
     }
 
     public function isInDb(PDO $connection) {
