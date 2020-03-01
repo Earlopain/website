@@ -47,20 +47,25 @@ class E621Post {
      * @return void
      */
     public function save(PDO $connection) {
-        if ($this->isInDb($connection) && $this->json->status === "deleted") {
-            $statement = $connection->prepare("INSERT INTO posts (id, md5, json, last_updated) VALUES (:id, :md5, :json, NOW())
-                                            ON DUPLICATE KEY UPDATE last_updated = NOW();");
+        if ($this->isInDb($connection)) {
+            if ($this->json->status === "deleted") {
+                $statement = $connection->prepare("UPDATE posts SET status = :status, last_updated = NOW() WHERE id = :id;");
+            } else {
+                $statement = $connection->prepare("UPDATE posts SET json = :json, status = :status, last_updated = NOW() WHERE id = :id");
+                $statement->bindValue("json", json_encode($this->json));
+            }
         } else {
-            $statement = $connection->prepare("INSERT INTO posts (id, md5, json, last_updated) VALUES (:id, :md5, :json, NOW())
-                                            ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW();");
+            $statement = $connection->prepare("INSERT INTO posts (id, md5, json, status, last_updated) VALUES (:id, :md5, :json, :status, NOW())");
+            if (isset($this->md5)) {
+                $statement->bindValue("md5", $this->md5);
+            } else {
+                $statement->bindValue("md5", null);
+            }
+            $statement->bindValue("json", json_encode($this->json));
         }
         $statement->bindValue("id", $this->id);
-        if (isset($this->md5)) {
-            $statement->bindValue("md5", $this->md5);
-        } else {
-            $statement->bindValue("md5", null);
-        }
-        $statement->bindValue("json", json_encode($this->json));
+        $statement->bindValue("status", $this->json->status);
+
         $statement->execute();
     }
 
