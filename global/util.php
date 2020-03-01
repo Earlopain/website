@@ -4,7 +4,7 @@ function getJson($url, $header = []) {
     foreach ($header as $key => $value) {
         $headerArray[] = $key . ": " . $value;
     }
-    $context = stream_context_create(["http" => ["header" => $headerArray]]);
+    $context = stream_context_create(["http" => ["header" => $headerArray, "ignore_errors" => true]]);
     $result = file_get_contents($url, false, $context);
     return json_decode($result);
 }
