@@ -3,6 +3,7 @@
 require_once "sql.php";
 require_once "userFavHistory.php";
 require_once "logger.php";
+require_once "e621user.php";
 
 class E621UserQueue {
     private static $logfile = "queue.log";
@@ -10,18 +11,18 @@ class E621UserQueue {
      * Returns the queue index of the user
      * Will be -1 if not in queue
      *
-     * @param  string  $username
+     * @param  int     $userid
      * @return integer queue index
      */
-    public static function queuePosition(string $username): int {
-        $statementPosition = SqlConnection::get("e621")->prepare("SELECT counter FROM user_queue where user_name = :user");
-        $statementPosition->bindValue("user", $username);
+    public static function queuePosition(int $userid): int {
+        $statementPosition = SqlConnection::get("e621")->prepare("SELECT counter FROM user_queue where user_id = :userid");
+        $statementPosition->bindValue("userid", $userid);
         $statementPosition->execute();
         $position = $statementPosition->fetch(PDO::FETCH_COLUMN);
         //Not in queue
         if ($position === false) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::INFO, "User {$username} not in queue");
+            $logger->log(LogLevel::INFO, "User {$userid} not in queue");
             return -1;
         }
         $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
@@ -33,36 +34,37 @@ class E621UserQueue {
     /**
      * Wether or not the user is already being processed
      *
-     * @param  string    $username
+     * @param  int       $userid
      * @return boolean
      */
-    private static function shouldAddToQueue(string $username) {
-        if (UserfavHistory::userIsInDb($username)) {
-            return false;
-        }
-        $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM user_queue WHERE user_name = :user");
-        $statement->bindValue("user", $username);
-        $statement->execute();
-        return $statement->fetch() !== false ? false : true;
+    private static function shouldAddToQueue(int $userid) {
+        $connection = SqlConnection::get("e621");
+        $statementProcessed = $connection->prepare("SELECT user_id FROM processed_users WHERE user_id = :userid");
+        $statementProcessed->bindValue("userid", $userid);
+        $statementProcessed->execute();
+        $statementQueue = $connection->prepare("SELECT user_id FROM user_queue WHERE user_id = :userid");
+        $statementQueue->bindValue("userid", $userid);
+        $statementQueue->execute();
+        return $statementProcessed->fetch() === false && $statementQueue->fetch() === false;
     }
 
     /**
      * Adds a user to the queue, if he's not already processed or in the queue
      *
-     * @param  string $username
+     * @param  int    $userid
      * @return void
      */
-    public static function addToQueue(string $username) {
-        if (!self::shouldAddToQueue($username)) {
+    public static function addToQueue(int $userid) {
+        if (!self::shouldAddToQueue($userid)) {
             return;
         }
-        $statement = SqlConnection::get("e621")->prepare("INSERT INTO user_queue (user_name) VALUES (:user)");
-        $statement->bindValue("user", $username);
+        $statement = SqlConnection::get("e621")->prepare("INSERT INTO user_queue (user_id) VALUES (:userid)");
+        $statement->bindValue("userid", $userid);
         $logger = Logger::get(self::$logfile);
         if ($statement->execute() === false) {
-            $logger->log(LogLevel::ERROR, "Failed to add {$username} to queue");
+            $logger->log(LogLevel::ERROR, "Failed to add {$userid} to queue");
         } else {
-            $logger->log(LogLevel::INFO, "Added {$username} to queue");
+            $logger->log(LogLevel::INFO, "Added {$userid} to queue");
         }
         return;
     }
@@ -73,12 +75,12 @@ class E621UserQueue {
      * @return string[]
      */
     public static function getFullQueue(): array{
-        $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM user_queue ORDER BY counter");
+        $statement = SqlConnection::get("e621")->prepare("SELECT user_id FROM user_queue ORDER BY counter");
         $statement->execute();
         $result = [];
 
-        while (($username = $statement->fetch(PDO::FETCH_COLUMN)) !== false) {
-            $result[] = $username;
+        while (($userid = $statement->fetch(PDO::FETCH_COLUMN)) !== false) {
+            $result[] = $userid;
         }
         return $result;
     }
@@ -86,15 +88,15 @@ class E621UserQueue {
     /**
      * Removes the specified user from the queue
      *
-     * @param  string $username
+     * @param  int    $userid
      * @return void
      */
-    public static function removeFromQueue(string $username) {
-        $statement = SqlConnection::get("e621")->prepare("DELETE FROM user_queue WHERE user_name = :user");
-        $statement->bindValue("user", $username);
+    public static function removeFromQueue(int $userid) {
+        $statement = SqlConnection::get("e621")->prepare("DELETE FROM user_queue WHERE user_id = :userid");
+        $statement->bindValue("userid", $userid);
         if ($statement->execute() === false) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::ERROR, "Failed to remove {$username} from queue");
+            $logger->log(LogLevel::ERROR, "Failed to remove {$userid} from queue");
         }
     }
 }

@@ -4,6 +4,7 @@ require_once "util.php";
 require_once "sql.php";
 require_once "logger.php";
 require_once "e621post.php";
+require_once "e621user.php";
 
 class UserfavHistory {
     private static $logfile = "userfavhistory.log";
@@ -12,7 +13,7 @@ class UserfavHistory {
      */
     private $postParams;
     /**
-     * Holds the users fav md5
+     * Holds the users fav ids
      * @var string[]
      */
     private $favs;
@@ -31,6 +32,7 @@ class UserfavHistory {
         $result = new ResultJson($this->postParams->tagGroups, $this->postParams->providedLocalFiles);
         //TODO: logic cleanup
         $userFavCount = $this->getFavCount();
+        //20229
         $maxFavsAtOnce = 1000;
         $indexStart = 0;
         $offset = $userFavCount - $maxFavsAtOnce;
@@ -68,8 +70,8 @@ class UserfavHistory {
      */
     private function getFavsJson(int $count, int $offset, int $indexStart): array{
         $end = $offset + $count - 1;
-        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN user_favs ON posts.md5 = user_favs.md5 WHERE user_favs.user_name = :username AND user_favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
-        $statement->bindValue("username", $this->postParams->username);
+        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN user_favs ON posts.id = user_favs.id WHERE user_favs.user_id = :userid AND user_favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
+        $statement->bindValue("userid", $this->postParams->userid);
         $statement->execute();
         $result = [];
 
@@ -82,20 +84,30 @@ class UserfavHistory {
         return $result;
     }
 
-    private function getFavCount() {
-        $statement = $this->connection->prepare("SELECT COUNT(*) FROM user_favs WHERE user_name = :username;");
-        $statement->bindValue("username", $this->postParams->username);
+    /**
+     * Returns the number of favs for the user in the db
+     *
+     * @return int
+     */
+    private function getFavCount(): int {
+        $statement = $this->connection->prepare("SELECT COUNT(*) FROM user_favs WHERE user_id = :userid;");
+        $statement->bindValue("userid", $this->postParams->userid);
         $statement->execute();
         return $statement->fetch(PDO::FETCH_COLUMN);
     }
-
-    public static function populateDb(string $username) {
-        $username = strtolower($username);
-        if (self::removeFromDb($username) === false) {
+    /**
+     * Writes all favs into the db and sets user status to finished when done
+     *
+     * @param  integer $userid
+     * @param  string  $username
+     * @return void
+     */
+    public static function populateDb(int $userid, string $username) {
+        if (self::removeFromDb($userid) === false) {
             return;
         }
         $connection = SqlConnection::get("e621");
-        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_name, md5, position) VALUES (:username, :md5, :position)");
+        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_id, id, position) VALUES (:userid, :id, :position)");
 
         $page = 1;
         $resultsPerPage = 320;
@@ -111,17 +123,16 @@ class UserfavHistory {
             $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
             $connection->beginTransaction();
             foreach ($jsonArray as $json) {
-                $result[] = $json->md5;
+                $result[] = $json->id;
                 E621Post::savePost($connection, $json);
                 // save post as user fav with position
-                $statementUserFav->bindValue("username", $username);
-                $statementUserFav->bindValue("md5", $json->md5);
+                $statementUserFav->bindValue("userid", $userid);
+                $statementUserFav->bindValue("id", $json->id);
                 $statementUserFav->bindValue("position", $counter);
                 //Failed to insert because of key constraint
-                //The user has added something while we were scraping, try again
                 if ($statementUserFav->execute() === false) {
                     $logger = Logger::get(self::$logfile);
-                    $logger->log(LogLevel::ERROR, "Post insert failed for " . $username . " => " . $json->md5);
+                    $logger->log(LogLevel::ERROR, "Post insert failed for " . $username . " => " . $json->id);
                     $counter--;
                 }
                 $counter++;
@@ -129,11 +140,10 @@ class UserfavHistory {
             $connection->commit();
             $page++;
         } while (count($jsonArray) === $resultsPerPage);
-        $statement = $connection->prepare("INSERT INTO users (user_name, last_updated) VALUES (:username, now())
-        ON DUPLICATE KEY UPDATE user_name = user_name");
 
-        $statement->bindValue("username", $username);
         $logger = Logger::get(self::$logfile);
+        $statement = SqlConnection::get("e621")->prepare("INSERT INTO processed_users (user_id) VALUES (:userid)");
+        $statement->bindValue("userid", $userid);
         if ($statement->execute() === true) {
             $logger->log(LogLevel::INFO, "Inserted {$counter} posts for user {$username}");
         } else {
@@ -141,36 +151,34 @@ class UserfavHistory {
         }
     }
 
-    private static function removeFromDb(string $username): bool {
-        $username = strtolower($username);
+    /**
+     * Erases users favs and the done status
+     *
+     * @param  integer   $userid
+     * @return boolean
+     */
+    private static function removeFromDb(int $userid): bool {
         $connection = SqlConnection::get("e621");
-        $statementRemoveUser = $connection->prepare("DELETE FROM users WHERE user_name = :user");
-        $statementRemoveUser->bindValue("user", $username);
-        $statementRemoveUserFavs = $connection->prepare("DELETE FROM user_favs WHERE user_name = :user");
-        $statementRemoveUserFavs->bindValue("user", $username);
+        $statementRemoveUser = $connection->prepare("DELETE FROM processed_users WHERE user_id = :userid");
+        $statementRemoveUser->bindValue("userid", $userid);
+        $statementRemoveUserFavs = $connection->prepare("DELETE FROM user_favs WHERE user_id = :userid");
+        $statementRemoveUserFavs->bindValue("userid", $userid);
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
         if ($result === false) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::WARNING, "Failed to remove {$username} from db");
+            $logger->log(LogLevel::WARNING, "Failed to remove {$userid} from db");
         }
         return $result;
     }
     /**
-     * Checks wether or not a user was already put into the db
-     * @return boolean
+     * Returns the number of favs for the user in the db
+     *
+     * @param  integer $userid
+     * @return int
      */
-    public static function userIsInDb(string $username): bool {
-        $username = strtolower($username);
-        $statement = SqlConnection::get("e621")->prepare("SELECT user_name FROM users WHERE user_name = :user");
-        $statement->bindValue("user", $username);
-        $statement->execute();
-        return $statement->fetch() !== false ? true : false;
-    }
-
-    public static function countPostsInDb(string $username) {
-        $username = strtolower($username);
-        $statement = SqlConnection::get("e621")->prepare("SELECT COUNT(*) FROM user_favs WHERE user_name = :user");
-        $statement->bindValue("user", $username);
+    public static function countPostsInDb(int $userid): int {
+        $statement = SqlConnection::get("e621")->prepare("SELECT COUNT(*) FROM user_favs WHERE user_id = :userid");
+        $statement->bindValue("userid", $userid);
         $statement->execute();
         return $statement->fetch(PDO::FETCH_COLUMN);
     }
@@ -259,6 +267,7 @@ class PostParams {
     /**
      * @var string
      */
+    public $userid;
     public $username;
     /**
      * @var TagGroup[]
@@ -283,6 +292,8 @@ class PostParams {
         $json = json_decode($jsonString, true);
         $this->username = strtolower($json["username"]);
         $this->username = str_replace(" ", "_", trim($this->username));
+        E621User::addToDb($this->username);
+        $this->userid = E621User::usernameToId($this->username);
         if (!isset($json["tagGroups"])) {
             $json["tagGroups"] = [];
         }
