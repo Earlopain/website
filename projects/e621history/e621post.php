@@ -69,6 +69,13 @@ class E621Post {
         $statement->execute();
     }
 
+    public static function saveNuked(PDO $connection, int $id) {
+        $statement = $connection->prepare("INSERT INTO posts (id, status, last_updated) VALUES (:id, :status, NOW())");
+        $statement->bindValue("id", $id);
+        $statement->bindValue("status", "nuked");
+        $statement->execute();
+    }
+
     /**
      * Saves the posts file as a blob in the db
      *
