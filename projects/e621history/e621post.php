@@ -76,7 +76,7 @@ class E621Post {
      * @return boolean True on success, false on failure
      */
     public function saveFile(PDO $connection): bool {
-        if ($this->hasFile($connection)) {
+        if ($this->json->status === "deleted" || $this->hasFile($connection)) {
             return false;
         }
         $fp = fopen($this->json->file_url, "r");
