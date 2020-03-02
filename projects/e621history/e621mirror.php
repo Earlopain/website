@@ -16,46 +16,56 @@ function checkFlaggedPosts(PDO $connection) {
     $logger = Logger::get("mirror.log");
     $jsonArray = getJson("https://e621.net/post/index.json?tags=status:flagged&limit=320", ["user-agent" => "earlopain"]);
     foreach ($jsonArray as $json) {
-        $post = new E621Post($json);
-        if ($post->hasFile($connection)) {
-            continue;
+        if (savePost($connection, $json, $json->id)) {
+            $logger->log(LogLevel::INFO, "Saved {$json->md5}");
         }
-        $connection->beginTransaction();
-        $post->save($connection);
-        echo ($post->id . " json\n");
-        if ($post->saveFile($connection)) {
-            echo $post->id . " saved\n";
-            $logger->log(LogLevel::INFO, "Saved {$post->md5}");
-        }
-        $connection->commit();
     }
 }
 
 function getNextMissingPosts(PDO $connection, int $stopId) {
-    $remaining = 10;
-    for ($i = 0; $i < $remaining; $i++) {
-        $id = getLowestId($connection);
-        if ($id > $stopId) {
-            return;
-        }
-        $url = "https://e621.net/post/show.json?id={$id}";
-        $json = getJson($url, ["user-agent" => "earlopain"]);
-        if ($json === false) {
-            return;
-        }
-        if (!isset($json->id)) {
-            echo ($id . " nuked\n");
-            E621Post::saveNuked($connection, $id);
+    $postCount = 10;
+    $startId = getLowestId($connection);
+    if ($startId - 1 === $stopId) {
+        return;
+    }
+    $beforeId = $startId + $postCount;
+    $jsonArray = getJson("https://e621.net/post/index.json?before_id={$beforeId}&limit={$postCount}", ["user-agent" => "earlopain"]);
+    $jsonArray = array_reverse($jsonArray);
+    foreach ($jsonArray as $index => $json) {
+        $jsonArray[$json->id] = $json;
+        unset($jsonArray[$index]);
+    }
+
+    $currentId = $startId;
+    for ($i = 0; $i < $postCount; $i++) {
+        if (isset($jsonArray[$currentId])) {
+            savePost($connection, $jsonArray[$currentId], $currentId);
         } else {
-            $connection->beginTransaction();
-            $post = new E621Post($json);
-            $post->save($connection);
-            echo ($id . " json\n");
-            if ($post->saveFile($connection)) {
-                echo ($id . " file\n");
-            }
-            $connection->commit();
+            $url = "https://e621.net/post/show.json?id={$currentId}";
+            $json = getJson($url, ["user-agent" => "earlopain"]);
+            savePost($connection, $json, $currentId);
         }
+        $currentId++;
+    }
+}
+
+function savePost(PDO $connection, $json, $id) {
+    if (!isset($json->id)) {
+        echo ($id . " nuked\n");
+        E621Post::saveNuked($connection, $id);
+        return false;
+    } else {
+        $connection->beginTransaction();
+        $post = new E621Post($json);
+        $post->save($connection);
+        $fileSaved = $post->saveFile($connection);
+        if ($fileSaved) {
+            echo ($id . " file\n");
+        } else if (!$post->hasFile($connection)) {
+            echo $id . " deleted\n";
+        }
+        $connection->commit();
+        return $fileSaved;
     }
 }
 
