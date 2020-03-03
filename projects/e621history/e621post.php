@@ -2,6 +2,7 @@
 
 require_once "userFavHistory.php";
 require_once "logger.php";
+require_once "util.php";
 
 class E621Post {
     public $tags;
@@ -79,16 +80,20 @@ class E621Post {
     /**
      * Saves the posts file as a blob in the db
      *
-     * @param  PDO     $connection
-     * @return boolean True on success, false on failure
+     * @param  PDO $connection
+     * @return int Returns one of the post_file constants
      */
     public function saveFile(PDO $connection): bool {
-        if ($this->json->status === "deleted" || $this->hasFile($connection)) {
-            return false;
+        if ($this->hasFile($connection)) {
+            return POST_FILE_SUCCESS;
+        } else if ($this->json->status === "deleted") {
+            return POST_FILE_DELETED;
         }
         $fp = fopen($this->json->file_url, "r");
         if ($fp === false) {
-            return false;
+            $logger = Logger::get("mirror.log");
+            $logger->log(LogLevel::ERROR, "Failed to open url for {$this->md5}");
+            return POST_FILE_RETRY;
         }
         $statement = $connection->prepare("UPDATE posts SET file = :fp WHERE id = :id");
         $statement->bindValue("id", $this->id);
@@ -98,7 +103,7 @@ class E621Post {
             $logger = Logger::get("mirror.log");
             $logger->log(LogLevel::ERROR, "Failed to insert {$this->md5}");
         }
-        return $result;
+        return $result === false ? POST_FILE_RETRY : POST_FILE_SUCCESS;
     }
     /**
      * Checks wether or not the file is already in the db

@@ -1,6 +1,10 @@
 <?php
+
+require_once "constants.php";
+
 function getJson(string $url, array $header = []) {
-    return json_decode(getUrl($url, $header));
+    $result = json_decode(getUrl($url, $header));
+    return $result !== null ? $result : NETWORK_ERROR;
 }
 
 function getUrl(string $url, array $header = []) {
@@ -10,7 +14,8 @@ function getUrl(string $url, array $header = []) {
     }
     $context = stream_context_create(["http" => ["header" => $headerArray, "ignore_errors" => true]]);
     $result = file_get_contents($url, false, $context);
-    return $result;
+
+    return $result !== false ? $result : NETWORK_ERROR;
 }
 
 function createDirIfNotExists($path) {

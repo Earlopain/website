@@ -15,8 +15,12 @@ while (true) {
 function checkFlaggedPosts(PDO $connection) {
     $logger = Logger::get("mirror.log");
     $jsonArray = getJson("https://e621.net/post/index.json?tags=status:flagged&limit=320", ["user-agent" => "earlopain"]);
+    if ($jsonArray === NETWORK_ERROR) {
+        handleNetworkError();
+        return;
+    }
     foreach ($jsonArray as $json) {
-        if (savePost($connection, $json, $json->id)) {
+        if (savePost($connection, $json, $json->id) === POST_FILE_SUCCESS) {
             $logger->log(LogLevel::INFO, "Saved {$json->md5}");
         }
     }
@@ -30,6 +34,10 @@ function getNextMissingPosts(PDO $connection, int $stopId) {
     }
     $beforeId = $startId + $postCount;
     $jsonArray = getJson("https://e621.net/post/index.json?before_id={$beforeId}&limit={$postCount}", ["user-agent" => "earlopain"]);
+    if ($jsonArray === NETWORK_ERROR) {
+        handleNetworkError();
+        return;
+    }
     $jsonArray = array_reverse($jsonArray);
     foreach ($jsonArray as $index => $json) {
         $jsonArray[$json->id] = $json;
@@ -41,8 +49,7 @@ function getNextMissingPosts(PDO $connection, int $stopId) {
         if (isset($jsonArray[$currentId])) {
             savePost($connection, $jsonArray[$currentId], $currentId);
         } else {
-            $url = "https://e621.net/post/show.json?id={$currentId}";
-            $json = getJson($url, ["user-agent" => "earlopain"]);
+            $json = getPostJson($currentId);
             savePost($connection, $json, $currentId);
         }
         $currentId++;
@@ -59,14 +66,33 @@ function savePost(PDO $connection, $json, $id) {
         $post = new E621Post($json);
         $post->save($connection);
         $fileSaved = $post->saveFile($connection);
-        if ($fileSaved) {
-            echo ($id . " file\n");
-        } else if (!$post->hasFile($connection)) {
-            echo $id . " deleted\n";
+        switch ($fileSaved) {
+            case POST_FILE_SUCCESS:
+                echo ($id . " file\n");
+                break;
+            case POST_FILE_DELETED:
+                echo $id . " deleted\n";
+                break;
+            case POST_FILE_RETRY:
+                $connection->rollBack();
+                return savePost($connection, getPostJson($id), $id);
+            default:
+                die("invalid POST_FILE constant");
+                break;
         }
         $connection->commit();
         return $fileSaved;
     }
+}
+
+function getPostJson(int $id) {
+    $url = "https://e621.net/post/show.json?id={$id}";
+    $json = getJson($url, ["user-agent" => "earlopain"]);
+    while ($json === NETWORK_ERROR) {
+        handleNetworkError();
+        $json = getJson($url, ["user-agent" => "earlopain"]);
+    }
+    return $json;
 }
 
 function getLowestId(PDO $connection) {
@@ -80,4 +106,9 @@ function getHighestAvailable() {
     $url = "https://e621.net/post/index.json?limit=1";
     $json = getJson($url, ["user-agent" => "earlopain"]);
     return $json[0]->id;
+}
+
+function handleNetworkError() {
+    echo "Network Error\n";
+    sleep(10);
 }
