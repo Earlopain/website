@@ -76,6 +76,8 @@ function savePost(PDO $connection, $json, $id) {
             case POST_FILE_RETRY:
                 $connection->rollBack();
                 return savePost($connection, getPostJson($id), $id);
+            case POST_FILE_ALREADY_DOWNLOADED:
+                break;
             default:
                 die("invalid POST_FILE constant");
                 break;

@@ -83,18 +83,22 @@ class E621Post {
      * @param  PDO $connection
      * @return int Returns one of the post_file constants
      */
-    public function saveFile(PDO $connection): bool {
+    public function saveFile(PDO $connection): int {
         if ($this->hasFile($connection)) {
-            return POST_FILE_SUCCESS;
+            return POST_FILE_ALREADY_DOWNLOADED;
         } else if ($this->json->status === "deleted") {
             return POST_FILE_DELETED;
         }
-        $fp = fopen($this->json->file_url, "r");
-        if ($fp === false) {
+        $fileContent = file_get_contents($this->json->file_url);
+        if (strlen($fileContent) !== $this->json->file_size) {
             $logger = Logger::get("mirror.log");
-            $logger->log(LogLevel::ERROR, "Failed to open url for {$this->md5}");
+            $logger->log(LogLevel::ERROR, "Network error for {$this->md5}");
             return POST_FILE_RETRY;
         }
+
+        $fp = fopen("php://memory", "r+");
+        fputs($fp, $fileContent);
+        rewind($fp);
         $statement = $connection->prepare("UPDATE posts SET file = :fp WHERE id = :id");
         $statement->bindValue("id", $this->id);
         $statement->bindValue("fp", $fp, PDO::PARAM_LOB);
@@ -102,8 +106,9 @@ class E621Post {
         if ($result === false) {
             $logger = Logger::get("mirror.log");
             $logger->log(LogLevel::ERROR, "Failed to insert {$this->md5}");
+            die("FATAL ERROR");
         }
-        return $result === false ? POST_FILE_RETRY : POST_FILE_SUCCESS;
+        return POST_FILE_SUCCESS;
     }
     /**
      * Checks wether or not the file is already in the db
