@@ -12,11 +12,6 @@ class UserfavHistory {
      * @var PostParams
      */
     private $postParams;
-    /**
-     * Holds the users fav ids
-     * @var string[]
-     */
-    private $favs;
 
     private $connection;
 
