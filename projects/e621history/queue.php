@@ -21,8 +21,7 @@ class E621UserQueue {
         $position = $statementPosition->fetch(PDO::FETCH_COLUMN);
         //Not in queue
         if ($position === false) {
-            $logger = Logger::get(self::$logfile);
-            $logger->log(LOG_INFO, "User {$userid} not in queue");
+            Logger::log(self::$logfile, LOG_INFO, "User {$userid} not in queue");
             return -1;
         }
         $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
@@ -60,11 +59,10 @@ class E621UserQueue {
         }
         $statement = SqlConnection::get("e621")->prepare("INSERT INTO user_queue (user_id) VALUES (:userid)");
         $statement->bindValue("userid", $userid);
-        $logger = Logger::get(self::$logfile);
         if ($statement->execute() === false) {
-            $logger->log(LOG_ERR, "Failed to add {$userid} to queue");
+            Logger::log(self::$logfile, LOG_ERR, "Failed to add {$userid} to queue");
         } else {
-            $logger->log(LOG_INFO, "Added {$userid} to queue");
+            Logger::log(self::$logfile, LOG_INFO, "Added {$userid} to queue");
         }
         return;
     }
@@ -95,8 +93,7 @@ class E621UserQueue {
         $statement = SqlConnection::get("e621")->prepare("DELETE FROM user_queue WHERE user_id = :userid");
         $statement->bindValue("userid", $userid);
         if ($statement->execute() === false) {
-            $logger = Logger::get(self::$logfile);
-            $logger->log(LOG_ERR, "Failed to remove {$userid} from queue");
+            Logger::log(self::$logfile, LOG_ERR, "Failed to remove {$userid} from queue");
         }
     }
 }

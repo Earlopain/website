@@ -13,7 +13,6 @@ while (true) {
 }
 
 function checkFlaggedPosts(PDO $connection) {
-    $logger = Logger::get("mirror.log");
     $jsonArray = getJson("https://e621.net/post/index.json?tags=status:flagged&limit=320", ["user-agent" => "earlopain"]);
     if ($jsonArray === NETWORK_ERROR) {
         handleNetworkError();
@@ -21,7 +20,7 @@ function checkFlaggedPosts(PDO $connection) {
     }
     foreach ($jsonArray as $json) {
         if (savePost($connection, $json, $json->id) === POST_FILE_SUCCESS) {
-            $logger->log(LOG_INFO, "Saved {$json->md5}");
+            Logger::log("mirror.log", LOG_INFO, "Saved {$json->md5}");
         }
     }
 }

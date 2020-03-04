@@ -18,7 +18,12 @@ class Logger {
 
     private $fileHandle;
 
-    public static function get($filePath): self {
+    public static function log(string $filePath, int $level, string $message, $object = null) {
+        $logger = self::get($filePath);
+        $logger->logInstance($level, $message, $object);
+    }
+
+    private static function get(string $filePath): self {
         if (!isset(self::$loggers[$filePath])) {
             self::$loggers[$filePath] = new self($filePath);
         }
@@ -42,7 +47,7 @@ class Logger {
         $this->fileHandle = fopen($filePath, "a");
     }
 
-    public function log(int $level, string $message, $object = null) {
+    private function logInstance(int $level, string $message, $object = null) {
         $logThis = "[" . $this->getTimestamp() . "] [" . self::$logLevels[$level] . "] " . $message;
         if ($object !== null) {
             $objectString = print_r($object, true);

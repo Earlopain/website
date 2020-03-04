@@ -132,8 +132,7 @@ class UserfavHistory {
                 $statementUserFav->bindValue("position", $counter);
                 //Failed to insert because of key constraint
                 if ($statementUserFav->execute() === false) {
-                    $logger = Logger::get(self::$logfile);
-                    $logger->log(LOG_ERR, "Post insert failed for " . $username . " => " . $json->id);
+                    Logger::log(self::$logfile, LOG_ERR, "Post insert failed for " . $username . " => " . $json->id);
                     $counter--;
                 }
                 $counter++;
@@ -142,13 +141,12 @@ class UserfavHistory {
             $page++;
         } while (count($jsonArray) === $resultsPerPage);
 
-        $logger = Logger::get(self::$logfile);
         $statement = SqlConnection::get("e621")->prepare("INSERT INTO processed_users (user_id) VALUES (:userid)");
         $statement->bindValue("userid", $userid);
         if ($statement->execute() === true) {
-            $logger->log(LOG_INFO, "Inserted {$counter} posts for user {$username}");
+            Logger::log(self::$logfile, LOG_INFO, "Inserted {$counter} posts for user {$username}");
         } else {
-            $logger->log(LOG_ERR, "Failed to insert {$username} into db");
+            Logger::log(self::$logfile, LOG_ERR, "Failed to insert {$username} into db");
         }
     }
 
@@ -166,8 +164,7 @@ class UserfavHistory {
         $statementRemoveUserFavs->bindValue("userid", $userid);
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
         if ($result === false) {
-            $logger = Logger::get(self::$logfile);
-            $logger->log(LOG_WARNING, "Failed to remove {$userid} from db");
+            Logger::log(self::$logfile, LOG_WARNING, "Failed to remove {$userid} from db");
         }
         return $result;
     }
