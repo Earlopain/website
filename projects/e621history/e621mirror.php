@@ -73,6 +73,7 @@ function savePost(PDO $connection, $json, $id) {
                 echo $id . " deleted\n";
                 break;
             case POST_FILE_RETRY:
+                Logger::log("mirror.log", LOG_ERR, "Network error for {$this->md5}");
                 $connection->commit();
                 return savePost($connection, getPostJson($id), $id);
             case POST_FILE_ALREADY_DOWNLOADED:

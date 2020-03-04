@@ -91,7 +91,6 @@ class E621Post {
         }
         $fileContent = file_get_contents($this->json->file_url);
         if (strlen($fileContent) !== $this->json->file_size) {
-            Logger::log("mirror.log", LOG_ERR, "Network error for {$this->md5}");
             return POST_FILE_RETRY;
         }
 
@@ -103,8 +102,7 @@ class E621Post {
         $statement->bindValue("fp", $fp, PDO::PARAM_LOB);
         $result = $statement->execute();
         if ($result === false) {
-            Logger::log("mirror.log", LOG_CRIT, "Failed to insert {$this->md5}");
-            die("FATAL ERROR");
+            die("FATAL ERROR => Failed to insert {$this->md5}");
         }
         return POST_FILE_SUCCESS;
     }
