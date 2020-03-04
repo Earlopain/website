@@ -62,7 +62,7 @@ class UserfavHistory {
      */
     private function getFavsJson(int $count, int $offset, int $indexStart): array{
         $end = $offset + $count - 1;
-        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN user_favs ON posts.id = user_favs.id WHERE user_favs.user_id = :userid AND user_favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
+        $statement = $this->connection->prepare("SELECT json, position FROM posts JOIN user_favs ON posts.id = user_favs.post_id WHERE user_favs.user_id = :userid AND user_favs.position  BETWEEN {$offset} AND {$end} ORDER BY position ASC;");
         $statement->bindValue("userid", $this->postParams->userid);
         $statement->execute();
         $result = [];
@@ -99,7 +99,7 @@ class UserfavHistory {
             return;
         }
         $connection = SqlConnection::get("e621");
-        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_id, id, position) VALUES (:userid, :id, :position)");
+        $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_id, post_id, position) VALUES (:userid, :postid, :position)");
 
         $page = 1;
         $resultsPerPage = 320;
@@ -117,10 +117,10 @@ class UserfavHistory {
             foreach ($jsonArray as $json) {
                 $result[] = $json->id;
                 $post = new E621Post($json);
-                $post->save($connection);
+                $result = $post->save($connection);
                 // save post as user fav with position
                 $statementUserFav->bindValue("userid", $userid);
-                $statementUserFav->bindValue("id", $json->id);
+                $statementUserFav->bindValue("postid", $json->id);
                 $statementUserFav->bindValue("position", $counter);
                 //Failed to insert because of key constraint
                 if ($statementUserFav->execute() === false) {
