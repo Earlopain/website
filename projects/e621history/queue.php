@@ -14,7 +14,8 @@ class E621UserQueue {
      * @return integer queue index
      */
     public static function queuePosition(int $userid): int {
-        $statementPosition = SqlConnection::get("e621")->prepare("SELECT counter FROM user_queue where user_id = :userid");
+        $connection = SqlConnection::get("e621");
+        $statementPosition = $connection->prepare("SELECT counter FROM user_queue where user_id = :userid");
         $statementPosition->bindValue("userid", $userid);
         $statementPosition->execute();
         $position = $statementPosition->fetch(PDO::FETCH_COLUMN);
@@ -23,7 +24,7 @@ class E621UserQueue {
             Logger::log(LOG_INFO, "User {$userid} not in queue");
             return -1;
         }
-        $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
+        $statementMinCount = $connection->prepare("SELECT MIN(counter) FROM user_queue");
         $statementMinCount->execute();
         $minCount = $statementMinCount->fetch(PDO::FETCH_COLUMN);
         return $position - $minCount;
