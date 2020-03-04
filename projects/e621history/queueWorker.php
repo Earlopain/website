@@ -14,7 +14,7 @@ while (count($allUsers = E621UserQueue::getFullQueue()) > 0) {
         $username = E621User::useridToName($userid);
         if ($username === "") {
             $logger = Logger::get("queue.log");
-            $logger->log(LogLevel::ERROR, "Unkown userid " . $userid . " in queue");
+            $logger->log(LOG_ERR, "Unkown userid " . $userid . " in queue");
             continue;
         }
         UserfavHistory::populateDb($userid, $username);

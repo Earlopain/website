@@ -22,7 +22,7 @@ class E621UserQueue {
         //Not in queue
         if ($position === false) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::INFO, "User {$userid} not in queue");
+            $logger->log(LOG_INFO, "User {$userid} not in queue");
             return -1;
         }
         $statementMinCount = SqlConnection::get("e621")->prepare("SELECT MIN(counter) FROM user_queue");
@@ -62,9 +62,9 @@ class E621UserQueue {
         $statement->bindValue("userid", $userid);
         $logger = Logger::get(self::$logfile);
         if ($statement->execute() === false) {
-            $logger->log(LogLevel::ERROR, "Failed to add {$userid} to queue");
+            $logger->log(LOG_ERR, "Failed to add {$userid} to queue");
         } else {
-            $logger->log(LogLevel::INFO, "Added {$userid} to queue");
+            $logger->log(LOG_INFO, "Added {$userid} to queue");
         }
         return;
     }
@@ -96,7 +96,7 @@ class E621UserQueue {
         $statement->bindValue("userid", $userid);
         if ($statement->execute() === false) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::ERROR, "Failed to remove {$userid} from queue");
+            $logger->log(LOG_ERR, "Failed to remove {$userid} from queue");
         }
     }
 }

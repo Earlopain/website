@@ -21,7 +21,7 @@ function checkFlaggedPosts(PDO $connection) {
     }
     foreach ($jsonArray as $json) {
         if (savePost($connection, $json, $json->id) === POST_FILE_SUCCESS) {
-            $logger->log(LogLevel::INFO, "Saved {$json->md5}");
+            $logger->log(LOG_INFO, "Saved {$json->md5}");
         }
     }
 }

@@ -3,12 +3,15 @@
 require_once "config.php";
 
 class Logger {
-    private $logLevels = [
-        LogLevel::CRITICAL => 0,
-        LogLevel::ERROR => 1,
-        LogLevel::WARNING => 2,
-        LogLevel::INFO => 3,
-        LogLevel::DEBUG => 4
+    private static $logLevels = [
+        LOG_EMERG => "EMERGENCY",
+        LOG_ALERT => "ALERT",
+        LOG_CRIT => "CRITICAL",
+        LOG_ERR => "ERROR",
+        LOG_WARNING => "WARNING",
+        LOG_NOTICE => "NOTICE",
+        LOG_INFO => "INFO",
+        LOG_DEBUG => "DEBUG"
     ];
 
     private static $loggers = [];
@@ -16,7 +19,7 @@ class Logger {
     private $fileHandle;
     private $treshhold;
 
-    public static function get($filePath, string $treshhold = LogLevel::DEBUG): self {
+    public static function get($filePath, string $treshhold = LOG_DEBUG): self {
         if (!isset(self::$loggers[$filePath])) {
             self::$loggers[$filePath] = new self($filePath, $treshhold);
         }
@@ -41,11 +44,11 @@ class Logger {
         $this->treshhold = $treshhold;
     }
 
-    public function log(string $level, string $message, $object = null) {
-        if ($this->logLevels[$this->treshhold] < $this->logLevels[$level]) {
+    public function log(int $level, string $message, $object = null) {
+        if ($this->treshhold < $level) {
             return;
         }
-        $logThis = "[" . $this->getTimestamp() . "] [" . $level . "] " . $message;
+        $logThis = "[" . $this->getTimestamp() . "] [" . self::$logLevels[$level] . "] " . $message;
         if ($object !== null) {
             $objectString = print_r($object, true);
             $logThis .= " " . str_replace("\n", "\n\t", $objectString);
@@ -61,12 +64,4 @@ class Logger {
 
         return $date->format("Y-m-d H:i:s.u");
     }
-}
-
-class LogLevel {
-    const CRITICAL = "CRITICAL";
-    const ERROR = "ERROR";
-    const WARNING = "WARNING";
-    const INFO = "INFO";
-    const DEBUG = "DEBUG";
 }

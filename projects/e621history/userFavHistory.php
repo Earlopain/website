@@ -133,7 +133,7 @@ class UserfavHistory {
                 //Failed to insert because of key constraint
                 if ($statementUserFav->execute() === false) {
                     $logger = Logger::get(self::$logfile);
-                    $logger->log(LogLevel::ERROR, "Post insert failed for " . $username . " => " . $json->id);
+                    $logger->log(LOG_ERR, "Post insert failed for " . $username . " => " . $json->id);
                     $counter--;
                 }
                 $counter++;
@@ -146,9 +146,9 @@ class UserfavHistory {
         $statement = SqlConnection::get("e621")->prepare("INSERT INTO processed_users (user_id) VALUES (:userid)");
         $statement->bindValue("userid", $userid);
         if ($statement->execute() === true) {
-            $logger->log(LogLevel::INFO, "Inserted {$counter} posts for user {$username}");
+            $logger->log(LOG_INFO, "Inserted {$counter} posts for user {$username}");
         } else {
-            $logger->log(LogLevel::ERROR, "Failed to insert {$username} into db");
+            $logger->log(LOG_ERR, "Failed to insert {$username} into db");
         }
     }
 
@@ -167,7 +167,7 @@ class UserfavHistory {
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
         if ($result === false) {
             $logger = Logger::get(self::$logfile);
-            $logger->log(LogLevel::WARNING, "Failed to remove {$userid} from db");
+            $logger->log(LOG_WARNING, "Failed to remove {$userid} from db");
         }
         return $result;
     }
