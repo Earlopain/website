@@ -20,7 +20,7 @@ function checkFlaggedPosts(PDO $connection) {
     }
     foreach ($jsonArray as $json) {
         if (savePost($connection, $json, $json->id) === POST_FILE_SUCCESS) {
-            Logger::log("mirror.log", LOG_INFO, "Saved {$json->md5}");
+            Logger::log(LOG_INFO, "Saved {$json->md5}");
         }
     }
 }
@@ -73,7 +73,7 @@ function savePost(PDO $connection, $json, $id) {
                 echo $id . " deleted\n";
                 break;
             case POST_FILE_RETRY:
-                Logger::log("mirror.log", LOG_ERR, "Network error for {$this->md5}");
+                Logger::log(LOG_ERR, "Network error for {$this->md5}");
                 $connection->commit();
                 return savePost($connection, getPostJson($id), $id);
             case POST_FILE_ALREADY_DOWNLOADED:

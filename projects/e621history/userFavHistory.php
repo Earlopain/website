@@ -7,7 +7,6 @@ require_once "e621post.php";
 require_once "e621user.php";
 
 class UserfavHistory {
-    private static $logfile = "userfavhistory.log";
     /**
      * @var PostParams
      */
@@ -25,9 +24,7 @@ class UserfavHistory {
      */
     public function generateGraph(): string {
         $result = new ResultJson($this->postParams->tagGroups, $this->postParams->providedLocalFiles);
-        //TODO: logic cleanup
         $userFavCount = $this->getFavCount();
-        //20229
         $maxFavsAtOnce = 1000;
         $indexStart = 0;
         $offset = $userFavCount - $maxFavsAtOnce;
@@ -127,7 +124,7 @@ class UserfavHistory {
                 $statementUserFav->bindValue("position", $counter);
                 //Failed to insert because of key constraint
                 if ($statementUserFav->execute() === false) {
-                    Logger::log(self::$logfile, LOG_ERR, "Post insert failed for " . $username . " => " . $json->id);
+                    Logger::log(LOG_ERR, "Post insert failed for " . $username . " => " . $json->id);
                     $counter--;
                 }
                 $counter++;
@@ -139,9 +136,9 @@ class UserfavHistory {
         $statement = SqlConnection::get("e621")->prepare("INSERT INTO processed_users (user_id) VALUES (:userid)");
         $statement->bindValue("userid", $userid);
         if ($statement->execute() === true) {
-            Logger::log(self::$logfile, LOG_INFO, "Inserted {$counter} posts for user {$username}");
+            Logger::log(LOG_INFO, "Inserted {$counter} posts for user {$username}");
         } else {
-            Logger::log(self::$logfile, LOG_ERR, "Failed to insert {$username} into db");
+            Logger::log(LOG_ERR, "Failed to insert {$username} into db");
         }
     }
 
@@ -159,7 +156,7 @@ class UserfavHistory {
         $statementRemoveUserFavs->bindValue("userid", $userid);
         $result = $statementRemoveUser->execute() && $statementRemoveUserFavs->execute();
         if ($result === false) {
-            Logger::log(self::$logfile, LOG_WARNING, "Failed to remove {$userid} from db");
+            Logger::log(LOG_WARNING, "Failed to remove {$userid} from db");
         }
         return $result;
     }

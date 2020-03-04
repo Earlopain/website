@@ -18,8 +18,16 @@ class Logger {
 
     private $fileHandle;
 
-    public static function log(string $filePath, int $level, string $message, $object = null) {
-        $logger = self::get($filePath);
+    public static function log(int $level, string $message, $object = null) {
+        $trace = debug_backtrace(2, 2);
+        $traceIndex = $trace[0]["function"] === __FUNCTION__ ? 0 : 1;
+        $fileName = pathinfo($trace[$traceIndex]["file"], PATHINFO_FILENAME);
+
+        self::logToFile($fileName, $level, $message, $object);
+    }
+
+    public static function logToFile(string $fileName, int $level, string $message, $object = null) {
+        $logger = self::get($fileName . ".log");
         $logger->logInstance($level, $message, $object);
     }
 
