@@ -17,16 +17,15 @@ class Logger {
     private static $loggers = [];
 
     private $fileHandle;
-    private $treshhold;
 
-    public static function get($filePath, string $treshhold = LOG_DEBUG): self {
+    public static function get($filePath): self {
         if (!isset(self::$loggers[$filePath])) {
-            self::$loggers[$filePath] = new self($filePath, $treshhold);
+            self::$loggers[$filePath] = new self($filePath);
         }
         return self::$loggers[$filePath];
     }
 
-    private function __construct(string $filePath, string $treshhold) {
+    private function __construct(string $filePath) {
         if (strpos($filePath, "/") === 0) {
             throw new Error("No absolute filepaths allowed: " . $filePath);
         }
@@ -41,13 +40,9 @@ class Logger {
             throw new Error("Logfile is not writable\n" . $filePath);
         }
         $this->fileHandle = fopen($filePath, "a");
-        $this->treshhold = $treshhold;
     }
 
     public function log(int $level, string $message, $object = null) {
-        if ($this->treshhold < $level) {
-            return;
-        }
         $logThis = "[" . $this->getTimestamp() . "] [" . self::$logLevels[$level] . "] " . $message;
         if ($object !== null) {
             $objectString = print_r($object, true);
