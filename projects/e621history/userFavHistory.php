@@ -103,7 +103,7 @@ class UserfavHistory {
 
         $page = 1;
         $resultsPerPage = 320;
-        $url = "https://e621.net/post/index.json?tags=fav:{$username}&limit={$resultsPerPage}&page=";
+        $url = "https://e621.net/posts.json?tags=fav:{$username}&limit={$resultsPerPage}&page=";
         $jsonArray = null;
         $counter = 0;
         $result = [];
@@ -114,7 +114,7 @@ class UserfavHistory {
             }
             $jsonArray = getJson($url . $page, ["user-agent" => "earlopain"]);
             $connection->beginTransaction();
-            foreach ($jsonArray as $json) {
+            foreach ($jsonArray->posts as $json) {
                 $result[] = $json->id;
                 $post = new E621Post($json);
                 $result = $post->save($connection);

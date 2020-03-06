@@ -12,7 +12,10 @@ class E621Post {
 
     public function __construct($json) {
         $this->tags = $json->tags;
-        $this->md5 = isset($json->md5) ? $json->md5 : null;
+        $this->md5 = isset($json->file->md5) ? $json->file->md5 : null;
+        if ($this->md5 === null || strlen($this->md5) !== 32) {
+            die("MD5 FAIL");
+        }
         $this->id = $json->id;
         $this->json = $json;
     }
@@ -44,36 +47,21 @@ class E621Post {
     }
     /**
      * Saves the post to the db. If is already exists, the current
-     * version will be overwritten IF the status is not deleted and last_update gets set to now()
+     * version will be overwritten
      * @return void
      */
     public function save(PDO $connection) {
-        if ($this->isInDb($connection)) {
-            if ($this->json->status === "deleted") {
-                $statement = $connection->prepare("UPDATE posts SET status = :status, last_updated = NOW() WHERE id = :id;");
-            } else {
-                $statement = $connection->prepare("UPDATE posts SET json = :json, status = :status, last_updated = NOW() WHERE id = :id");
-                $statement->bindValue("json", json_encode($this->json));
-            }
-        } else {
-            $statement = $connection->prepare("INSERT INTO posts (id, md5, json, status, last_updated) VALUES (:id, :md5, :json, :status, NOW())");
-            if (isset($this->md5)) {
-                $statement->bindValue("md5", $this->md5);
-            } else {
-                $statement->bindValue("md5", null);
-            }
-            $statement->bindValue("json", json_encode($this->json));
-        }
+        $statement = $connection->prepare("INSERT INTO posts (id, md5, json, last_updated) VALUES (:id, :md5, :json, NOW())
+                                                ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW()");
+        $statement->bindValue("md5", $this->md5);
         $statement->bindValue("id", $this->id);
-        $statement->bindValue("status", $this->json->status);
-
+        $statement->bindValue("json", json_encode($this->json));
         $statement->execute();
     }
 
     public static function saveNuked(PDO $connection, int $id) {
-        $statement = $connection->prepare("INSERT INTO posts (id, status, last_updated) VALUES (:id, :status, NOW())");
+        $statement = $connection->prepare("INSERT INTO posts (id, status, last_updated) VALUES (:id, NOW())");
         $statement->bindValue("id", $id);
-        $statement->bindValue("status", "nuked");
         $statement->execute();
     }
 
@@ -86,11 +74,14 @@ class E621Post {
     public function saveFile(PDO $connection): int {
         if ($this->hasFile($connection)) {
             return POST_FILE_ALREADY_DOWNLOADED;
-        } else if ($this->json->status === "deleted") {
+        } else if ($this->json->flags->deleted) {
             return POST_FILE_DELETED;
         }
-        $fileContent = file_get_contents($this->json->file_url);
-        if (strlen($fileContent) !== $this->json->file_size) {
+        //Investigate
+        $a = $this->md5 {0} . $this->md5 {1};
+        $b = $this->md5 {2} . $this->md5 {3};
+        $fileContent = file_get_contents("https://static1.e621.net/data/{$a}/{$b}/{$this->md5}.{$this->json->file->ext}");
+        if (strlen($fileContent) !== $this->json->file->size) {
             return POST_FILE_RETRY;
         }
 
