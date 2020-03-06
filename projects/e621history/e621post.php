@@ -60,7 +60,7 @@ class E621Post {
     }
 
     public static function saveNuked(PDO $connection, int $id) {
-        $statement = $connection->prepare("INSERT INTO posts (id, status, last_updated) VALUES (:id, NOW())");
+        $statement = $connection->prepare("INSERT INTO posts (id, last_updated) VALUES (:id, NOW())");
         $statement->bindValue("id", $id);
         $statement->execute();
     }
