@@ -3,8 +3,11 @@
 require_once "constants.php";
 
 function getJson(string $url, array $header = []) {
-    $result = json_decode(getUrl($url, $header));
-    return $result !== null ? $result : NETWORK_ERROR;
+    $content = getUrl($url, $header);
+    if ($content === NETWORK_ERROR) {
+        return $content;
+    }
+    return json_decode($content);
 }
 
 function getUrl(string $url, array $header = []) {

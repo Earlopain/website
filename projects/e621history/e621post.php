@@ -11,7 +11,12 @@ class E621Post {
     private $json;
 
     public function __construct($json) {
-        $this->tags = $json->tags;
+        $this->tags = "";
+        $tagArray = [];
+        foreach ($json->tags as $key => $value) {
+            $tagArray = array_merge($tagArray, $value);
+        }
+        $this->tags = implode(" ", $tagArray);
         $this->md5 = isset($json->file->md5) ? $json->file->md5 : null;
         if ($this->md5 === null || strlen($this->md5) !== 32) {
             die("MD5 FAIL");

@@ -16,17 +16,14 @@ class E621User {
         if (self::usernameIsInDb($username)) {
             return false;
         }
-        $json = getJson("https://e621.net/user/index.json?name={$username}", ["user-agent" => "earlopain"]);
-        if (!isset($json[0])) {
-            return false;
-        }
-        if (strtolower($json[0]->name) !== strtolower($username)) {
+        $json = getJson("https://e621.net/users/{$username}.json", ["user-agent" => "earlopain"]);
+        if ($json === null || $json === NETWORK_ERROR) {
             return false;
         }
 
         $statement = $connection->prepare("INSERT INTO users (user_id, user_name, last_updated) VALUES (:userid, :username, NOW())");
-        $statement->bindValue("userid", $json[0]->id);
-        $statement->bindValue("username", $json[0]->name);
+        $statement->bindValue("userid", $json->id);
+        $statement->bindValue("username", $json->name);
         return $statement->execute();
     }
 
