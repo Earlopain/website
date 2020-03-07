@@ -102,8 +102,9 @@ class UserfavHistory {
         $statementUserFav = $connection->prepare("INSERT INTO user_favs (user_id, post_id, position) VALUES (:userid, :postid, :position)");
 
         $page = 1;
-        $resultsPerPage = 320;
-        $url = "https://e621.net/posts.json?tags=fav:{$username}&limit={$resultsPerPage}&page=";
+        //Limit currently has no effect and is 75 by default
+        $resultsPerPage = 75;
+        $url = "https://e621.net/favorites.json?user_id={$userid}&limit={$resultsPerPage}&page=";
         $counter = 0;
         $result = [];
         do {
@@ -130,7 +131,8 @@ class UserfavHistory {
             }
             $connection->commit();
             $page++;
-        } while (count($jsonArray->posts) === $resultsPerPage);
+            //need to check for message, because empty pages return an error
+        } while (!isset($jsonArray->message) && count($jsonArray->posts) === $resultsPerPage);
 
         $statement = SqlConnection::get("e621")->prepare("INSERT INTO processed_users (user_id) VALUES (:userid)");
         $statement->bindValue("userid", $userid);
