@@ -32,9 +32,15 @@ function getNextMissingPosts(PDO $connection, int $stopId) {
         return;
     }
     $beforeId = $startId + $postCount;
-    $jsonArray = getJson("https://e621.net/posts.json?before_id={$beforeId}&limit={$postCount}", ["user-agent" => "earlopain"]);
+
+    $url = "https://e621.net/posts.json?tags=id:<{$beforeId}%20status:any&limit={$postCount}";
+    $jsonArray = getJson($url, ["user-agent" => "earlopain"]);
     if ($jsonArray === NETWORK_ERROR) {
         handleNetworkError();
+        return;
+    }
+    if (!isset($jsonArray->posts)) {
+        Logger::log(LOG_ERR, "No posts from {$url}", $jsonArray);
         return;
     }
     $jsonArray = array_reverse($jsonArray->posts);
@@ -48,6 +54,7 @@ function getNextMissingPosts(PDO $connection, int $stopId) {
         if (isset($jsonArray[$currentId])) {
             savePost($connection, $jsonArray[$currentId], $currentId);
         } else {
+            //This is not needed. Posts not returned in the api are probably nuked
             $json = getPostJson($currentId);
             savePost($connection, $json, $currentId);
         }
