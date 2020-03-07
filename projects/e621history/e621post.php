@@ -57,9 +57,9 @@ class E621Post {
      */
     public function save(PDO $connection) {
         $statement = $connection->prepare("INSERT INTO posts (id, md5, json, last_updated) VALUES (:id, :md5, :json, NOW())
-                                                ON DUPLICATE KEY UPDATE json = :json, last_updated = NOW()");
-        $statement->bindValue("md5", $this->md5);
+                                                ON DUPLICATE KEY UPDATE md5 = :md5, json = :json, last_updated = NOW()");
         $statement->bindValue("id", $this->id);
+        $statement->bindValue("md5", $this->md5);
         $statement->bindValue("json", json_encode($this->json));
         $statement->execute();
     }
