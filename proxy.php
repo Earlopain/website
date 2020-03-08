@@ -1,7 +1,6 @@
 <?php
 require_once "secret.php";
 require_once "util.php";
-header("Access-Control-Allow-Origin: *");
 
 $json = json_decode(file_get_contents('php://input'));
 if (!isset($json->url)) {
