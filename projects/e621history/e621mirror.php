@@ -82,6 +82,7 @@ function savePost(PDO $connection, $json, $id) {
             case POST_FILE_RETRY:
                 Logger::log(LOG_ERR, "Network error for {$json->file->md5}");
                 $connection->commit();
+                handleNetworkError();
                 return savePost($connection, getPostJson($id), $id);
             case POST_FILE_ALREADY_DOWNLOADED:
                 break;
