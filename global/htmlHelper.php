@@ -17,7 +17,7 @@ function generateHeadBoilerplate() {
     <meta name="msapplication-TileColor" content="#2b5797">
     <meta name="msapplication-config" content="{$prefix}/favicons/browserconfig.xml">
     <meta name="theme-color" content="#00cc4a">
-    <link rel="stylesheet" href="{$prefix}/darkmode.css">
+    <link rel="stylesheet" href="{$prefix}/global.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 HTML;
