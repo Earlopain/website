@@ -5,6 +5,7 @@
     --darkest-grey: #232325;
     --dark-terminal-green: #146411;
     --light-terminal-green: #9bf293;
+    --user-promt-padding: 10px;
 }
 
 html,
@@ -32,4 +33,39 @@ a {
 
 g .updatemenu-item-rect {
     fill: var(--dark-grey) !important;
+}
+
+.user-prompt-text {
+    position: absolute;
+    top: var(--user-promt-padding);
+    left: 50%;
+    width: 25%;
+    transform: translate(-50%);
+    border: 2px solid var(--light-grey);
+}
+
+.user-promt-notice {
+    margin-left: calc(var(--user-promt-padding) * 2);
+    margin-top: var(--user-promt-padding);
+}
+
+.user-prompt-textarea-container {
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.user-prompt-textarea-container textarea{
+    width: calc(100% - calc(var(--user-promt-padding) * 4));
+    min-height: 200px;
+    margin-bottom: var(--user-promt-padding);
+    margin-top: var(--user-promt-padding);
+}
+
+.user-promt-button {
+    display: grid;
+    padding-left: calc(var(--user-promt-padding) * 1.7);
+    padding-right: calc(var(--user-promt-padding) * 1.7);
+    padding-bottom: var(--user-promt-padding);
 }

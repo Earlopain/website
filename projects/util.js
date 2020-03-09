@@ -118,3 +118,33 @@ function infoMessage(message, level) {
         }, 25);
     }
 }
+
+function getUserTextInput(promt = "Please enter", prefilled = "", callback = (userInput) => { }) {
+    let wrapper = document.createElement("div");
+    wrapper.classList.add("user-prompt-text");
+
+    let promtDiv = document.createElement("div");
+    promtDiv.innerText = promt;
+    promtDiv.classList.add("user-promt-notice");
+
+    const textarea = document.createElement("textarea");
+    textarea.value = prefilled;
+    let inputArea = document.createElement("div");
+    inputArea.appendChild(textarea);
+    inputArea.classList.add("user-prompt-textarea-container");
+    let buttonDiv = document.createElement("div");
+    buttonDiv.classList.add("user-promt-button");
+    let buttonSubmit = document.createElement("button");
+    buttonSubmit.appendChild(document.createTextNode("Submit"));
+
+    buttonSubmit.addEventListener("click", () => {
+        callback(textarea.value);
+    }, { once: true });
+
+    buttonDiv.appendChild(buttonSubmit);
+    wrapper.appendChild(promtDiv);
+    wrapper.appendChild(inputArea);
+    wrapper.appendChild(document.createElement("br"));
+    wrapper.appendChild(buttonDiv);
+    document.body.appendChild(wrapper);
+}
