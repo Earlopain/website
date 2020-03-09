@@ -119,7 +119,7 @@ function infoMessage(message, level) {
     }
 }
 
-function getUserTextInput(promt = "Please enter", prefilled = "", callback = (userInput) => { }) {
+function getUserTextInput(promt = "Please enter", prefilled = "", callback = userInput => { }) {
     let wrapper = document.createElement("div");
     wrapper.classList.add("user-prompt-text");
 
@@ -139,6 +139,7 @@ function getUserTextInput(promt = "Please enter", prefilled = "", callback = (us
 
     buttonSubmit.addEventListener("click", () => {
         callback(textarea.value);
+        wrapper.remove();
     }, { once: true });
 
     buttonDiv.appendChild(buttonSubmit);
