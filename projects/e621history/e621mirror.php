@@ -8,21 +8,38 @@ $highestId = getHighestAvailable($connection);
 while (true) {
     echo "checking flagged\n";
     checkFlaggedPosts($connection);
+    echo "checking pending\n";
+    checkUnaprovedPosts($connection);
     echo "getting next\n";
     getNextMissingPosts($connection, $highestId);
 }
 
-function checkFlaggedPosts(PDO $connection) {
-    $jsonArray = getJson("https://e621.net/posts.json?tags=status:flagged&limit=320", ["user-agent" => "earlopain"]);
-    if ($jsonArray === NETWORK_ERROR) {
-        handleNetworkError();
-        return;
-    }
-    foreach ($jsonArray->posts as $json) {
-        if (savePost($connection, $json, $json->id) === POST_FILE_SUCCESS) {
-            Logger::log(LOG_INFO, "Saved {$json->file->md5}");
+function checkLinkPosts(PDO $connection, string $url) {
+    $limit = 320;
+    $page = 1;
+    while (true) {
+        $jsonArray = getJson($url . "&page=" . $page, ["user-agent" => "earlopain"]);
+        if ($jsonArray === NETWORK_ERROR) {
+            handleNetworkError();
+            continue;
         }
+        foreach ($jsonArray->posts as $json) {
+            savePost($connection, $json, $json->id);
+        }
+
+        if(count($jsonArray->posts) !== $limit) {
+            return;
+        }
+        $page++;
     }
+}
+
+function checkFlaggedPosts(PDO $connection) {
+    checkLinkPosts($connection, "https://e621.net/posts.json?tags=status:flagged&limit=320");
+}
+
+function checkUnaprovedPosts(PDO $connection) {
+    checkLinkPosts($connection, "https://e621.net/posts.json?tags=status:pending&limit=320");
 }
 
 function getNextMissingPosts(PDO $connection, int $stopId) {
@@ -110,7 +127,7 @@ function getPostJson(int $id) {
 
 function getLowestId(PDO $connection) {
     //https://stackoverflow.com/a/31558121
-    $statement = $connection->prepare("SELECT MIN(id) + 1 FROM posts t1 WHERE NOT EXISTS ( SELECT 1 FROM posts t2 WHERE id = t1.id + 1 )");
+    $statement = $connection->prepare("SELECT p1.id + 1 AS result FROM posts AS p1 LEFT OUTER JOIN posts AS p2 ON p2.id = p1.id + 1 WHERE p2.id IS NULL ORDER BY result LIMIT 1");
     $statement->execute();
     return $statement->fetchColumn();
 }
