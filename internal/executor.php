@@ -23,7 +23,7 @@ function getCommand() {
     $command = "";
     switch ($_POST["command"]) {
         case 'plexrestart':
-            $command = "sudo service plexmediaserver restart";
+            $command = "sudo systemctl restart plexmediaserver";
             break;
         case 'plexrefreshcomics':
             $command = "node /media/plex/software/e621comics/e621PoolDownloader.js";
@@ -35,7 +35,7 @@ function getCommand() {
             $command = wrapPlexStop("sudo node /media/plex/software/plexFixDateAdded.js");
             break;
         case 'apache2restart':
-            $command = "sudo service apache2 restart";
+            $command = "sudo systemctl restart apache2";
             break;
         case 'deezerdl':
             $filePath = "/media/plex/software/deezerdl/downloadLinks.txt";
@@ -68,5 +68,5 @@ function youtubedl($targetFormat) {
 }
 
 function wrapPlexStop($command) {
-    return "echo 'Stopping Server' && sudo service plexmediaserver stop && echo 'Server Stopped' && " . $command . " && echo 'Starting Server' && sudo service plexmediaserver start && echo 'Server Started'";
+    return "echo 'Stopping Server' && sudo systemctl stop plexmediaserver && echo 'Server Stopped' && " . $command . " && echo 'Starting Server' && sudo systemctl start plexmediaserver && echo 'Server Started'";
 }
