@@ -16,7 +16,7 @@ function getUrl(string $url, array $header = []) {
         $headerArray[] = $key . ": " . $value;
     }
     $context = stream_context_create(["http" => ["header" => $headerArray, "ignore_errors" => true]]);
-    $result = file_get_contents($url, false, $context);
+    $result = @file_get_contents($url, false, $context);
 
     return $result !== false ? $result : NETWORK_ERROR;
 }
