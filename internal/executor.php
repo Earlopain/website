@@ -38,8 +38,12 @@ function getCommand() {
             $command = "sudo systemctl restart apache2";
             break;
         case 'deezerdl':
-            $filePath = "/media/plex/software/deezerdl/downloadLinks.txt";
-            file_put_contents($filePath, $_POST["link"]);
+            $fileName = "downloadLinks.txt";
+            $folder = posix_getpwuid(posix_getuid())["dir"] . "/.config/smloadr";
+            if (!file_exists($folder)) {
+                mkdir($folder, 0777, true);
+            }
+            file_put_contents($folder . "/" . $fileName, $_POST["link"]);
             $command = "smloadr -q MP3_320 -p /media/plex/plexmedia/music -d all";
             break;
         case 'e621dl':
