@@ -40,7 +40,7 @@ function getCommand() {
         case 'deezerdl':
             $filePath = "/media/plex/software/deezerdl/downloadLinks.txt";
             file_put_contents($filePath, $_POST["link"]);
-            $command = "cd /media/plex/software/deezerdl && ./SMLoader -q MP3_320 -p /media/plex/plexmedia/music -d all";
+            $command = "smloadr -q MP3_320 -p /media/plex/plexmedia/music -d all";
             break;
         case 'e621dl':
             $command = "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
