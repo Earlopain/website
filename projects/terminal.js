@@ -9,6 +9,23 @@ class Terminal {
         this.addCss();
     }
 
+    parseFromJson(json) {
+        for (const key of Object.keys(json)) {
+            const value = json[key];
+            if (typeof value === "string") {
+                if (value.startsWith("http") || value.startsWith("mailto") || value.startsWith("/")) {
+                    this.addFile(key, "href", value);
+                } else {
+                    this.addFile(key);
+                }
+            } else {
+                this.startFolder(key);
+                this.parseFromJson(value);
+                this.endFolder();
+            }
+        }
+    }
+
     moveUp() {
         if (this.location !== 0) {
             this.location--;
