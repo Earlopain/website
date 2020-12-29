@@ -1,102 +1,114 @@
-let textarea;
-
 window.addEventListener("DOMContentLoaded", () => {
-    textarea = document.getElementById("textarea");
-
-    let commandInProgress = false;
-
-    for (const button of document.getElementsByTagName("button")) {
-        button.addEventListener("click", async () => {
-            if (commandInProgress) {
-                console.log("already executing");
-                return;
-            }
-            commandInProgress = true;
-
-            const type = button.getAttribute("data-type");
-            const data = button.getAttribute("data-extra");
-            await execute(type, data);
-            commandInProgress = false;
-        });
-    }
-
+    new Executor();
 });
 
-async function execute(type, data) {
-    switch (type) {
-        case "command":
-            const textContent = textarea.value;
-            textarea.value = "";
-            hideSubmitButton();
-            await executeOnServer(data, textContent);
-            break;
-        case "getfile":
-            textarea.value = "";
-            await getFileFromServer(data);
-            document.getElementById("submitfile").setAttribute("filename", data);
-            showSubmitButton();
-            break;
-        case "savefile":
-            const filename = document.getElementById("submitfile").getAttribute("filename");
-            hideSubmitButton();
-            await putFileOnServer(filename, textarea.value);
-            document.getElementById("submitfile").removeAttribute("filename");
-            break;
+class Executor {
+    constructor() {
+        this.textarea = document.getElementById("textarea");
+        this.submitButton = document.getElementById("submitfile");
+        this.commandInProgress = false;
+        this.fileToSave = undefined;
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        for (const button of document.getElementsByTagName("button")) {
+            button.addEventListener("click", async () => {
+                if (this.commandInProgress) {
+                    console.log("already executing");
+                    return;
+                }
+                this.commandInProgress = true;
+
+                const type = button.getAttribute("data-type");
+                const data = button.getAttribute("data-extra");
+                await this.execute(type, data);
+                this.commandInProgress = false;
+            });
+        }
+    }
+
+    async execute(type, data) {
+        switch (type) {
+            case "command":
+                const textContent = this.textarea.value;
+                this.textarea.value = "";
+                hideElement(this.submitButton);
+                await this.executeOnServer(data, textContent);
+                break;
+            case "getfile":
+                this.textarea.value = "";
+                await this.getFileFromServer(data);
+                this.fileToSave = data;
+                showElement(this.submitButton);
+                break;
+            case "savefile":
+                if (this.fileToSave === undefined) {
+                    console.log("Something went wrong");
+                    return;
+                }
+                await this.putFileOnServer(this.fileToSave, textarea.value);
+                this.fileToSave = undefined;
+                break;
+        }
+    }
+
+    async executeOnServer(command, extraData) {
+        switch (command) {
+            case "deezerdl":
+            case "musicvideo":
+            case "shortmovie":
+            case "youtube":
+            case "e621dl":
+            case "e621replace":
+                await httpPOST({ "command": command, "link": extraData }, this.readerCallback);
+                break;
+            default:
+                await httpPOST({ "command": command }, this.readerCallback);
+                break;
+        }
+    }
+
+    async getFileFromServer(filePath) {
+        await httpGET("executor.php?getfile=" + filePath, this.readerCallback);
+    }
+
+    async putFileOnServer(filename, data) {
+        await httpPOST({ "savefile": filename, "savefiledata": data }, this.readerCallback);
+    }
+
+    readerCallback(text) {
+        textarea.value += text;
+        textarea.scrollTop = textarea.scrollHeight;
     }
 }
 
-async function executeOnServer(command, extraData) {
-    switch (command) {
-        case "deezerdl":
-        case "musicvideo":
-        case "shortmovie":
-        case "youtube":
-        case "e621dl":
-        case "e621replace":
-            await httpPOST({ "command": command, "link": extraData });
-            break;
-        default:
-            await httpPOST({ "command": command });
-            break;
-    }
+function hideElement(e) {
+    e.style.display = "none";
 }
 
-async function getFileFromServer(filePath) {
-    await httpGET("executor.php?getfile=" + filePath);
+function showElement(e) {
+    e.style.display = "";
 }
 
-async function putFileOnServer(filename, data) {
-    await httpPOST({ "savefile": filename, "savefiledata": data });
-}
-
-function hideSubmitButton() {
-    document.getElementById("submitfile").style.display = "none";
-}
-
-function showSubmitButton() {
-    document.getElementById("submitfile").style.display = "";
-}
-
-async function httpGET(url) {
+async function httpGET(url, callback = function () { }) {
     const request = await fetch(url);
-    await handleReader(request.body.getReader());
+    await handleReader(request.body.getReader(), callback);
 }
 
-async function httpPOST(formDataJSON) {
+async function httpPOST(formDataJSON, callback = function () { }) {
     const request = await fetch("executor.php", {
         method: "POST",
         body: JSON.stringify(formDataJSON)
     });
-    await handleReader(request.body.getReader());
+    await handleReader(request.body.getReader(), callback);
 }
 
-
-async function handleReader(reader, callback) {
+async function handleReader(reader, callback = function () { }) {
     const decoder = new TextDecoder("utf-8");
     while (true) {
         const read = await reader.read();
-        textarea.value += decoder.decode(read.value);
-        textarea.scrollTop = textarea.scrollHeight;
+        callback(decoder.decode(read.value));
         if (read.done) {
             break;
         }
