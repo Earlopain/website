@@ -5,66 +5,65 @@ error_reporting(E_ALL);
 ignore_user_abort(true);
 set_time_limit(0);
 
-if (isset($_POST["command"])) {
+if ($_SERVER["REQUEST_METHOD"] === "GET") {
+    if (isset($_GET["getfile"])) {
+        echo file_get_contents($_GET["getfile"]);
+    }
+} else if ($_SERVER["REQUEST_METHOD"] === "POST ") {
+    if (isset($_POST["command"])) {
+        executeCommand($_POST["command"]);
+    } else if (isset($_POST["savefile"]) && isset($_POST["savefiledata"])) {
+        file_put_contents($_POST["savefile"], $_POST["savefiledata"]);
+    }
+}
+
+function executeCommand($commandId) {
     while (@ob_end_flush()); // end all output buffers if any
     //die(getCommand());
-    $proc = popen(getCommand(), 'r');
+    $command = addCommandFinish(getCommand($commandId));
+    $proc = popen($command, 'r');
     while (!feof($proc)) {
         echo fread($proc, 4096);
         @flush();
     }
-} elseif (isset($_GET["getfile"])) {
-    echo file_get_contents($_GET["getfile"]);
-} elseif (isset($_POST["savefile"]) && isset($_POST["savefiledata"])) {
-    file_put_contents($_POST["savefile"], $_POST["savefiledata"]);
 }
 
-function getCommand() {
-    $command = "";
-    switch ($_POST["command"]) {
-        case 'plexrestart':
-            $command = "sudo systemctl restart plexmediaserver";
-            break;
-        case 'plexrefreshcomics':
-            $command = "node /media/plex/software/e621comics/e621PoolDownloader.js";
-            break;
-        case 'plextagimages':
-            $command = "node /media/plex/software/filetagger/plexTagNewImages.js";
-            break;
-        case 'plexfixdates':
-            $command = wrapPlexStop("sudo node /media/plex/software/plexFixDateAdded.js");
-            break;
-        case 'apache2restart':
-            $command = "sudo systemctl restart apache2";
-            break;
-        case 'deezerdl':
+function getCommand($command) {
+    switch ($command) {
+        case "plexrestart":
+            return "sudo systemctl restart plexmediaserver";
+        case "plexrefreshcomics":
+            return "node /media/plex/software/e621comics/e621PoolDownloader.js";
+        case "plextagimages":
+            return "node /media/plex/software/filetagger/plexTagNewImages.js";
+        case "plexfixdates":
+            return wrapPlexStop("sudo node /media/plex/software/plexFixDateAdded.js");
+        case "apache2restart":
+            return "sudo systemctl restart apache2";
+        case "deezerdl":
             $fileName = "downloadLinks.txt";
             $folder = posix_getpwuid(posix_getuid())["dir"] . "/.config/smloadr";
             if (!file_exists($folder)) {
                 mkdir($folder, 0777, true);
             }
             file_put_contents($folder . "/" . $fileName, $_POST["link"]);
-            $command = "smloadr -q MP3_320 -p /media/plex/plexmedia/music -d all";
-            break;
-        case 'e621dl':
-            $command = "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
-            break;
-        case 'e621replace':
-            $command = "node /media/plex/software/e621replacer.js '" . $_POST["link"] . "'";
-            break;
-        case 'musicvideo':
-            $command = youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
-            break;
-        case 'shortmovie':
-            $command = youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
-            break;
-        case 'youtube':
-            $command = youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s");
-            break;
+            return "smloadr -q MP3_320 -p /media/plex/plexmedia/music -d all";
+        case "e621dl":
+            return "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
+        case "e621replace":
+            return "node /media/plex/software/e621replacer.js '" . $_POST["link"] . "'";
+        case "musicvideo":
+            return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
+        case "shortmovie":
+            return youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
+        case "youtube":
+            return youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s");
         default:
-            $command = "echo test";
-            break;
+            return "echo invalid_command";
     }
+}
+
+function addCommandFinish($command) {
     return $command . " 2>&1 && echo DONE";
 }
 
