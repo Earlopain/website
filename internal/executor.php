@@ -12,16 +12,16 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode(file_get_contents('php://input'), true);
     if (isset($data["command"])) {
-        executeCommand($data["command"]);
+        executeCommand($data["command"], @$data["link"]);
     } else if (isset($data["savefile"]) && isset($data["savefiledata"])) {
         file_put_contents($data["savefile"], $data["savefiledata"]);
     }
 }
 
-function executeCommand($commandId) {
+function executeCommand($commandId, $extraData) {
     while (@ob_end_flush()); // end all output buffers if any
     //die(getCommand());
-    $command = addCommandFinish(getCommand($commandId));
+    $command = addCommandFinish(getCommand($commandId, $extraData));
     $proc = popen($command, 'r');
     while (!feof($proc)) {
         echo fread($proc, 4096);
@@ -29,7 +29,7 @@ function executeCommand($commandId) {
     }
 }
 
-function getCommand($command) {
+function getCommand($command, $extraData) {
     switch ($command) {
         case "plexrestart":
             return "sudo systemctl restart plexmediaserver";
@@ -47,18 +47,18 @@ function getCommand($command) {
             if (!file_exists($folder)) {
                 mkdir($folder, 0777, true);
             }
-            file_put_contents($folder . "/" . $fileName, $_POST["link"]);
+            file_put_contents($folder . "/" . $fileName, $extraData);
             return "smloadr -q MP3_320 -p /media/plex/plexmedia/music -d all";
         case "e621dl":
-            return "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
+            return "node /media/plex/software/e621downloader.js '" . $extraData . "'";
         case "e621replace":
-            return "node /media/plex/software/e621replacer.js '" . $_POST["link"] . "'";
+            return "node /media/plex/software/e621replacer.js '" . $extraData . "'";
         case "musicvideo":
-            return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
+            return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s", $extraData);
         case "shortmovie":
-            return youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
+            return youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s", $extraData);
         case "youtube":
-            return youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s");
+            return youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s", $extraData);
         default:
             return "echo invalid_command";
     }
@@ -68,9 +68,9 @@ function addCommandFinish($command) {
     return $command . " 2>&1 && echo DONE";
 }
 
-function youtubedl($targetFormat) {
+function youtubedl($targetFormat, $extraData) {
     $filePath = "/media/plex/software/tempfiles/youtubedl.txt";
-    file_put_contents($filePath, $_POST["link"]);
+    file_put_contents($filePath, $extraData);
     return "export LC_ALL=en_US.UTF-8 && youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '{$targetFormat}'";
 }
 
