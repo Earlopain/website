@@ -49,6 +49,9 @@ function getCommand() {
         case 'e621dl':
             $command = "node /media/plex/software/e621downloader.js '" . $_POST["link"] . "'";
             break;
+        case 'e621replace':
+            $command = "node /media/plex/software/e621replacer.js '" . $_POST["link"] . "'";
+            break;
         case 'musicvideo':
             $command = youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
             break;

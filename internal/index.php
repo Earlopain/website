@@ -38,6 +38,9 @@ generateHeadBoilerplate();?>
         <button class="button" onclick="executeOnServer('e621dl')">E621 Download</button>
     </div>
     <div class="buttoncontainer">
+        <button class="button" onclick="executeOnServer('e621replace')">E621 Replacer</button>
+    </div>
+    <div class="buttoncontainer">
         <button class="button" onclick="executeOnServer('musicvideo')">Youtube Musicvideo</button>
     </div>
     <div class="buttoncontainer">

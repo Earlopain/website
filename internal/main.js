@@ -14,6 +14,7 @@ function executeOnServer(command) {
         case "shortmovie":
         case "youtube":
         case "e621dl":
+        case "e621replace":
             httpPOST({ "command": command, "link": document.getElementById("commandout").value });
             break;
         default:
