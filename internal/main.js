@@ -2,17 +2,17 @@ let commandInProgress = false;
 let loadedFile;
 
 let textarea;
-window.addEventListener("DOMContentLoaded" , () => {
+window.addEventListener("DOMContentLoaded", () => {
     textarea = document.getElementById("textarea");
 });
 
-function executeOnServer(command) {
-    hideSubmitButton();
+async function executeOnServer(command) {
     if (commandInProgress) {
         console.log("already executing");
         return;
     }
     commandInProgress = true;
+    textarea.value = "";
     switch (command) {
         case "deezerdl":
         case "musicvideo":
@@ -20,25 +20,26 @@ function executeOnServer(command) {
         case "youtube":
         case "e621dl":
         case "e621replace":
-            httpPOST({ "command": command, "link": textarea.value });
+            await httpPOST({ "command": command, "link": textarea.value });
             break;
         default:
-            httpPOST({ "command": command });
+            await httpPOST({ "command": command });
             break;
     }
-    textarea.value = "";
+    commandInProgress = false;
 }
 
-function getFileFromServer(filePath) {
+async function getFileFromServer(filePath) {
     if (commandInProgress) {
         console.log("already executing");
         return;
     }
-    textarea.value = "";
-    showSubmitButton();
-    loadedFile = filePath;
     commandInProgress = true;
-    httpGET("executor.php?getfile=" + filePath);
+    textarea.value = "";
+    loadedFile = filePath;
+    await httpGET("executor.php?getfile=" + filePath);
+    showSubmitButton();
+    commandInProgress = false;
 }
 
 function putFileOnServer() {
@@ -53,33 +54,28 @@ function showSubmitButton() {
     document.getElementById("submitfile").style.display = "";
 }
 
-
-function requestOnProgress(event) {
-    textarea.value = event.target.responseText.substr(-50000);
-    textarea.scrollTop = 999999;
+async function httpGET(url) {
+    const request = await fetch(url);
+    await handleReader(request.body.getReader());
 }
 
-function httpGET(url) {
-    let xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", url, true); // false for synchronous request
-    xmlHttp.addEventListener("progress", requestOnProgress);
-    xmlHttp.addEventListener("load", () => {
-        commandInProgress = false;
+async function httpPOST(formDataJSON) {
+    const request = await fetch("executor.php", {
+        method: "POST",
+        body: JSON.stringify(formDataJSON)
     });
-    xmlHttp.send(null);
+    await handleReader(request.body.getReader());
 }
 
-function httpPOST(formDataJSON) {
-    let xmlHttp = new XMLHttpRequest();
-    let formData = new FormData();
-    Object.keys(formDataJSON).forEach(key => {
-        formData.append(key, formDataJSON[key])
-    });
-    xmlHttp.open("POST", "executor.php", true); // false for synchronous request
-    xmlHttp.addEventListener("progress", requestOnProgress);
-    xmlHttp.addEventListener("load", () => {
-        hideSubmitButton();
-        commandInProgress = false;
-    });
-    xmlHttp.send(formData);
+
+async function handleReader(reader, callback) {
+    const decoder = new TextDecoder("utf-8");
+    while (true) {
+        const read = await reader.read();
+        textarea.value += decoder.decode(read.value);
+        textarea.scrollTop = textarea.scrollHeight;
+        if (read.done) {
+            break;
+        }
+    }
 }

