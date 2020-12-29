@@ -1,17 +1,25 @@
-.buttoncontainer{
-    display: inline-block;
-    width: 400px;
-    height: 100px;
-    padding: 10px;
+.buttoncontainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    row-gap: 10px;
+    column-gap: 10px;
+    padding-bottom: 10px;
 }
 
-.button{
-    width: 100%;
-    height: 100%;
+.buttoncontainer button, .outputcontainer button {
+    height: 100px;
     font-size: 1.5em;
 }
 
-.output{
-    width: 200%;
+.outputcontainer {
+    align-items: flex-end;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    column-gap: 10px;
+    width: 75vw;
+}
+
+.outputcontainer textarea {
     height: 500px;
+    font-size: 1.5em;
 }

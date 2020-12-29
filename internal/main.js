@@ -1,6 +1,11 @@
 let commandInProgress = false;
 let loadedFile;
 
+let textarea;
+window.addEventListener("DOMContentLoaded" , () => {
+    textarea = document.getElementById("textarea");
+});
+
 function executeOnServer(command) {
     hideSubmitButton();
     if (commandInProgress) {
@@ -15,13 +20,13 @@ function executeOnServer(command) {
         case "youtube":
         case "e621dl":
         case "e621replace":
-            httpPOST({ "command": command, "link": document.getElementById("commandout").value });
+            httpPOST({ "command": command, "link": textarea.value });
             break;
         default:
             httpPOST({ "command": command });
             break;
     }
-    document.getElementById("commandout").value = "";
+    textarea.value = "";
 }
 
 function getFileFromServer(filePath) {
@@ -29,7 +34,7 @@ function getFileFromServer(filePath) {
         console.log("already executing");
         return;
     }
-    document.getElementById("commandout").value = "";
+    textarea.value = "";
     showSubmitButton();
     loadedFile = filePath;
     commandInProgress = true;
@@ -37,7 +42,7 @@ function getFileFromServer(filePath) {
 }
 
 function putFileOnServer() {
-    httpPOST({ "savefile": loadedFile, "savefiledata": document.getElementById("commandout").value });
+    httpPOST({ "savefile": loadedFile, "savefiledata": textarea.value });
 }
 
 function hideSubmitButton() {
@@ -50,8 +55,8 @@ function showSubmitButton() {
 
 
 function requestOnProgress(event) {
-    document.getElementById("commandout").value = event.target.responseText.substr(-50000);
-    document.getElementById("commandout").scrollTop = 999999;
+    textarea.value = event.target.responseText.substr(-50000);
+    textarea.scrollTop = 999999;
 }
 
 function httpGET(url) {
