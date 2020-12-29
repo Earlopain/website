@@ -1,18 +1,51 @@
-let commandInProgress = false;
-let loadedFile;
-
 let textarea;
+
 window.addEventListener("DOMContentLoaded", () => {
     textarea = document.getElementById("textarea");
+
+    let commandInProgress = false;
+
+    for (const button of document.getElementsByTagName("button")) {
+        button.addEventListener("click", async () => {
+            if (commandInProgress) {
+                console.log("already executing");
+                return;
+            }
+            commandInProgress = true;
+
+            const type = button.getAttribute("data-type");
+            const data = button.getAttribute("data-extra");
+            await execute(type, data);
+            commandInProgress = false;
+        });
+    }
+
 });
 
-async function executeOnServer(command) {
-    if (commandInProgress) {
-        console.log("already executing");
-        return;
+async function execute(type, data) {
+    switch (type) {
+        case "command":
+            const textContent = textarea.value;
+            textarea.value = "";
+            hideSubmitButton();
+            await executeOnServer(data, textContent);
+            break;
+        case "getfile":
+            textarea.value = "";
+            await getFileFromServer(data);
+            document.getElementById("submitfile").setAttribute("filename", data);
+            showSubmitButton();
+            break;
+        case "savefile":
+            const filename = document.getElementById("submitfile").getAttribute("filename");
+            hideSubmitButton();
+            await putFileOnServer(filename, textarea.value);
+            document.getElementById("submitfile").removeAttribute("filename");
+            break;
     }
-    commandInProgress = true;
-    textarea.value = "";
+}
+
+async function executeOnServer(command, extraData) {
     switch (command) {
         case "deezerdl":
         case "musicvideo":
@@ -20,30 +53,20 @@ async function executeOnServer(command) {
         case "youtube":
         case "e621dl":
         case "e621replace":
-            await httpPOST({ "command": command, "link": textarea.value });
+            await httpPOST({ "command": command, "link": extraData });
             break;
         default:
             await httpPOST({ "command": command });
             break;
     }
-    commandInProgress = false;
 }
 
 async function getFileFromServer(filePath) {
-    if (commandInProgress) {
-        console.log("already executing");
-        return;
-    }
-    commandInProgress = true;
-    textarea.value = "";
-    loadedFile = filePath;
     await httpGET("executor.php?getfile=" + filePath);
-    showSubmitButton();
-    commandInProgress = false;
 }
 
-function putFileOnServer() {
-    httpPOST({ "savefile": loadedFile, "savefiledata": textarea.value });
+async function putFileOnServer(filename, data) {
+    await httpPOST({ "savefile": filename, "savefiledata": data });
 }
 
 function hideSubmitButton() {
