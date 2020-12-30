@@ -28,10 +28,10 @@ generateHeadBoilerplate();?>
             <button data-type="command" data-extra="plextagimages">Plex Tag Images</button>
             <button data-type="command" data-extra="plexfixdates">Plex Fix Dates</button>
             <button data-type="getfile" data-extra="smloadrconfig">Deezer Set ARL</button>
+            <button data-type="savefile" id="submitfile" style="display: none">Submit File</button>
         </div>
         <div id="outputcontainer">
             <textarea id="textarea"></textarea>
-            <button data-type="savefile" id="submitfile" style="display: none">Submit File</button>
         </div>
     </div>
 </body>
