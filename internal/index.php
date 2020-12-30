@@ -13,7 +13,7 @@ generateHeadBoilerplate();?>
     <div>
         <div class="buttoncontainer">
             <button data-type="command" data-extra="e621dl">E621 Download</button>
-            <button data-type="getfile" data-extra="/media/plex/software/e621comics/pools.json">E621 Edit Comics</button>
+            <button data-type="getfile" data-extra="e621pools">E621 Edit Comics</button>
             <button data-type="command" data-extra="plexrefreshcomics">E621 Refresh Comics</button>
             <button data-type="command" data-extra="e621replace">E621 Replacer</button>
             <button data-type="command" data-extra="sofurryepub">Sofurry EPUB</button>
@@ -29,7 +29,7 @@ generateHeadBoilerplate();?>
             <button data-type="command" data-extra="plexrestart">Plex Restart</button>
             <button data-type="command" data-extra="plextagimages">Plex Tag Images</button>
             <button data-type="command" data-extra="plexfixdates">Plex Fix Dates</button>
-            <button data-type="getfile" data-extra="/srv/http/.config/smloadr/SMLoadrConfig.json">Deezer Set ARL</button>
+            <button data-type="getfile" data-extra="smloadrconfig">Deezer Set ARL</button>
         </div>
         <div class="outputcontainer">
             <textarea id="textarea"></textarea>
