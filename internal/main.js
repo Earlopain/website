@@ -54,20 +54,7 @@ class Executor {
     }
 
     async executeOnServer(command, extraData) {
-        switch (command) {
-            case "deezerdl":
-            case "musicvideo":
-            case "shortmovie":
-            case "youtube":
-            case "e621dl":
-            case "e621replace":
-            case "sofurryepub":
-                await httpPOST({ "command": command, "link": extraData }, this.readerCallback);
-                break;
-            default:
-                await httpPOST({ "command": command }, this.readerCallback);
-                break;
-        }
+        await httpPOST({ "command": command, "link": extraData }, this.readerCallback);
     }
 
     async getFileFromServer(filePath) {
