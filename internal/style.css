@@ -1,4 +1,19 @@
-.buttoncontainer {
+:root {
+    --margin: 8px;
+}
+
+body {
+    margin: 0;
+}
+
+#container {
+    margin: var(--margin);
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    height: calc(100vh - var(--margin) * 2);
+}
+
+#buttoncontainer {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     row-gap: 10px;
@@ -6,12 +21,19 @@
     padding-bottom: 10px;
 }
 
-.buttoncontainer button, .outputcontainer button {
-    height: 100px;
+#buttoncontainer div {
+    display: none;
+}
+
+#buttoncontainer div+button {
+    grid-column-start: 1;
+}
+
+#buttoncontainer button, #outputcontainer button {
     font-size: 1.5em;
 }
 
-.outputcontainer {
+#outputcontainer {
     align-items: flex-end;
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -19,7 +41,7 @@
     width: 75vw;
 }
 
-.outputcontainer textarea {
-    height: 500px;
+#outputcontainer textarea {
+    min-height: 100%;
     font-size: 1.5em;
 }
