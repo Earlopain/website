@@ -16,6 +16,7 @@ generateHeadBoilerplate();?>
             <button data-type="getfile" data-extra="/media/plex/software/e621comics/pools.json">E621 Edit Comics</button>
             <button data-type="command" data-extra="plexrefreshcomics">E621 Refresh Comics</button>
             <button data-type="command" data-extra="e621replace">E621 Replacer</button>
+            <button data-type="command" data-extra="sofurryepub">Sofurry EPUB</button>
         </div>
         <div class="buttoncontainer">
             <button data-type="command" data-extra="deezerdl">Deezer Download</button>

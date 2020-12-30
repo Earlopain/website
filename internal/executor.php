@@ -53,6 +53,8 @@ function getCommand($command, $extraData) {
             return "node /media/plex/software/e621downloader.js '" . $extraData . "'";
         case "e621replace":
             return "node /media/plex/software/e621replacer.js '" . $extraData . "'";
+        case "sofurryepub":
+            return "node /media/plex/software/sofurryepub/main.js '" . $extraData . "'";
         case "musicvideo":
             return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s", $extraData);
         case "shortmovie":

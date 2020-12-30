@@ -61,6 +61,7 @@ class Executor {
             case "youtube":
             case "e621dl":
             case "e621replace":
+            case "sofurryepub":
                 await httpPOST({ "command": command, "link": extraData }, this.readerCallback);
                 break;
             default:
