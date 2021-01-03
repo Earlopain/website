@@ -14,7 +14,7 @@ generateHeadBoilerplate();?>
         <div id=buttoncontainer>
             <button data-type="command" data-extra="e621dl">E621 Download</button>
             <button data-type="getfile" data-extra="e621pools">E621 Edit Comics</button>
-            <button data-type="command" data-extra="plexrefreshcomics">E621 Refresh Comics</button>
+            <button data-type="command" data-extra="e621refreshpools">E621 Refresh Pools</button>
             <button data-type="command" data-extra="e621replace">E621 Replacer</button>
             <button data-type="command" data-extra="sofurryepub">Sofurry EPUB</button>
             <div></div>

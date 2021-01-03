@@ -57,12 +57,12 @@ class Executor {
         await httpPOST({ "command": command, "link": extraData }, this.readerCallback);
     }
 
-    async getFileFromServer(filePath) {
-        await httpGET("executor.php?getfile=" + filePath, this.readerCallback);
+    async getFileFromServer(fileId) {
+        await httpGET("executor.php?fileid=" + fileId, this.readerCallback);
     }
 
-    async putFileOnServer(filename, data) {
-        await httpPOST({ "savefile": filename, "savefiledata": data }, this.readerCallback);
+    async putFileOnServer(fileId, data) {
+        await httpPOST({ "fileid": fileId, "filecontent": data }, this.readerCallback);
     }
 
     readerCallback(text) {

@@ -9,12 +9,12 @@ class ProgramFactory {
         switch ($name) {
             case "plexfixdates":
                 return new PlexFixDates();
-            case "startplex":
+            case "plexstart":
                 return new PlexStart();
-            case "stoplex":
+            case "plexstop":
                 return new PlexStop();
-            case "restartplex":
-                return new RestartPlex();
+            case "plexrestart":
+                return new PlexRestart();
             case "apacherestart":
                 return new ApacheRestart();
             case "youtube":
@@ -23,7 +23,7 @@ class ProgramFactory {
                 return new YoutubeMusicVideo();
             case "shortmovie":
                 return new YoutubeShortMovies();
-            case "plexrefreshcomics":
+            case "e621refreshpools":
                 return new E621RefreshPools();
             case "plextagimages":
                 return new PlexTagImages();

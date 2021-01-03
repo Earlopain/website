@@ -6,6 +6,6 @@ class PlexFixDates extends Program {
             "sudo", "/usr/bin/node", "/media/plex/software/plexFixDateAdded.js"
         ];
     }
-    protected $programBefore = "stoplex";
-    protected $programAfter = "startplex";
+    protected $programBefore = "plexstop";
+    protected $programAfter = "plexstart";
 }
