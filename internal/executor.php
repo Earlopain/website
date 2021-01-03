@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
 function executeCommand($commandId, $extraData) {
     while (@ob_end_flush()); // end all output buffers if any
-    $command = addCommandFinish(getCommand($commandId, $extraData));
+    $command = getCommand($commandId, $extraData);
     $descriptorspec = [
         0 => ["pipe", "r"], // stdin
         1 => ["pipe", "w"], // stdout
@@ -39,6 +39,7 @@ function executeCommand($commandId, $extraData) {
         echo stream_get_contents($pipes[2]);
         fclose($pipes[2]);
         proc_close($proc);
+        echo "DONE";
     } else {
         echo "Failed to open process";
     }
@@ -79,10 +80,6 @@ function getCommand($command, $extraData) {
         default:
             return "echo invalid_command";
     }
-}
-
-function addCommandFinish($command) {
-    return $command . " 2>&1 && echo DONE";
 }
 
 function youtubedl($targetFormat) {
