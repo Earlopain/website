@@ -20,12 +20,27 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
 function executeCommand($commandId, $extraData) {
     while (@ob_end_flush()); // end all output buffers if any
-    //die(getCommand());
     $command = addCommandFinish(getCommand($commandId, $extraData));
-    $proc = popen($command, 'r');
-    while (!feof($proc)) {
-        echo fread($proc, 4096);
-        @flush();
+    $descriptorspec = [
+        0 => ["pipe", "r"], // stdin
+        1 => ["pipe", "w"], // stdout
+        2 => ["pipe", "w"], // stderr
+    ];
+    $proc = proc_open($command, $descriptorspec, $pipes);
+
+    if (is_resource($proc)) {
+        fwrite($pipes[0], $extraData);
+        fclose($pipes[0]);
+        while (!feof($pipes[1])) {
+            echo fread($pipes[1], 4096);
+            @flush();
+        }
+        fclose($pipes[1]);
+        echo stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        proc_close($proc);
+    } else {
+        echo "Failed to open process";
     }
 }
 
@@ -56,11 +71,11 @@ function getCommand($command, $extraData) {
         case "sofurryepub":
             return "node /media/plex/software/sofurryepub/main.js '" . $extraData . "'";
         case "musicvideo":
-            return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s", $extraData);
+            return youtubedl("/media/plex/plexmedia/musicvideos/%(title)s.%(ext)s");
         case "shortmovie":
-            return youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s", $extraData);
+            return youtubedl("/media/plex/plexmedia/shortmovies/%(title)s.%(ext)s");
         case "youtube":
-            return youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s", $extraData);
+            return youtubedl("/media/plex/plexmedia/youtube/%(uploader)s/%(title)s.%(ext)s");
         default:
             return "echo invalid_command";
     }
@@ -70,11 +85,9 @@ function addCommandFinish($command) {
     return $command . " 2>&1 && echo DONE";
 }
 
-function youtubedl($targetFormat, $extraData) {
-    $filePath = "/media/plex/software/tempfiles/youtubedl.txt";
-    file_put_contents($filePath, $extraData);
+function youtubedl($targetFormat) {
     $format = youtubedlformat();
-    return "export LC_ALL=en_US.UTF-8 && youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file {$filePath} -o '{$targetFormat}' --format '{$format}' ";
+    return "export LC_ALL=en_US.UTF-8 && youtube-dl --write-thumbnail --no-cache-dir --no-playlist --batch-file - -o '{$targetFormat}' --format '{$format}' ";
 }
 
 function youtubedlformat() {
