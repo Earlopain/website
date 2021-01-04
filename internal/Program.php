@@ -44,10 +44,11 @@ abstract class Program {
                 echo fread($pipes[1], 4096);
             }
             fclose($pipes[1]);
-            if(stream_get_meta_data($pipes[2])["unread_bytes"] === 0) {
+            $error = stream_get_contents($pipes[2]);
+            if($error === false || empty($error)) {
                 $success = true;
             } else {
-                echo stream_get_contents($pipes[2]);
+                echo $error;
             }
             fclose($pipes[2]);
             proc_close($proc);
