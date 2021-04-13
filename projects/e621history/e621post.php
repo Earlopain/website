@@ -34,7 +34,7 @@ class E621Post {
         foreach ($tagGroup->allFilters as $seperatedFilters) {
             foreach ($seperatedFilters as $filter) {
                 //if filter starts with '-' the opposite should match
-                $inverse = $filter{0} === "-";
+                $inverse = strpos($filter, "-") === 0;
                 $filterNoMinus = $inverse ? substr($filter, 1) : $filter;
                 $regex = RegexCache::escapeStringToRegex($filterNoMinus);
                 $result = preg_match($regex, $this->tags) === 1 ? true : false;
@@ -83,8 +83,8 @@ class E621Post {
             return POST_FILE_DELETED;
         }
         //Investigate
-        $a = $this->md5 {0} . $this->md5 {1};
-        $b = $this->md5 {2} . $this->md5 {3};
+        $a = substr($this->md5, 0, 2);
+        $b = substr($this->md5, 2, 2);
         $fileContent = file_get_contents("https://static1.e621.net/data/{$a}/{$b}/{$this->md5}.{$this->json->file->ext}");
         if (strlen($fileContent) !== $this->json->file->size) {
             return POST_FILE_RETRY;
@@ -98,7 +98,8 @@ class E621Post {
         $statement->bindValue("fp", $fp, PDO::PARAM_LOB);
         $result = $statement->execute();
         if ($result === false) {
-            die("FATAL ERROR => Failed to insert {$this->md5}");
+            echo ("Failed to insert {$this->md5}");
+            return POST_FILE_RETRY;
         }
         return POST_FILE_SUCCESS;
     }
